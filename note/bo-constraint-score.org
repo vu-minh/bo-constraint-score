@@ -1,0 +1,958 @@
+BO CONSTRAINT SCORE -*- mode: org -*-
+Time-stamp: <2019-07-09 16:04:24 vmvu>
+:PROPERTIES:
+:header-args: :session bo-dr-constraint-score-default-session :async t
+:END:
+
+#+TITLE: Bayesian Optimization for DR method with constraint scores
+#+DATE: <2019-06-27 Do>
+
+*Description*: Apply Bayesian Optimization method to find the best parameter(s) for any parametric-DR method with the goal of maximizing the user's constraint scores or visualization-quality metrics.
+
+*Goal*:
+  + find best param w.r.t constraint scores
+  + explain why this param is best
+
+*Global notes*:
+  + Title [v1] <2019-06-27 Do>
+    /Bayesian Optimization for Dimensionaly Reduction methods with Constraint Scores/
+    - Auto find DR param -> vague
+    - Using constraint score -> not clear what it is
+    - Bayesian Optimization -> too technique
+    - Missing: interpretable / explainable score.
+
+
+* IDEAS
+
+** TODO Portablability and Scalability
++ Nhan manh phuong phap co the ap dung voi bat ky DR method nao, bat cu metrics/scores nao
++ Tim best param nhung khong dung grid search, co the optimize cung luc cho nhieu param khac nhau
++ Nghi ve demo cho 3 nhom phuong phap khac nhau: (tSNE, UMAP), (graph-based), (DR truyen thong)?
+
+  
+* Experiments
+  SCHEDULED: <2019-06-27 Do>
+  module: file:bo-constraint-score/bo-constraint.py
+  score implementation: file:bo-constraint-score/constraint-score.py
+
+**** Setup ipython starter code
+#+BEGIN_SRC ipython :results silent
+%load_ext autoreload
+%autoreload 2
+%matplotlib inline
+#+END_SRC
+
+#+BEGIN_SRC ipython :results silent
+import os
+import joblib
+import datetime
+
+import numpy as np
+import pandas as pd
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib import gridspec
+
+from sklearn.manifold import TSNE, Isomap, LocallyLinearEmbedding
+from MulticoreTSNE import MulticoreTSNE
+
+from umap import UMAP
+#+END_SRC
+
+
+Load the util functions in a separate module.
+#+BEGIN_SRC ipython  :results silent
+import sys
+sys.path.insert(0, "./bo-constraint-score/")
+
+import importlib
+constraint_score = importlib.import_module("constraint-score")
+#+END_SRC
+
+Prepare for the dataset
+#+BEGIN_SRC ipython :results silent
+from common.dataset import dataset, constraint
+dataset.set_data_home("./data")
+#+END_SRC
+
+
+**** Prepare data
+
+***** Setup global vars and plot dir
+#+BEGIN_SRC ipython :results silent
+dataset_name = "DIGITS"
+global_seed = int("062019")
+n_links = 100
+
+plot_dir = f"./bo-constraint-score/plots/{dataset_name}"
+if not os.path.exists(plot_dir):
+    os.makedirs(plot_dir)
+#+END_SRC
+
+***** Load and normalize data
+#+BEGIN_SRC ipython  
+X_original, X, labels = dataset.load_dataset(
+    name=dataset_name,
+    preprocessing_method=None,
+    dtype=np.double
+)
+
+X = X / 255.0
+
+print(X.shape, labels.shape)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [11]: 
+# output
+(500, 784) (500,)
+
+:end:
+
+***** PCA to observe the number of dims to keep
+
+#+BEGIN_SRC ipython :ipyfile '( (:name "pca-explained-variance" :caption "PCA explained variance") )
+from sklearn.decomposition import PCA
+
+pca = PCA()
+pca.fit(X)
+variances = pca.explained_variance_ratio_.cumsum()
+(n_keep,) = np.where(variances > 0.95)
+print(n_keep[0])
+
+plt.plot(variances)
+plt.axvline(x=n_keep[0], c="c", ls="--")
+plt.axhline(y=0.95, c="r", ls=":")
+plt.title(f"{n_keep[0]} dimensions preserve 95% variance")
+plt.savefig(f"{plot_dir}/pca_explained_variance.png")
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [149]: 
+# output
+111
+
+# text/plain
+: <Figure size 432x288 with 1 Axes>
+
+# image/png
+#+caption: PCA explained variance
+#+name: pca-explained-variance
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/3eaabe6363d0c4b38d917a58f4b9e443dd07958e.png]]
+:end:
+
+***** Apply PCA
+#+BEGIN_SRC ipython
+X = PCA(n_components=n_keep[0]).fit_transform(X)
+print(X.shape)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [141]: 
+# output
+(500, 111)
+
+:end:
+
+
+** TODO Interpretable scores
+
+*** Basic visualization
+
+**** Run demo with tSNE and UMAP
+
+#+BEGIN_SRC ipython :results silent
+def simple_scatter_plot(Z, labels, title="", file_name=""):
+    plt.figure(figsize=(6,6))
+    plt.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.3, cmap="jet")
+    plt.title(f"[{dataset_name}] {title}")
+    file_name = title if file_name == "" else file_name
+    plt.savefig(f"{plot_dir}/{file_name}.png")
+
+def run_demo_tsne(perp=30):
+    tsne = MulticoreTSNE(perplexity=perp, random_state=global_seed, min_grad_norm=1e-32, n_iter=1500)
+    Z = tsne.fit_transform(X)
+    simple_scatter_plot(Z, labels, title=f"tSNE with perp={perp}", file_name=f"tSNE_perp{perp}")
+    return Z
+
+def run_demo_umap(n_neighbors=5, min_dist=0.1):
+    umap = UMAP(n_neighbors=n_neighbors, min_dist=min_dist)
+    Z = umap.fit_transform(X)
+    simple_scatter_plot(Z, labels, title=f"UMAP with n_neighbors={n_neighbors}, min_dist={min_dist}",
+                        file_name=f"UMAP_nneighbors{n_neighbors}_mindist{min_dist}")
+    return Z
+
+def run_demo_lle(n_neighbors=5):
+    Z = LocallyLinearEmbedding(n_neighbors=n_neighbors, n_components=2, method="modified").fit_transform(X)
+    # print("LLE reconstruction error: %g" % err)
+    simple_scatter_plot(Z, labels, title=f"LLE with n_neighbors={n_neighbors}",
+                        file_name=f"LLE_nneighbors{n_neighbors}")
+    return Z
+
+
+def run_demo_isomap(n_neighbors=5):
+    Z = Isomap(n_neighbors=n_neighbors, n_components=2).fit_transform(X)
+    simple_scatter_plot(Z, labels, title=f"Isomap with n_neighbors={n_neighbors}",
+                        file_name=f"Isomap_nneighbors{n_neighbors}")
+    return Z
+#+END_SRC
+
+
+#+BEGIN_SRC ipython :results drawer
+# run_demo_tsne(perp=30)
+# run_demo_tsne(perp=120)
+
+# run_demo_umap(n_neighbors=5, min_dist=0.1)
+# run_demo_umap(n_neighbors=30, min_dist=0.1)
+# run_demo_umap(n_neighbors=5, min_dist=0.3)
+# run_demo_umap(n_neighbors=30, min_dist=0.3)
+
+# run_demo_lle(n_neighbors=30)
+# run_demo_lle(n_neighbors=50)
+# run_demo_lle(n_neighbors=100)
+# run_demo_lle(n_neighbors=150)
+
+_ = run_demo_isomap(n_neighbors=5)
+_ = run_demo_isomap(n_neighbors=30)
+# run_demo_isomap(n_neighbors=50)
+# run_demo_isomap(n_neighbors=100)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [43]: 
+# text/plain
+: <Figure size 432x432 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/7135bdec97352fb7f7159d59e5ec960af648468a.png]]
+
+# text/plain
+: <Figure size 432x432 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/0fc0b7c29f3c61b1aaf262945641a44345d66df7.png]]
+:end:
+
+**** Compare the embeddings with different perplexity
+
+***** tSNE
+| #+ATTR_ORG: :width 100                                           | #+ATTR_ORG: :width 100                                            |
+| [[./bo-constraint-score/plots/FASHION500/perp30_no_constraints.png]] | [[./bo-constraint-score/plots/FASHION500/perp120_no_constraints.png]] |
+
+***** UMAP
+|                | min_dist=0.1                                                            | min_dist=0.3                                                            |
+| n_neighbors=5  | [[./bo-constraint-score/plots/FASHION500/UMAP_nneighbors5_mindist0.1.png]]  | [[./bo-constraint-score/plots/FASHION500/UMAP_nneighbors5_mindist0.3.png]] |
+| n_neighbors=30 | [[./bo-constraint-score/plots/FASHION500/UMAP_nneighbors30_mindist0.1.png]] | [[./bo-constraint-score/plots/FASHION500/UMAP_nneighbors30_mindist0.3.png]] |
+
+***** LLE
+#+BEGIN_SRC ipython
+_ = run_demo_lle(n_neighbors=5)
+_ = run_demo_lle(n_neighbors=40)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [49]: 
+# text/plain
+: <Figure size 432x432 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/89cc749ff413b21d70e46a918568b780a51024ab.png]]
+
+# text/plain
+: <Figure size 432x432 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/5098271912995588c1272ad095cbf1796a3d114a.png]]
+:end:
+
+
+**** Constraints
+#+BEGIN_SRC ipython
+sim_links = constraint.gen_similar_links(
+    labels, n_links, include_link_type=False, seed=global_seed)
+dis_links = constraint.gen_dissimilar_links(
+    labels, n_links, include_link_type=False, seed=global_seed)
+
+print(sim_links.shape, dis_links.shape)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [14]: 
+# output
+(100, 2) (100, 2)
+
+:end:
+
+**** Visualize the links in the embedding
+
+#+BEGIN_SRC ipython :async t
+Z = run_demo_umap(n_neighbors=10)
+
+plt.figure(figsize=(10, 10))
+plt.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.2, cmap="jet")
+
+plt.plot(*Z[sim_links].T, c="b", alpha=0.3)
+plt.plot(*Z[dis_links].T, c="r", alpha=0.3)
+plt.show()
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [16]: 
+# text/plain
+: <Figure size 432x432 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/15de8422052542d6e80aaff6850b26842e787977.png]]
+
+# text/plain
+: <Figure size 720x720 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/beb4972b160845150be7db737ab9a1646aa29538.png]]
+:end:
+
+
+*** Explain the idea of =q_ij=
+**** TODO make a sketch to explain =q_ij= for a pair
+**** Why =q_ij=-based score is better than others
+***** Analyze the component of =q_ij=-base score
++ =S_M= and =S_C= agree with 2 type of stress-based scores
++ combine them -> agree with AUC_RNX
++ *EXPLAINABLE*: the viz is not perfect
+  -> so what are the /wrong/ parts in the viz (presented as the violated constraints)
+***** Pros and Cons of the score?
++ Only need a porportion of the lables
+
+*** Overview =q_ij= score and the goal
+**** Goal: 
++ =q_ij= scores in the optimal viz must say/explain somethings.
++ Using =q_ij= scores for both auto-generated ML and CL.
++ How to visualize these scores for individual links?
++ What can we highlight from the scores of ML/CL pairs with the viz-perp-30 vs. vis-perp-optimial?
++ Show the violated pairs (ML with small =q_ij= and CL with large =q_ij=) and their chances in optimal viz. (in order to response that the score does well its job).
+
+**** Calculate qij-based score for each of individual link
+#+BEGIN_SRC ipython
+Q = constraint_score.calculate_Q(Z, degrees_of_freedom=1.0)
+
+final_score, sim_scores, dis_scores = constraint_score.qij_based_scores(
+    Q, sim_links, dis_links, normalized=True
+)
+
+print(f"Final score: {final_score}\n"
+      f"Sim score: {sim_scores.mean()}\n"
+      f"Dis score: {dis_scores.mean()}\n"
+)
+
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [17]: 
+# output
+Final score: 0.6607507119383509
+Sim score: 0.6526294997104594
+Dis score: 0.6688719241662423
+
+
+:end:
+
+**** Observe the detail values of the scores of each link
+#+BEGIN_SRC ipython  
+_, axes = plt.subplots(3, 1, figsize=(12, 6))
+axes[0].plot(sim_scores, c="b")
+axes[0].set_ylim(bottom=sim_scores.min(), top=sim_scores.max())
+
+axes[1].plot(dis_scores, c="r")
+axes[1].set_ylim(bottom=dis_scores.min(), top=dis_scores.max())
+
+axes[2].plot(0.5 * sim_scores + 0.5 * dis_scores, c="c")
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [196]: 
+# text/plain
+: [<matplotlib.lines.Line2D at 0x7f60c4425ba8>]
+
+# text/plain
+: <Figure size 864x432 with 3 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/776b06515b86d6180c9197e012a2239551a6f277.png]]
+:end:
+
+**** Normalized the scores?
+*IMPORTANT UPDATE* <2019-07-04 Do>
+Normalized score does not work. Tried with BO for both {tsne, umap} and {FASHION500, DIGITS}, the scores normalized are presque the same, and increase a little bit when perp/n_neighbors increases.
+
+We are observing the values of the scores. Question: should normalize them.
+
+#+BEGIN_SRC ipython
+from scipy.interpolate import interp1d
+
+final_score, sim_scores, dis_scores = constraint_score.qij_based_scores(
+    Q, sim_links, dis_links, normalized=False
+)
+
+sim_score_vmap = interp1d([sim_scores.min(), sim_scores.max()], [0, 1])
+dis_score_vmap = interp1d([dis_scores.min(), dis_scores.max()], [0, 1])
+
+def debug_score_bar_chart(scores, score_vmap):
+    _, [ax0, ax1, ax2] = plt.subplots(3, 1, figsize=(10,5))
+
+    n_scores = len(scores)
+    xvals = np.arange(n_scores)
+    colors = np.array(["b"] * n_scores)
+    good_scores = scores > scores.mean()
+    colors[good_scores] = "r"
+
+    ax0.bar(xvals, scores, color=colors)
+    ax0.set_ylim(bottom=scores.min(), top=scores.max())
+
+    # score normalized
+    scores_normalized = (scores - scores.min()) / (scores.max() - scores.min())
+    ax1.bar(xvals, scores_normalized, color=colors)
+    ax1.set_ylim(0,1)
+
+    # score uing vmap
+    ax2.bar(xvals, score_vmap(scores), color=colors)
+    ax2.set_ylim(0,1)
+    
+
+debug_score_bar_chart(sim_scores, sim_score_vmap)
+debug_score_bar_chart(dis_scores, dis_score_vmap)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [197]: 
+# text/plain
+: <Figure size 720x360 with 3 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/669ee1a5774520eeec145272633a058fdb105092.png]]
+
+# text/plain
+: <Figure size 720x360 with 3 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/bb9808ebc25e27c3b4bc6d39c7c226a39a39a609.png]]
+:end:
+
+
+*** Visualize =q_ij= [1/5]
+
+**** Create custom colormap for score values
+Something looks like:
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/d650398d32c1b9a50756f28a517fbafb781abc56.png]]
+
+Plot the constraint with color based on the custom cmap
+
+#+BEGIN_SRC ipython :results silent
+# color map
+n_lut = 200  # number of value in the lookup table for the colormap
+sim_link_cmap = cm.get_cmap("Blues_r", n_lut)
+dis_link_cmap = cm.get_cmap("Oranges_r", n_lut)
+color_norm = mpl.colors.Normalize(vmin=0, vmax=1)
+
+
+def plot_links_with_color(ax, Z, links, scores, cmap, score_threshold=0.1, link_type=""):
+    """Plot the violated links"""
+    # color = {"sim": "blue", "dis": "orange"}[link_type]
+    for idx, (pair, score) in enumerate(zip(links, scores)):
+        color = cmap(score)
+        if score > score_threshold: continue
+        ax.plot(*Z[pair].T, c=color)
+        p = (Z[pair[0]] + Z[pair[1]]) / 2
+        ax.text(*p, s=f"{(idx)}: {score:.2f}", c=color, fontsize=8)
+
+
+def scatter_with_links(Z, sim_links, dis_links, sim_scores, dis_scores, score_threshold=0.1):
+    fig = plt.figure(figsize=(10, 11))
+    gs = gridspec.GridSpec(11, 10)
+    ax1 = plt.subplot(gs[:10, :])
+    ax21 = plt.subplot(gs[10:, :5])
+    ax21.set_title("Similar score")
+    ax22 = plt.subplot(gs[10:, 5:])
+    ax22.set_title("Dissimilar score")
+
+    #plot colorbar
+    mpl.colorbar.ColorbarBase(
+        ax=ax21, cmap=sim_link_cmap,
+        norm=color_norm, orientation="horizontal")
+    mpl.colorbar.ColorbarBase(
+        ax=ax22, cmap=dis_link_cmap,
+        norm=color_norm, orientation="horizontal")
+
+    # plot the embeddings
+    ax1.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.1, cmap="jet")
+
+    ## normalize the scores (the input scores are normalized)
+    # sim_scores = constraint_score.normalize_scores(sim_scores)
+    # dis_scores = constraint_score.normalize_scores(dis_scores)
+    
+    # plot the constraints with scores
+    plot_links_with_color(ax1, Z, sim_links, sim_scores, sim_link_cmap, score_threshold, link_type="sim")
+    plot_links_with_color(ax1, Z, dis_links, dis_scores, dis_link_cmap, score_threshold, link_type="dis")
+#+END_SRC
+
+**** Compare the score between a /good/ viz (perp=30) and a  /not good/ viz (perp=128)
+#+BEGIN_SRC ipython :results silent
+def test_viz_score(sim_links, dis_links, score_threshold=0.1, score_dof=1.0, perplexity=None, n_neighbors=None):
+    n_links = len(sim_links) + len(dis_links)
+    if perplexity is not None:
+        Z = run_demo_tsne(perp=perplexity)
+        out_name = f"tsne_perp{perplexity}_{n_links}links"
+    elif n_neighbors is not None:
+        Z = run_demo_umap(n_neighbors=n_neighbors, min_dist=0.1)
+        out_name = f"umap_nneighbors{n_neighbors}_mindist{0.1}_{n_links}links"
+    else:
+        raise ValueError("Should set perplexity or n_neighbors param")
+
+    Q = constraint_score.calculate_Q(Z, degrees_of_freedom=score_dof)
+    final_score, sim_scores, dis_scores = constraint_score.qij_based_scores(
+	Q, sim_links, dis_links, normalized=True
+    )
+
+    print(f"Final score: {final_score}\n"
+	  f"Sim score: {sim_scores.mean()}\n"
+	  f"Dis score: {dis_scores.mean()}\n"
+    )
+
+    scatter_with_links(Z, sim_links, dis_links, sim_scores, dis_scores, score_threshold)
+    plt.savefig(f"{plot_dir}/{out_name}.png")
+#+END_SRC
+
+#+BEGIN_SRC ipython :async t
+test_viz_score(sim_links, dis_links, score_threshold=0.2, score_dof=1.0, n_neighbors=30)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [26]: 
+# output
+Final score: 0.6363559190946096
+Sim score: 0.6563069252624486
+Dis score: 0.6164049129267707
+
+
+# text/plain
+: <Figure size 432x432 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/f8f3451cbc40ce8d5a52170d91cc0c4ad899bbad.png]]
+
+# text/plain
+: <Figure size 720x792 with 3 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/5e8e5f39b5144dbab4842b5bcd3834b75001672f.png]]
+:end:
+
+
+#+BEGIN_SRC ipython :async t
+test_viz_score(sim_links, dis_links, score_threshold=0.2, score_dof=1.0, n_neighbors=200)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [30]: 
+# output
+Final score: 0.6614460246644596
+Sim score: 0.7220883313335754
+Dis score: 0.6008037179953436
+
+
+# text/plain
+: <Figure size 432x432 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/dca7520ea54785a35521a86738c7384d17f83a06.png]]
+
+# text/plain
+: <Figure size 720x792 with 3 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/3bedd5782e25bef86918627de5a056e606fa5676.png]]
+:end:
+
+#+BEGIN_SRC ipython
+test_viz_score(sim_links, dis_links, score_threshold=0.2, score_dof=0.5, n_neighbors=300)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [32]: 
+# output
+Final score: 0.6455321560901224
+Sim score: 0.6652560289997091
+Dis score: 0.6258082831805357
+
+
+# text/plain
+: <Figure size 432x432 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/3aa27a75125125484bd77b5ad43f43b08e588997.png]]
+
+# text/plain
+: <Figure size 720x792 with 3 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/27bbdf613a95856a6eba23fe3e181c3231195ccc.png]]
+:end:
+
+#+BEGIN_SRC ipython
+run_viz(500, sim_links, dis_links, score_threshold=0.2, score_dof=1.0)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [135]: 
+# output
+Final score: 0.6418363142434272
+Sim score: 0.562571447307936
+Dis score: 0.7211011811789185
+
+
+# text/plain
+: <Figure size 720x792 with 3 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/5962bc7bb98982d53cd9c11401cb4a5d58a9e426.png]]
+:end:
+
+#+BEGIN_SRC ipython
+run_viz(1000, sim_links, dis_links, score_threshold=0.2, score_dof=1.0)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [136]: 
+# output
+Final score: 0.6405185463385201
+Sim score: 0.5894762193155977
+Dis score: 0.6915608733614427
+
+
+# text/plain
+: <Figure size 720x792 with 3 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/4598cc5e6c57f413cd76d858fcbc1ad30b609a15.png]]
+:end:
+
+**** DEBUG =q_ij= and =log(q_ij)=
+<2019-07-03 Mi> Debug thanh cong: BUG: ~power = - (degrees_of_freedom + 1.0) / 2.0~
+
++ Dang quan sat 2 diem rat gan nhau (ML) nhung score rat be (pair ~id 10: -21.17~). Nguoc lai 2 diem xa nhau (nhung van la ML) thi co score lon hon (pair ~id 36: -15.13~).
+Nhu vay neu muon maximize score thi se uu tien cho pair =36=, thuc chat no phai la penalty moi dung.
+
++ Theo ly thuyet =log()= la ham dong bien tren R+ voi ~base > 1~, nhu the voi =q_ij= lon thi =log(q_ij)= cung phai lon. Mac du gia tri cua =q_ij= sieu nho nhung luon duong nen =log(q_ij)= phan anh dung /order/ cua =q_ij= .
+
++ Workflow debug:
+  - Tinh Z -> Q
+  - lay 10 pair ML cho de quan sat
+  - plot pairs de chac chan co pair /ngan/, co pair /dai/
+  - lay =q_ij= cho nhung pair nay va =log(q_ij)=
+
+#+BEGIN_SRC ipython :async t
+# tsne = MulticoreTSNE(perplexity=40, n_iter=1500, min_grad_norm=1e-32, random_state=1989)
+# Z = tsne.fit_transform(X)
+Q = constraint_score.calculate_Q(Z, degrees_of_freedom=1.0)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [77]: 
+:end:
+
+#+BEGIN_SRC ipython
+# take 10 similar links
+mustlinks_idx = np.random.choice(len(sim_links), size=6)
+mustlinks = sim_links[mustlinks_idx]
+print(mustlinks_idx, mustlinks)
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [91]: 
+# output
+[ 3  6 37 30 20 10] [[1631 1426]
+ [ 683  547]
+ [ 334 1106]
+ [1188 1262]
+ [ 109  651]
+ [1503 1441]]
+
+:end:
+
+
+#+BEGIN_SRC ipython
+plt.figure(figsize=(10,10))
+plt.scatter(Z[:,0], Z[:,1], c=labels, alpha=0.1, cmap="jet")
+
+# plot mustlinks
+plt.plot(*Z[mustlinks].T, c="b")
+
+for link_id, (p0, p1) in zip(mustlinks_idx, mustlinks):
+    p = 0.5 * (Z[p0] + Z[p1])
+    q = Q[p0,p1]
+    logq = np.log(q)
+    plt.text(*p, s=f"({link_id}), {q}, {logq:.2f} ", fontsize=10)
+    print(link_id, (p0, p1), q, logq)
+
+plt.show()
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [92]: 
+# output
+3 (1631, 1426) 2.1087126931563704e-07 -15.372017987686036
+6 (683, 547) 9.551580238203382e-08 -16.16397413317943
+37 (334, 1106) 5.561572490410427e-07 -14.402214760666173
+30 (1188, 1262) 8.52127235188285e-06 -11.672944891197268
+20 (109, 651) 7.230873905731355e-07 -14.139735749930084
+10 (1503, 1441) 8.457894407586045e-06 -11.680410303316092
+
+# text/plain
+: <Figure size 720x720 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/cb2a0ad63ed1d8fe3c503ea050ea6e7107e0d2b3.png]]
+:end:
+
+**** Observe Q by heatmap plot
++ [-] Viz Q as a heatmap (an idea from this, apply non-negative matrix factorization technique on Q???)
+#+BEGIN_SRC ipython
+plt.figure(figsize=(10, 10))
+plt.imshow(np.log(Q), cmap="inferno")
+plt.colorbar()
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [152]: 
+# output
+/opt/anaconda3/lib/python3.6/site-packages/ipykernel_launcher.py:2: RuntimeWarning: divide by zero encountered in log
+  
+
+
+
+# text/plain
+: <Figure size 720x720 with 2 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/50d2eb9dd207b66ec6693c6836afbf38f2f6d2c4.png]]
+:end:
+
+#+BEGIN_SRC ipython
+from scipy.spatial.distance import squareform
+Qs = squareform(Q)
+Qs.sort()
+Qs = squareform(Qs)
+
+plt.figure(figsize=(10, 10))
+plt.imshow(np.log(Qs), cmap="inferno")
+plt.colorbar()
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [153]: 
+# output
+/opt/anaconda3/lib/python3.6/site-packages/ipykernel_launcher.py:7: RuntimeWarning: divide by zero encountered in log
+  import sys
+
+
+
+# text/plain
+: <Figure size 720x720 with 2 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/76ef332a3e649921a6bf6fb6d90b56d05089eda2.png]]
+:end:
+
+
++ [X] Highlight pairs of Mls and CLs (not clear in the heatmap, do it
+  in 2D scatter plot)
+
++ [ ] Find a rule for finding the violated constraints, e.g. a threshold
+  - build a bound for simlinks and dislinks, based on the values of Q.
+  - violeted mustlink: score > 
+
+
+
+#+BEGIN_SRC ipython
+min_sim_score, max_sim_score = min_score, max_score
+min_dis_score, max_dis_score = -max_sim_score, -min_sim_score
+
+print(min_sim_score, max_sim_score)
+print(min_dis_score, max_dis_score)
+
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [164]: 
+# output
+-21.342353816110077 -13.341643504550795
+13.341643504550795 21.342353816110077
+
+:end:
+
+
+
+
+
+**** Viz =q_ij= of the selected pairs in an intuitive way:
+  - [ ] Colorize =q_ij= by values, distinguish color for 2 types: Red for CL, Blue of ML
+  - [ ] Not violated links (ML with ~q_ij > threshold~, CL with ~q_ij < threshold~) are blued or having small alpha.
+  - [ ] Violated links are highlighted or haves big alpha.
+
+
+
+*** =q_ij= with different /degree-of-fredom/
+    cite:kobak-2019-heavy-sne shows that, with the degree of freedom
+    in t-distribution smaller than 1, the local groups are highlighted
+    clearer.
++ [ ] setup code to calculate scores with all perplexities (using old
+  precalculated embeddings)
++ [ ] setup code to test the score with different values of degree-of-freedom ($\nu$)
++ [ ] try $\nu$ with manual constraints to see if it /can/ work
++ [ ] make decision to use or not to use this param
+
+
+*** Interpretation of =q_ij=
++ The formulate of =q_ij= lets us think about the kde plot.
+    $$
+    q_{ij} = \frac{ ( 1 + || y_i - y_j ||^2 )^{-1} }
+                  { \sum_{k \neq l} (1 + || y_k - y_l ||^2  )^{-1} }
+    $$
+Something similar to this cite:kobak-2019-heavy-sne (but not sure now)
+[[file:./images/screenshot-01.png]]
+
+
+*** Viz =score= for each individual pair for each perp
+
+*** Xps with different number of constraints (and of each type of constraints) 
++ Do basic Xps with different number of constraints.
++ Think about Umap =min_dist= param which can be used to force the group
++ Think about Xps with a proposed score focusing on /clustering/ on the visualization. 
+(Is it a good idea of clustering on the viz???)
++ Analyze the usage of UMAP and tSNE to rise the need of finding the best param(s):
+https://www.nature.com/articles/s41586-019-0969-x (TODO: read and confirm: UMAP is used to find the /transcriptional landscape of mammalian organogenesis/, the task which is imposible without the visualization. But the viz is controlled by the params, which are hard to tune. Which different params, we see different parterns).
+https://www.nature.com/articles/nbt.4314
+
+** TODO Other dataset
+
+*** CIFAR10 dataset
++ Take a pretrained CNN for features presentation.
++ Think how to present the viz
++ Using user-constraints with this dataset is OK?
+
+*** TODO single-cell RNA dataset
++ Tim cac gene dataset don gian nhung co labels/explanation - va co the tao constraints
++ Co the dung thu dataset in the demo for GPLVM
+
+
+** TODO Score in case of partial labels 
++ Chi co labels cua mot vai class nhat dinh
++ Xem cac bai bao dang skimming, ho dung dataset nao
+
+** TODO GUI for interactive BO
++ Goal: interactive BO for auto-param selection for DR method
++ Clickable sampled points in the approximated function to see the viz @ the sampled params.
++ Good way to communicate the score of (dis)similar pairs.
+
+
+* Nghi den cong thuc khac cho scores:
+Tinh toan lai hoan toan, lam lai workflow chi don gian de:
++ chuan bi mot list embeddings (nhu da lam tu truoc)
++ custom bat cu loai score nao
++ tinh score cho tat cac embeddings da tinh san
++ thu nhieu loai score, plot cac duong de tim ra quy luat
+
+* Related Works
+
+** TODO Literature review
++ Auto perp in tSNE
++ Auto param in DR / in ML
++ Viz Quality measurement
++ User subjective aspect
+
+
+** TODO Organize the bibtex
+Skim more Related Works in the topic of auto-perp-tSNE: http://www.arxiv-sanity.com/1708.03229v1
+
+
+* References
+bibliography:bibliography/references-research.bib
+bibliography:bibliography/references-reading.bib
+
+Plotting utils:
++ Custom colorbar:
+https://matplotlib.org/3.1.0/tutorials/colors/colormap-manipulation.html
+https://matplotlib.org/3.1.0/tutorials/colors/colorbar_only.html
+
+* Logs
+<2019-07-03 Mi>: 
++ Debug score values, chot lai cong thuc score van OK, ko co van de logic
++ Thu voi FASHION5K, dung PCA dim=178:
+  - perp=1000 voi perp=500 cha co gi khac nhau
+  - score cung ko co cai thien gi nhieu
++ Nghi den viec su dung cac dataset nho, nhe nhang, khong nen thu voi data to, kho phan tich ma chay thi lau -> TODO: tim dataset nho nao
+
+<2019-07-04 Do>:
++ Idea: using UMAP now
++ Su dung nhung tap dataset tot de demo, muc dich la communicate the results
+
+<2019-07-05 Fr>:
++ Can not continue the Xps (boi vi ho muon viet ngay bai bao)
++ Bay gio minh se bat dau lai cau truc bai bao vay
++ Tiep tuc y tuong Xps, voi umap:
+  - lam BO 2D cho 2 params
+  - phai lam them phan viz 2D nua, co khi su dung lib GpyOP
+  - y tuong evaluate voi clustering score (tut umap: https://umap-learn.readthedocs.io/en/latest/clustering.html)
++ test thu GpyOpt
+#+BEGIN_SRC ipython
+# --- Load GPyOpt
+from GPyOpt.methods import BayesianOptimization
+import numpy as np
+
+# --- Define your problem
+def f(x): return (6*x-2)**2*np.sin(12*x-4)
+domain = [{'name': 'var_1', 'type': 'continuous', 'domain': (0,1)}]
+
+# --- Solve your problem
+myBopt = BayesianOptimization(f=f, domain=domain)
+myBopt.run_optimization(max_iter=15)
+
+plt.figure(figsize=(8, 5))
+myBopt.plot_acquisition()
+#+END_SRC
+
+#+RESULTS:
+:results:
+# Out [51]: 
+# text/plain
+: <Figure size 576x360 with 0 Axes>
+
+# text/plain
+: <Figure size 432x288 with 1 Axes>
+
+# image/png
+[[file:obipy-resources/16e7650cf23d0872fdf271f806429ee14b4c1713/f3a41cb18901042d4abf366736db0ec3c9eeca03.png]]
+:end:
+
