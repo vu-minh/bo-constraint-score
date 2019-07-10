@@ -1,0 +1,46 @@
+\section{Quality metrics}\label{appendix:qual_metrics}
+Let $d^{x}_{ij}$ and $d^{y}_{ij}$ be, respectively, the distance between instances $i$ and $j$ in HD and LD.
+Let $d^x$ and $d^y$ be the distances matrices for all pair of points in HD and LD.
+Here are the mathematical formulas for the five selected metrics.
+
+\begin{itemize}[leftmargin=*]
+	\item The Correlation Coefficient is defined as:
+    $$
+    \textnormal{CC} = \textnormal{pearson\_correlation}(d^x, d^y) = \frac{\textnormal{Cov}(d^x, d^y)}{\sigma(d^x)\sigma(d^y)}
+    $$
+    \item For measuring the distance order in NMS, an isotonic transformation $d^{iso}$ is performed on $d^x$. The Kruskal's stress is then computed using this transformation:
+        $$ 
+        \textnormal{NMS} = \sqrt{\frac
+            { \sum_{ij} (d^{iso}_{ij} - d^{y}_{ij})^2 }
+            { \sum_{ij} d^{y}_{ij} } }
+        $$
+    \item The Curvilinear Component Analysis Stress function is defined as:
+        $$
+        \textnormal{CCA} = \sum_{ij} (d^{x}_{ij} - d^{y}_{ij})^2 F_{\lambda}(d^{y}_{ij}),
+        $$
+        in which $F_{\lambda}(d^{y}_{ij})$ is a decreasing-weighting function of $d^{y}_{ij}$.
+        Examples of weighting functions include
+        the step function or $1-sigmoid(d^{y}_{ij})$. We used the latter in this paper.
+    \item The stress function of Sammon's Nonlinear mapping is:
+        $$ 
+        \textnormal{NLM} = \frac{1}{\sum_{ij} d^{x}_{ij}}
+            \sum_{ij} \frac{ (d^{x}_{ij} - d^{y}_{ij})^2 }{d^{x}_{ij}}
+        $$
+    \item The quality measure AUC logRNX can be defined by step:
+        \begin{itemize}
+            \item Let $k$ be the number of neighbors considered, $N$ the number of instances, $\nu_{i}^{k}$ the set of the $k$ closest neighbors of $i$ in the embedding and $n_{i}^{k}$ the set of the $k$ closest neighbors of $i$ in the HD space, $Q_{NX}$ is defined as: 
+            $$
+            Q_{NX}(k)= \frac{1}{Nk} \sum_{i=1}^{N} |\nu_{i}^{k} \cap n_{i}^{k}| 
+            $$
+            \item $R_{NX}(k)$, the rescaled version of $Q_{NX}(k)$, is defined as:
+            $$ 
+            R_{NX}(k) =  \frac{(N-1) Q_{NX}(k) - k}{N - 1 - k} 
+            $$
+            \item AUC$_{log}$RNX is computed by taking the area under the $R_{NX}(k)$ curve in the log-scale of $k$:
+            $$
+            \textnormal{AUC}_{log}\textnormal{RNX} =
+            	{\left(\sum_{k=1}^{N-2} \frac{R_{NX}(k)}{k} \right)} /
+                {\left(\sum_{k=1}^{N-2}\frac{1}{k}\right)}
+            $$
+        \end{itemize}
+\end{itemize}
