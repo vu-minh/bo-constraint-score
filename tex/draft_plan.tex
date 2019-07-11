@@ -1,27 +1,49 @@
 \section{Introduction}
 
+Dimensionality Reduction Methods for Visualization.
 tSNE~\cite{maaten2008tsne}, UMAP~\cite{mcinnes2018umap}.
 
-
+Co gang giai thich: scores la stochastic variable.
+BO co the giai quyet van de do (cai hinh ve tren bang de giai thich voi ban G.)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Background}
-
-\subsection{Dimensionality Reduction Methods for Visualization}
-
-\subsection{Automatic Parameter Tuning with Bayesian Optimization}
+\section{Related Work}
 
 \subsection{Usage of Pairwise Constraints in Unsupervised Learning}
 
 
+\subsection{Visualization Quality Metrics}
+
+
+\subsection{Choosing a Good Perplexity for t-SNE}
+Automatic selection of perplexity for t-SNE~\cite{cao2017automatic}.
+
+
+\subsection{Automatic Parameter Tuning with Bayesian Optimization}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Introduction to the Proposed Constraint Preserving Score}
+\section{Constraint Preserving Score}
+
+
+\subsection{Visual Definition of the Pairwise Constraints}
+
+\subsection{Quantify the Pairwise Constraints}
+
+\subsection{Basic characteristics of Constraint Preserving Score}
+
+\par ML with CCA
+\par CL with BIC
+\par ML+CL with AUC\_RNX
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Constraint-based Score as Target in Bayesian Optimization Approach}
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Evaluation}
+\section{Experimental Setup}
 
 
 
@@ -31,9 +53,34 @@ tSNE~\cite{maaten2008tsne}, UMAP~\cite{mcinnes2018umap}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Related Works}
-Automatic selection of perplexity for t-SNE~\cite{cao2017automatic}.
+\section{Discussion}
+
+This work is based on two fundamental elements:
+(1) The $q_{ij}$-based score built upon a limit number of constraints can distinguish the visualizations prefering local structure and those prefereing global structure.
+(2) Bayesian Optimization approach provides a solid foundation to estimate the maximum value of any complex blackbox cost function.
+With the appropriate setting, BayOpt fit well with the constraint-based score to solve the problem of parameter tuning.
+
+\par
+The violated constraints in our methods correspond to the shortcomming of t-SNE in \cite{wattenberg2016use}.
+t-SNE can not preserve the within-cluster distances and between-clusters distances.
+[TODO: Add reproduced figures].
+The $q_{ij}$-based score can help to understand the defective of the visualization.
+
+\par
+Easily generate pairwise constraints from labels.
+  Only need small amount of labeled points for each class to generate hundreds of constraints.
+  The proposed method only need 200 constraints to work well.
+
+\par
+Can replace the auto-generated constraints by the manual constraints of the real user.
+
+\par
+The user can interact directly in the loop of Bayesian Optimization method to select the next parameter to discover.
+
+
+\par
+Both the constraint-based score and the BayOpt's internal steps are explainable even for the non-technical users. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion and Conclusion}
+\section{Conclusion and Future Work}
