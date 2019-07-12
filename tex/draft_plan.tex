@@ -1,7 +1,7 @@
 \section{Introduction}
 
 \par
-(1) Keep the session 1 (context, problematic).
+(1) Keep the section 1 (context, problematic).
 
 
 \vspace{8pt}
@@ -148,13 +148,14 @@ To present and analyze the results, we can present following points (but we stil
 \caption{BayOpt with t-SNE with 1 param.}\label{fig:tsne1}
 \end{figure*}
 
++ Add experiment with LargeVis. (TODO)
 
-+ BayOpt for finding \verb|n_neighbors| param for UMAP. (Case of 1 param to tune with UMAP, Fig.~\ref{fig:umap1}) (Done)
-\begin{figure*}
-\centering
-\includegraphics[width=.6\textwidth]{{UMAP_ucb_kappa5_constraint1.0_DIGITS_step15}.png}
-\caption{BayOpt with UMAP with 1 param.}\label{fig:umap1}
-\end{figure*}
++ \st{BayOpt for finding n-neighbors param for UMAP. (Case of 1 param to tune with UMAP) (Done) } %Fig.~\ref{fig:umap1})
+%% \begin{figure*}
+%% \centering
+%% \includegraphics[width=.6\textwidth]{{UMAP_ucb_kappa5_constraint1.0_DIGITS_step15}.png}
+%% \caption{BayOpt with UMAP with 1 param.}\label{fig:umap1}
+%% \end{figure*}
 
 + BayOpt for finding \verb|n_neighbors| and \verb|min_dist| params for UMAP. (Case of 2 params to tune with UMAP, Fig.~\ref{fig:umap2}) (Plan to do)
 \begin{figure*}
@@ -212,14 +213,16 @@ We can analyze the explainability of the score / the visual assessment of the qu
 \vspace{8pt} \par
 To discuss:
 
-+ How to evaluate the visualization corresponding to the optimal hyperparam found by our method? (We can show this optimal viz and other `non-optimal' viz and analyze them visually/intuitively).
++ How to evaluate the visualization corresponding to the optimal hyperparam found by our method? => We can show this optimal viz and other `non-optimal' viz and analyze them visually/intuitively.
 
-+ Compare our score with John's score? (Apply BayOpt to John's metric, compare the predictive score function - the prediction line in the graphs, compare the optimal hyperparameter).
++ \st{Compare our score with John's score? (Apply BayOpt to John's metric, compare the predictive score function - the prediction line in the graphs, compare the optimal hyperparameter).}
+(John's metric use HD data, time complexity of $O(DN^3)$ while our score is $O(DN^2)$ with a scale factor of the number of constraints.)
 
-+ Compare our result with the method of auto-selecting perplexity of Cao and Wang?
++ Compare our result with the method of auto-selecting perplexity of Cao and Wang? (TODO)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}
+Meeting 12/07: not sound enough for now, to discuss later.
 
 \par
 Discuss the variance of the proposed score (w.r.t to different set of constraints, different number of constraitns).
@@ -232,6 +235,9 @@ The violated constraints in our methods correspond to the shortcomming of t-SNE 
 t-SNE can not preserve the within-cluster distances and between-clusters distances.
 [TODO: Add reproduced figures].
 The $q_{ij}$-based score can help to understand the defective of the visualization.
+
+\par
+Add discussion for UMAP.
 
 \par
 Easily generate pairwise constraints from labels.
