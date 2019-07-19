@@ -41,6 +41,7 @@ They can use our method as a blackbox hyperparameter tuning toolbox with an addi
 They can use our method as a transparent toolbox to understand the internal step in the optimization process thanks to BayOpt approach.
 
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background and Related Work}
 
@@ -78,6 +79,8 @@ However this score has two disavantages:
 (2) it works only with one hyperparameter (perplexity of t-SNE), and thus can not be generalized for other DR methods.
 Our proposed method can do better.
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Constraint Preserving Score}
 
@@ -106,6 +109,7 @@ Analyze the behaviour of the proposed score with respect to the global and local
 \end{figure}
 
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Constraint-based Score as Target in Bayesian Optimization Approach}
 
@@ -130,6 +134,7 @@ Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
 + Explain the exploitation-exploration trade-off in BayOpt (and estimate the number of times we need to try before reaching to the global maximum).
 
 %+ Note about the nature of BayOpt that, it can work with any non-convex multi-modal objective function and it assures to find the global extremum.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -220,6 +225,8 @@ To discuss:
 
 + Compare our result with the method of auto-selecting perplexity of Cao and Wang? (TODO)
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}
 Meeting 12/07: not sound enough for now, to discuss later.
@@ -254,6 +261,7 @@ The user can interact directly in the loop of Bayesian Optimization method to se
 
 \par
 Both the constraint-based score and the BayOpt's internal steps are explainable even for the non-technical users. 
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
