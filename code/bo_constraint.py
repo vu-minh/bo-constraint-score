@@ -12,17 +12,17 @@ from MulticoreTSNE import MulticoreTSNE
 import umap
 
 
-def generate_constraints(score_name, n_constraints):
+def generate_constraints(score_name, n_constraints, seed=None):
     return {
         "qij": {
             "sim_links": constraint.gen_similar_links(
-                labels, n_constraints, include_link_type=True, seed=rnd_seed),
+                labels, n_constraints, include_link_type=True, seed=seed),
             "dis_links": constraint.gen_dissimilar_links(
-                labels, n_constraints, include_link_type=True, seed=rnd_seed)
+                labels, n_constraints, include_link_type=True, seed=seed)
         },
         "contrastive": {
             "contrastive_constraints": constraint.generate_contrastive_constraints(
-                labels, n_constraints, seed=rnd_seed)
+                labels, n_constraints, seed=seed)
         }
     }[score_name]
 
@@ -103,9 +103,12 @@ if __name__ == "__main__":
     ap.add_argument("-d", "--dataset_name", default="")
     ap.add_argument("-m", "--method_name", default="tsne",
                     help=" in ['tsne', 'umap']")
-    ap.add_argument("-s", "--score_name", default="qij",
+    ap.add_argument("-sc", "--score_name", default="qij",
                     help=" in ['qij', 'contrastive', 'cosine', 'cosine_ratio']")
-    ap.add_argument("-n", "--n_constraints", default=50, type=int)
+    ap.add_argument("-st", "--strategy", default="partial_labels",
+                    help="strategy: using partial labels or auto-generated constraints")
+    ap.add_argument("-nc", "--n_constraints", default=50, type=int)
+    ap.add_argument("-nl", "--n_labels_each_class", default=5, type=int)
     ap.add_argument("-rs", "--random_seed", default=None)
     ap.add_argument("-cp", "--constraint_proportion", default=1.0, type=float,
                     help="target_function = cp * user_constraint + (1-cp)* John's metric")
@@ -133,16 +136,20 @@ if __name__ == "__main__":
 
     method_name = args.method_name
     score_name = args.score_name
-    n_constraints = args.n_constraints
     rnd_seed = int(args.random_seed)
-    constraint_proportion = args.constraint_proportion
 
     plot_dir = f"./plots/{dataset_name}/{method_name}/{score_name}"
     if not os.path.exists(plot_dir):
         os.makedirs(plot_dir)
 
-    constraints = generate_constraints(score_name, n_constraints)
-    target_function_wrapper = partial(target_function,
-                                      method_name, score_name, constraints)
+    if args.strategy == "partial_labels":
+        sim_links, dis_links = constraint.generate_constraints_from_partial_labels(
+            labels, n_labels_each_class=args.n_labels_each_class, seed=rnd_seed)
+        constraints = {'sim_links': sim_links, 'dis_links': dis_links}
+        print(f"[Debug]: From {args.n_labels_each_class} =>"
+              f"(sim-links: {len(sim_links)}, dis-links: {len(dis_links)})")
+    else:  # using auto-generated constraints
+        constraints = generate_constraints(score_name, args.n_constraints, seed=rnd_seed)
+    target_function_wrapper = partial(target_function, method_name, score_name, constraints)
     best_result = run_bo(target_func=target_function_wrapper)
     print(best_result)
