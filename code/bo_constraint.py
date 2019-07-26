@@ -1,3 +1,4 @@
+import joblib
 import numpy as np
 from functools import partial
 from bayes_opt import BayesianOptimization
@@ -91,6 +92,13 @@ def run_bo(target_func,
             mlflow.log_param("p", res["params"]["p"])
             mlflow.log_metric("target_func", res["target"])
 
+    # log optimizer for further plotting
+    log_obj = locals()
+    log_obj['optimizer'] = optimizer
+    log_name = f"{log_dir}/{util_func}-kappa{kappa}-xi{xi}-n{n_total_runs}.z"
+    joblib.dump(log_obj, log_name)
+    mlflow.log_artifact(log_name)
+
     return optimizer.max
 
 
@@ -107,8 +115,12 @@ if __name__ == "__main__":
                     help=" in ['qij', 'contrastive', 'cosine', 'cosine_ratio']")
     ap.add_argument("-st", "--strategy", default="partial_labels",
                     help="strategy: using partial labels or auto-generated constraints")
-    ap.add_argument("-nc", "--n_constraints", default=50, type=int)
-    ap.add_argument("-nl", "--n_labels_each_class", default=5, type=int)
+    ap.add_argument("-nr", "--n_total_runs", default=15, type=int,
+                    help="number of evaluated points run by BayOpt")
+    ap.add_argument("-nc", "--n_constraints", default=50, type=int,
+                    help="number of constraints each type")
+    ap.add_argument("-nl", "--n_labels_each_class", default=5, type=int,
+                    help="number of labelled points selected for each class")
     ap.add_argument("-rs", "--random_seed", default=None)
     ap.add_argument("-cp", "--constraint_proportion", default=1.0, type=float,
                     help="target_function = cp * user_constraint + (1-cp)* John's metric")
@@ -138,9 +150,12 @@ if __name__ == "__main__":
     score_name = args.score_name
     rnd_seed = int(args.random_seed)
 
-    plot_dir = f"./plots/{dataset_name}/{method_name}/{score_name}"
-    if not os.path.exists(plot_dir):
-        os.makedirs(plot_dir)
+    dir_name_pattern = f"{dataset_name}/{method_name}/{score_name}"
+    plot_dir = f"./plots/{dir_name_pattern}"
+    log_dir = f"./logs/{dir_name_pattern}"
+    for dir_path in [plot_dir, log_dir]:
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
 
     if args.strategy == "partial_labels":
         sim_links, dis_links = constraint.generate_constraints_from_partial_labels(
@@ -151,5 +166,5 @@ if __name__ == "__main__":
     else:  # using auto-generated constraints
         constraints = generate_constraints(score_name, args.n_constraints, seed=rnd_seed)
     target_function_wrapper = partial(target_function, method_name, score_name, constraints)
-    best_result = run_bo(target_func=target_function_wrapper)
+    best_result = run_bo(target_func=target_function_wrapper, n_total_runs=args.n_total_runs)
     print(best_result)
