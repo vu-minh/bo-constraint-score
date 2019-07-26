@@ -3,65 +3,28 @@ import numpy as np
 from functools import partial
 from bayes_opt import BayesianOptimization
 
-
+import utils
 from common.dataset import dataset
-from common.dataset import constraint
-import constraint_score
 from bo_plot import plot_gp_one_param
 
 from MulticoreTSNE import MulticoreTSNE
 import umap
 
 
-def generate_constraints(score_name, n_constraints, seed=None):
-    return {
-        "qij": {
-            "sim_links": constraint.gen_similar_links(
-                labels, n_constraints, include_link_type=True, seed=seed),
-            "dis_links": constraint.gen_dissimilar_links(
-                labels, n_constraints, include_link_type=True, seed=seed)
-        },
-        "contrastive": {
-            "contrastive_constraints": constraint.generate_contrastive_constraints(
-                labels, n_constraints, seed=seed)
-        }
-    }[score_name]
-
-
-def contrastive_score(Z, contrastive_constraints):
-    return constraint_score.contrastive_score(Z, contrastive_constraints)
-
-
-def qij_score(Z, sim_links, dis_links, degrees_of_freedom=0.5):
-    Q = constraint_score.calculate_Q(Z, degrees_of_freedom)
-    final_score, sim_scores, dis_scores = constraint_score.qij_based_scores(
-        Q, sim_links, dis_links, normalized=False
-    )
-    return final_score
-
-
-def score_embedding(Z, score_name, constraints):
-    score_func = {
-        "contrastive": partial(contrastive_score, **constraints),
-        "qij": partial(qij_score, **constraints)
-    }[score_name]
-    return score_func(Z)
-
-
-def target_function(method_name, score_name, constraints, p):
+def target_function(method_name, score_name, constraints, seed, p):
     method = {
-        "tsne": MulticoreTSNE(perplexity=p, n_iter=1000, random_state=2019, n_jobs=3,
+        "tsne": MulticoreTSNE(perplexity=p, n_iter=1000, random_state=seed, n_jobs=3,
                               n_iter_without_progress=1000, min_grad_norm=1e-32),
-        "umap": umap.UMAP(n_neighbors=int(p))
+        "umap": umap.UMAP(n_neighbors=int(p), random_state=seed)
     }[method_name]
     Z = method.fit_transform(X)
-    score = score_embedding(Z, score_name, constraints)
+    score = utils.score_embedding(Z, score_name, constraints)
     return score
 
 
 def run_bo(target_func,
            n_total_runs=15, n_random_inits=5,
-           kappa=5, xi=0.025, util_func="ucb"):
+           kappa=5, xi=0.025, util_func="ucb", seed=None):
     perp_range = np.array(list(range(2, X.shape[0] // 3)))
     true_target_values = None
 
@@ -69,7 +32,7 @@ def run_bo(target_func,
     optimizer = BayesianOptimization(
         target_func,
         {"p": (2, X.shape[0] // 3)},
-        random_state=rnd_seed,
+        random_state=seed,
     )
 
     # using `util_func`, evaluate the target function at some randomly initial points
@@ -138,13 +101,8 @@ if __name__ == "__main__":
 
     dataset.set_data_home("./data")
     dataset_name = args.dataset_name
-    X, _, labels = dataset.load_dataset(dataset_name)
-    X /= 255.0
-
-    # add preprocessing with PCA
-    # from sklearn.decomposition import PCA
-    # X = PCA(n_components=100).fit_transform(X)
-    print(X.shape, labels.shape)
+    _, X, labels = dataset.load_dataset(dataset_name)  # COIL20 normalized
+    # X /= 255.0  # for DIGITS, not for COIL20
 
     method_name = args.method_name
     score_name = args.score_name
@@ -157,14 +115,13 @@ if __name__ == "__main__":
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
-    if args.strategy == "partial_labels":
-        sim_links, dis_links = constraint.generate_constraints_from_partial_labels(
-            labels, n_labels_each_class=args.n_labels_each_class, seed=rnd_seed)
-        constraints = {'sim_links': sim_links, 'dis_links': dis_links}
-        print(f"[Debug]: From {args.n_labels_each_class} =>"
-              f"(sim-links: {len(sim_links)}, dis-links: {len(dis_links)})")
-    else:  # using auto-generated constraints
-        constraints = generate_constraints(score_name, args.n_constraints, seed=rnd_seed)
-    target_function_wrapper = partial(target_function, method_name, score_name, constraints)
+    constraints = utils.generate_constraints(
+        args.strategy, score_name, labels, seed=rnd_seed,
+        n_constraints=args.n_constraints,
+        n_labels_each_class=args.n_labels_each_class
+    )
+
+    target_function_wrapper = partial(
+        target_function, method_name, score_name, constraints, rnd_seed)
     best_result = run_bo(target_func=target_function_wrapper, n_total_runs=args.n_total_runs)
     print(best_result)
