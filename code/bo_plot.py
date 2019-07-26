@@ -29,15 +29,15 @@ def plot_gp_one_param(optimizer, x, y, util_func="ucb", kappa=5, xi=0.01,
     current_best_param = optimizer.max["params"]["p"]
 
     mu, sigma = _posterior(optimizer, x_obs, y_obs, x)
-    # axis.plot(x, y, linewidth=3, label="Target")
-    axis.plot(x_obs.flatten(), y_obs, "D", markersize=8, label="Observations", color="r")
-    axis.plot(x, mu, "--", color="k", label="Prediction")
+    # axis.plot(x, y, marker="--", linewidth=1, color="#FF8200", label="True Target")
+    axis.plot(x_obs.flatten(), y_obs, "o", markersize=8, label="Observations", color="#1B365D")
+    axis.plot(x, mu, color="#0047BB", label="Prediction")
 
     axis.fill(
         np.concatenate([x, x[::-1]]),
         np.concatenate([mu - 1.9600 * sigma, (mu + 1.9600 * sigma)[::-1]]),
-        alpha=0.25,
-        fc="c",
+        alpha=0.75,
+        fc="#CCDAF1",
         ec="None",
         label="95% confidence interval",
     )
@@ -45,22 +45,19 @@ def plot_gp_one_param(optimizer, x, y, util_func="ucb", kappa=5, xi=0.01,
     # axis.set_xlim((x_obs.min(), x_obs.max()))
     # TODO 20190614 if the score is negative, the current ylim will trim out some range.
     # a workaround is to add sign of the value, but not tested
-    #
-    # axis.set_ylim((0.85 * y_obs.min() * np.sign(y_obs.min()),
-    #                1.15 * y_obs.max() * np.sign(y_obs.max())))
-    # axis.set_ylabel("tsne_with_metric_and_constraint", fontdict={"size": 16})
-
+    axis.set_ylim((0.85 * y_obs.min() * np.sign(y_obs.min()),
+                   1.15 * y_obs.max() * np.sign(y_obs.max())))
     utility_function = UtilityFunction(kind=util_func, kappa=kappa, xi=xi)
     utility = utility_function.utility(x, optimizer._gp, y_max=current_max_target_function)
 
-    acq.plot(x, utility, label=f"Utility Function ({util_func})", color="purple")
+    acq.plot(x, utility, label=f"Utility Function ({util_func})", color="green")
     acq.plot(
         x[np.argmax(utility)],
         np.max(utility),
-        "*",
-        markersize=15,
+        "^",
+        markersize=11,
         label="Next Best Guess",
-        markerfacecolor="gold",
+        markerfacecolor="#FF8200",
         markeredgecolor="k",
         markeredgewidth=1,
     )
@@ -77,10 +74,10 @@ def plot_gp_one_param(optimizer, x, y, util_func="ucb", kappa=5, xi=0.01,
     acq.set_title(f"Next best guess param: {next_best_guess_param}", fontdict={"size": 16})
 
     # draw indicator vline @ the next query point
-    acq.axvline(next_best_guess_param, color='g', linestyle='--', alpha=0.4)
-    axis.axvline(next_best_guess_param, color='g', linestyle='--', alpha=0.4)
+    acq.axvline(next_best_guess_param, color='g', linestyle='--', alpha=0.5)
+    axis.axvline(next_best_guess_param, color='g', linestyle='--', alpha=0.5)
     # draw indicator hline @ the current  max value of the  target function
-    axis.axhline([current_max_target_function], color='r', linestyle='--', alpha=0.4)
+    axis.axhline([current_max_target_function], color='#A1AFF8', linestyle='--', alpha=0.7)
 
     debug_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     debug_method_name = {
@@ -94,7 +91,7 @@ def plot_gp_one_param(optimizer, x, y, util_func="ucb", kappa=5, xi=0.01,
         f"GP ({debug_method_name} utility function) after {steps} steps"
         f" with best predicted param = {current_best_param:.2f}", size=20)
     fig_name = (f"./{plot_dir}/{debug_method_name}"
-                # f"_constraint{constraint_proportion}"
                 f"_{dataset_name}_step{steps}.png")
     plt.savefig(fig_name, bbox_inches="tight")
+    plt.close()
     mlflow.log_artifact(fig_name)
