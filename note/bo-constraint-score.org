@@ -21,6 +21,27 @@ Time-stamp: <2019-07-09 16:04:24 vmvu>
     - Bayesian Optimization -> too technique
     - Missing: interpretable / explainable score.
 
+* Material for writing
+
+** Intro BayesianOptimization
++ Copy from https://mlconf.com/blog/lets-talk-bayesian-optimization/
+Through hyperparameter optimization, a practitioner identifies free parameters in the model
+that can be tuned to achieve better model performance.
+There are a few commonly used methods: hand-tuning, grid search, random search,
+evolutionary algorithms and Bayesian optimization.
+Hand-tuning is a manual guess-test-revise process that relies on
+a practitioner’s previous experience and knowledge.
+A grid search exhaustively explores configurations until
+a reasonable accuracy has been reached.
+Random search uses random samplings of all possible combinations of all hyperparameters.
+And evolutionary algorithms use the comparison of “mutation-like” configurations
+with the best performing configurations to iterate on the model parameters.
+The goal of each of these methods is to find the global optima of hyperparameter values.
+
++ Slide 28/83 https://www.slideshare.net/SigOpt/mlconf-2016-sigopt-talk-by-scott-clark
+*Overfit* a GP model.
+
+
 
 * IDEAS
 
