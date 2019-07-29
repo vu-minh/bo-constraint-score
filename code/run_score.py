@@ -38,7 +38,7 @@ def plot_score(method_name, score_name, list_n_labels_values, degrees_of_freedom
 
     plt.figure(figsize=(10, 5))
     for n_labels_each_class, scores in all_scores.items():
-        plt.plot(list(scores.values())[:120], alpha=0.5,
+        plt.plot(list(scores.values()), alpha=0.5,
                  label=f"n_labels_each_class={n_labels_each_class}")
         best_param = np.argmax(list(scores.values()))
         print(f"With n_labels_each_class={n_labels_each_class}, best_param={best_param}")
