@@ -40,7 +40,8 @@ def run_largevis(X, perplexity_range, seed=42):
             "python2", largevis_exe,
             "-input", input_file_name,
             "-output", output_file_name,
-            "-perp", f"{perp}"
+            "-perp", f"{perp}",
+            "-threads", "32"  # update number of threads for running on dev server
         ])
 
         # loaf from output file to numpy array
@@ -134,7 +135,7 @@ if __name__ == "__main__":
             os.makedirs(dir_path)
 
     if args.debug:
-        param_range = [2, 3, 5, 10, 15, 20, 30, 50, 100]
+        param_range = [20]  # [2, 3, 5, 10, 15, 20, 30, 50, 100]
     else:
         param_range = range(2, X.shape[0] // 3)
 
