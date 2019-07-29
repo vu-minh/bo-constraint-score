@@ -36,10 +36,11 @@ def run_largevis(X, perplexity_range, seed=42):
     for perp in perplexity_range:
         print("Largevis with perplexity: ", perp)
 
-        check_call(["python2", largevis_exe,
-                    "-input", input_file_name,
-                    "-output", output_file_name,
-                    "-perp", f"{perp}",
+        check_call([
+            "python2", largevis_exe,
+            "-input", input_file_name,
+            "-output", output_file_name,
+            "-perp", f"{perp}"
         ])
 
         # loaf from output file to numpy array
@@ -86,7 +87,7 @@ def test_plot(method_name, n_neighbors_range):
         Z = joblib.load(in_name)
         plt.figure(figsize=(8, 8))
         plt.title(f"{dataset_name} {method_name} (n_neighbors={n_neighbors})")
-        plt.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.4, s=20, cmap="Spectral")
+        plt.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.4, s=14, cmap="Spectral")
         plt.savefig(f"{plot_dir}/{n_neighbors}.png")
 
 
@@ -99,7 +100,7 @@ def test_load_all_embeddings(method_name, list_n_neighbors=[2, 5, 20, 50]):
 
         plt.figure(figsize=(8, 8))
         plt.title(f"{dataset_name} {method_name} (n_neighbors={n_neighbors})")
-        plt.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.4, cmap="Spectral")
+        plt.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.4, s=14, cmap="Spectral")
         plt.savefig(f"{plot_dir}/test_load_{n_neighbors}.png")
 
 
