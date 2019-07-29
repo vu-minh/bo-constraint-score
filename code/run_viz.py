@@ -41,6 +41,7 @@ def run_largevis(X, perplexity_range, seed=42):
             "-input", input_file_name,
             "-output", output_file_name,
             "-perp", f"{perp}",
+            "-samples", f"{int(X.shape[0]/100)}",
             "-threads", "32"  # update number of threads for running on dev server
         ])
 
