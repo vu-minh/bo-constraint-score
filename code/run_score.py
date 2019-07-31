@@ -10,6 +10,10 @@ from common.dataset import dataset
 import utils
 
 
+# to profile with line_profiler, add @profile decoration to the target function
+# and run kernprof -l script.py -with --params
+
+# @profile
 def run_score(method_name, score_name, list_n_labels_values,
               seed=42, n_repeat=1, degrees_of_freedom=1.0):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
@@ -36,14 +40,14 @@ def run_score(method_name, score_name, list_n_labels_values,
             json.dump(scores, out_file)
 
     merge_all_score_files(method_name, score_name, list_n_labels_values, seed=seed,
-                          n_repeat=n_repeat, degree_of_freedom=degree_of_freedom)
+                          n_repeat=n_repeat, degrees_of_freedom=degrees_of_freedom)
 
 
 def merge_all_score_files(method_name, score_name, list_n_labels_values,
                           seed=42, n_repeat=1, degrees_of_freedom=1.0):
     all_scores = collections.defaultdict(list)
     list_params = None
-    
+
     for i in range(n_repeat):
         run_index = seed + i
         in_name = f"{score_dir}/dof{degrees_of_freedom}_{run_index}.txt"
@@ -91,25 +95,35 @@ def plot_scores_with_std(method_name, score_name, list_n_labels_values,
         print(n_labels_each_class, len(scores))
         _plot_scores_with_variance(ax, np.array(scores))
         # ax.set_title(f"{n_labels_each_class} labels each class")
+
+    plt.tight_layout()
     plt.savefig(f"{plot_dir}/scores_with_std_dof{degrees_of_freedom}.png")
-    plt.savefig("temp.png")
+    plt.close()
 
 
-def plot_score(method_name, score_name, list_n_labels_values, degrees_of_freedom=1.0):
-    with open(f"{score_dir}/raw_scores_dof{degrees_of_freedom}.txt", "r") as in_file:
-        all_scores = json.load(in_file)
+def plot_scores(method_name, score_name, list_n_labels_values,
+                seed=42, n_repeat=1, degrees_of_freedom=1.0):
+    with open(f"{score_dir}/dof{degrees_of_freedom}_all.txt", "r") as in_file:
+        json_data = json.load(in_file)
 
-    plt.figure(figsize=(10, 5))
+    list_params = json_data['list_params']
+    all_scores = json_data['all_scores']
+
+    def _plot_scores_with_variance(ax, scores):
+        mean = np.mean(scores, axis=0)
+        sigma = np.std(scores, axis=0)
+        ax.plot(mean)
+        ax.fill_between(np.array(list_params), mean + 2 * sigma, mean - 2 * sigma,
+                        fc="#CCDAF1", alpha=0.5)
+        ax.axvline(np.argmax(mean), color='g', linestyle='--', alpha=0.5)
+
+    _, ax = plt.subplots(1, 1, figsize=(16, 8))
     for n_labels_each_class, scores in all_scores.items():
-        plt.plot(list(scores.values()), alpha=0.5,
-                 label=f"n_labels_each_class={n_labels_each_class}")
-        best_param = np.argmax(list(scores.values()))
-        print(f"With n_labels_each_class={n_labels_each_class}, best_param={best_param}")
-        plt.axvline(x=best_param, linestyle="--", alpha=0.4)
+        _plot_scores_with_variance(ax, np.array(scores))
 
-    plt.legend()
     plt.tight_layout()
     plt.savefig(f"{plot_dir}/all_scores_dof{degrees_of_freedom}.png")
+    plt.close()
 
 
 if __name__ == "__main__":
@@ -146,6 +160,7 @@ if __name__ == "__main__":
     for dir_path in [embedding_dir, plot_dir, score_dir]:
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
+        print(dir_path)
 
     list_n_labels_values = [5] if args.debug else range(2, 16)
 
@@ -157,8 +172,6 @@ if __name__ == "__main__":
                               degrees_of_freedom=args.degrees_of_freedom)
 
     if args.plot:
-        # plot_score(method_name, score_dir, list_n_labels_values,
-        #            degrees_of_freedom=args.degrees_of_freedom)
         plot_scores_with_std(method_name, score_name, list_n_labels_values, seed=args.seed,
                              n_repeat=args.n_repeat,
                              degrees_of_freedom=args.degrees_of_freedom)
