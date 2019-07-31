@@ -91,6 +91,7 @@ def test_plot(method_name, n_neighbors_range):
         plt.title(f"{dataset_name} {method_name} (n_neighbors={n_neighbors})")
         plt.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.4, s=14, cmap="Spectral")
         plt.savefig(f"{plot_dir}/{n_neighbors}.png")
+        plt.close()
 
 
 def test_load_all_embeddings(method_name, list_n_neighbors=[2, 5, 20, 50]):
@@ -104,6 +105,7 @@ def test_load_all_embeddings(method_name, list_n_neighbors=[2, 5, 20, 50]):
         plt.title(f"{dataset_name} {method_name} (n_neighbors={n_neighbors})")
         plt.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.4, s=14, cmap="Spectral")
         plt.savefig(f"{plot_dir}/test_load_{n_neighbors}.png")
+        plt.close()
 
 
 if __name__ == "__main__":
@@ -138,7 +140,7 @@ if __name__ == "__main__":
     if args.debug:
         param_range = [20]  # [2, 3, 5, 10, 15, 20, 30, 50, 100]
     else:
-        param_range = range(2, X.shape[0] // 3)
+        param_range = range(2, X.shape[0] // 3)  # only for small dataset
 
     if args.run:
         run_viz(method_name, X, param_range, seed=args.seed)
