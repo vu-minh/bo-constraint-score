@@ -1,6 +1,7 @@
 # run umap for a grid of its params
 
 import os
+import math
 import joblib
 from itertools import product
 from subprocess import check_call
@@ -10,6 +11,7 @@ import matplotlib.pyplot as plt
 from common.dataset import dataset
 import umap
 from MulticoreTSNE import MulticoreTSNE
+import utils
 
 
 def run_viz(method_name, X, seed=42, embedding_dir="",
@@ -88,9 +90,9 @@ def run_tsne(X, perplexity=30, seed=42, check_log=True, embedding_dir=""):
 
 
 def run_umap(X, n_neighbors=15, min_dist=0.1, seed=42, check_log=True, embedding_dir=""):
-    print(f"[Debug] UMAP(n_neighbors={n_neighbors}, min_dist={min_dist}, seed={seed})")
+    print(f"[Debug] UMAP(n_neighbors={n_neighbors}, min_dist={min_dist:.4f}, seed={seed})")
 
-    embedded_file_name = f"{embedding_dir}/{n_neighbors}_{min_dist}.z"
+    embedded_file_name = f"{embedding_dir}/{n_neighbors}_{min_dist:.4f}.z"
     if check_log and os.path.exists(embedded_file_name):
         print(f"[Debug] Reuse {embedded_file_name}")
         return joblib.load(embedded_file_name)
@@ -119,7 +121,7 @@ def merge_embeddings(method_name, perplexity_range=[], min_dist_range=[0.1]):
     if method_name in ['umap']:
         for n_neighbors in perplexity_range:
             for min_dist in min_dist_range:
-                embedding_indices.append(f"{n_neighbors}_{min_dist}")
+                embedding_indices.append(f"{n_neighbors}_{min_dist:.4f}")
 
     # load all embeddings and add to final dict
     all_embeddings = {}
@@ -132,14 +134,16 @@ def merge_embeddings(method_name, perplexity_range=[], min_dist_range=[0.1]):
     joblib.dump(all_embeddings, f"{embedding_dir}/all.z")
 
 
-def test_load_from_all_embeddings(method_name, param1=30, param2=0.1):
+def test_load_from_all_embeddings(method_name, param1="30", param2="0.1000"):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
     print(list(all_embeddings.keys()))
     if method_name in ['tsne', 'largevis']:
         embedding_index = str(param1)
     if method_name in ['umap']:
         embedding_index = f"{param1}_{param2}"
-    Z = all_embeddings.get(embedding_index)
+    Z = all_embeddings.get(embedding_index, None)
+    if Z is None:
+        raise ValueError(f"Invalid param: {embedding_index}")
 
     plt.figure(figsize=(8, 8))
     plt.title(f"[Debug] Test load {dataset_name} {method_name} {embedding_index}")
@@ -154,8 +158,16 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dataset_name", default="")
     ap.add_argument("-m", "--method_name", default="umap",
-                    help="['tsne', 'umap', 'largevis', 'TODO-umap-n-params']")
+                    help="['tsne', 'umap', 'largevis']")
     ap.add_argument("-s", "--seed", default=2019, type=int)
+    ap.add_argument("--perp_scale", default="log2",
+                    help="perplexity scale, in ['log2', 'log10', 'linear', 'hardcoded']")
+    ap.add_argument("--min_dist_scale", default="log10",
+                    help="min_dist scale, in ['log2', 'log10', 'linear', 'hardcoded']")
+    ap.add_argument("--n_perp", default=200, type=int,
+                    help="approximated number of perplexity to evaluate")
+    ap.add_argument("--n_min_dist", default=9, type=int,
+                    help="approximated number of min_dist to evaluate")
     ap.add_argument("--debug", action="store_true")
     ap.add_argument("--run", action="store_true", help="run method for all params")
     ap.add_argument("--plot", action="store_true", help="generate plot for all params")
@@ -178,17 +190,33 @@ if __name__ == "__main__":
             os.makedirs(dir_path)
 
     if args.debug:
-        perplexity_range = [30]  # [2, 3, 5, 10, 15, 20, 30, 50, 100]
-        min_dist_range = [0.1]
+        perplexity_range = [30]
+    elif args.perp_scale == "hardcoded":
+        perplexity_range = [2, 3, 4, 10, 15, 20, 30, 50, 100, 200, 350, 500]
     else:
-        perplexity_range = range(2, X.shape[0] // 3)  # only for small dataset
+        min_perp, max_perp = 2, int(X.shape[0] // 3)
+        perplexity_range = utils.generate_value_range(
+            args.perp_scale, min_perp, max_perp, num=args.n_perp, dtype=int)
+        print(perplexity_range)
+
+    if args.debug:
         min_dist_range = [0.1]
+    elif args.min_dist_scale == "hardcoded":
+        min_dist_range = [0.001, 0.0025, 0.005,
+                          0.01, 0.025, 0.05,
+                          0.1, 0.25, 0.5, 1.0]
+    else:
+        start_min_dist, stop_min_dist = 0.001, 1.0
+        min_dist_range = utils.generate_value_range(
+            args.min_dist_scale, start_min_dist, stop_min_dist,
+            num=args.n_min_dist, dtype=float)
+        print(list(map("{:.4f}".format, min_dist_range)))
 
     if args.run:
         run_viz(method_name, X, seed=42, embedding_dir=embedding_dir,
                 perplexity_range=perplexity_range, min_dist_range=min_dist_range)
         merge_embeddings(method_name,
                          perplexity_range=perplexity_range, min_dist_range=min_dist_range)
-
+        
     if args.plot:
         test_load_from_all_embeddings(method_name)

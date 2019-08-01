@@ -1,6 +1,7 @@
 from functools import partial
 
-
+import math
+import numpy as np
 from common.dataset import constraint
 import constraint_score
 
@@ -47,3 +48,27 @@ def score_embedding(Z, score_name, constraints, degrees_of_freedom=0.5):
         "qij": partial(_qij_score, degrees_of_freedom=degrees_of_freedom, **constraints)
     }[score_name]
     return score_func(Z)
+
+
+def generate_value_range(range_type='linear', min_val=2, max_val=1000, num=100, dtype=int):
+    return {
+        'log2': _generate_log2_range,
+        'log10': _generate_log10_range,
+        'linear': _generate_linear_range,
+    }[range_type](min_val, max_val, num, dtype)
+
+
+def _generate_linear_range(min_val=2, max_val=1000, num=100, dtype=int):
+    return np.unique(np.linspace(min_val, max_val, num=num, dtype=dtype))
+
+
+def _generate_log2_range(min_val=2, max_val=1000, num=100, dtype=int):
+    min_exp = int(math.log2(min_val))
+    max_exp = int(math.log2(max_val))
+    return np.unique(np.logspace(min_exp, max_exp, num=num, base=2, dtype=dtype))
+
+
+def _generate_log10_range(min_val=1, max_val=1000, num=100, dtype=int):
+    min_exp = int(math.log10(min_val))
+    max_exp = int(math.log10(max_val))
+    return np.unique(np.logspace(min_exp, max_exp, num=num, base=10, dtype=dtype))
