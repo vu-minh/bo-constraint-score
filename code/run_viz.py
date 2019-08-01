@@ -72,7 +72,7 @@ def run_largevis(X, perplexity=30, seed=42, check_log=True, embedding_dir=""):
     Z = np.loadtxt(output_file_name, skiprows=1)
     # save numpy array to z file
     joblib.dump(Z, embedded_file_name)
-
+    return Z
 
 def run_tsne(X, perplexity=30, seed=42, check_log=True, embedding_dir=""):
     print(f"[Debug] MulticoreTSNE(perplexity={perplexity}, seed={seed})")
@@ -87,6 +87,7 @@ def run_tsne(X, perplexity=30, seed=42, check_log=True, embedding_dir=""):
         n_iter_without_progress=1500, min_grad_norm=1e-32,
     ).fit_transform(X)
     joblib.dump(Z, embedded_file_name)
+    return Z
 
 
 def run_umap(X, n_neighbors=15, min_dist=0.1, seed=42, check_log=True, embedding_dir=""):
@@ -100,6 +101,7 @@ def run_umap(X, n_neighbors=15, min_dist=0.1, seed=42, check_log=True, embedding
     Z = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, random_state=seed) \
             .fit_transform(X)
     joblib.dump(Z, embedded_file_name)
+    return Z
 
 
 def merge_embeddings(method_name, perplexity_range=[], min_dist_range=[0.1]):
