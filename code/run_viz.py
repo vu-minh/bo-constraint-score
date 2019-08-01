@@ -1,16 +1,16 @@
 # run umap for a grid of its params
 
 import os
-import math
 import joblib
 from itertools import product
 from subprocess import check_call
 
 import numpy as np
 import matplotlib.pyplot as plt
-from common.dataset import dataset
-import umap
 from MulticoreTSNE import MulticoreTSNE
+import umap
+
+from common.dataset import dataset
 import utils
 
 
@@ -134,9 +134,10 @@ def merge_embeddings(method_name, perplexity_range=[], min_dist_range=[0.1]):
     joblib.dump(all_embeddings, f"{embedding_dir}/all.z")
 
 
-def test_load_from_all_embeddings(method_name, param1="30", param2="0.1000"):
+def test_load_from_all_embeddings(method_name, param1="30", param2="0.0010"):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
-    print(list(all_embeddings.keys()))
+    print(f"Embedded keys: {str(list(all_embeddings.keys()))[:100]} ... ]")
+    
     if method_name in ['tsne', 'largevis']:
         embedding_index = str(param1)
     if method_name in ['umap']:
