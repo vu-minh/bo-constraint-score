@@ -1,4 +1,4 @@
-# run umap for all a grid of its params
+# run umap for a grid of its params
 
 import os
 import joblib
@@ -12,14 +12,29 @@ import umap
 from MulticoreTSNE import MulticoreTSNE
 
 
-def run_viz(method_name, X, param_ranges, seed=42):
-    {
-        'tsne': lambda: run_tsne(X, perplexity_range=param_ranges, seed=seed),
-        'umap': lambda: run_umap(X, n_neighbors_range=param_ranges, seed=seed),
-        'umap_nneighbors': lambda: (),  # TODO: run umap with 1 param
-        'umap_nneighbors_mindist': lambda: (),  # TODO: run umap with 2 params
-        'largevis': lambda: run_largevis(X, perplexity_range=param_ranges, seed=seed)
-    }[method_name]()
+def run_viz(method_name, X, seed=42, embedding_dir="",
+            perplexity_range=[], min_dist_range=[0.1]):
+
+    def _run_tsne(perp, min_dist):
+        run_tsne(X, perplexity=perp, seed=seed,
+                 check_log=True, embedding_dir=embedding_dir)
+
+    def _run_umap(perp, min_dist):
+        run_umap(X, n_neighbors=perp, min_dist=min_dist, seed=seed,
+                 check_log=True, embedding_dir=embedding_dir)
+
+    def _run_largevis(perp, min_dist):
+        run_largevis(X, perplexity=perp, seed=seed,
+                     check_log=True, embedding_dir=embedding_dir)
+
+    method_func = {
+        'tsne': _run_tsne,
+        'umap': _run_umap,
+        'largevis': _run_largevis
+    }[method_name]
+
+    for perp, min_dist in product(perplexity_range, min_dist_range):
+        method_func(perp,  min_dist)
 
 
 def run_largevis(X, perplexity=30, seed=42, check_log=True, embedding_dir=""):
@@ -85,39 +100,25 @@ def run_umap(X, n_neighbors=15, min_dist=0.1, seed=42, check_log=True, embedding
     joblib.dump(Z, embedded_file_name)
 
 
-def merge_embeddings(method_name, **kwargs):
+def merge_embeddings(method_name, perplexity_range=[], min_dist_range=[0.1]):
     """Merge all embeddings in .z file into a big .z file.
 
-    Each embedding is indexed by its param(s) in `kwargs`.
     + tSNE and LargeVis use `perplexity`,
     + UMAP use `n_neighbors` and `min_dist`
-   
-    Args:
-        method_name: name of method, in ['tsne', 'umap', 'largevis']
-        kwargs: keyword arguments for each method:
-                {'perplexity_range': []} for 'tsne' and 'largevis'
-                {'n_neighbors_range': [], 'min_dist_range': []} for 'umap'
+
     Returns:
         dict of all embeddings indexed by its corresponding param value(s)
         E.g.: {50: []} or {50_0.1: []}
     """
-    # check if kargs containts the correct param key
-    param_keys = {
-        'tsne': ['perplexity_range'],
-        'largevis': ['perplexity_range'],
-        'umap': ['n_neighbors_range', 'min_dist_range']
-    }
-    for param_key in param_keys[method_name]:
-        assert param_key in kwargs
 
     # build list of embedding indices that will be used as file name
     embedding_indices = []
     if method_name in ['tsne', 'largevis']:
-        for perplexity in kwargs['perplexity_range']:
+        for perplexity in perplexity_range:
             embedding_indices.append(str(perplexity))
     if method_name in ['umap']:
-        for n_neighbors in kwargs['n_neighbors_range']:
-            for min_dist in kwargs['min_dist_range']:
+        for n_neighbors in perplexity_range:
+            for min_dist in min_dist_range:
                 embedding_indices.append(f"{n_neighbors}_{min_dist}")
 
     # load all embeddings and add to final dict
@@ -163,9 +164,11 @@ if __name__ == "__main__":
     dataset.set_data_home("./data")
     dataset_name = args.dataset_name
     method_name = args.method_name
+
+    # custom preprocessing method for each dataset
     preprocessing_method = {
         'COIL20': None
-    }.get(dataset_name, 'unitScale')
+    }.get(dataset_name, 'unitScale')  # default for image dataset
 
     X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method)
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
@@ -182,10 +185,10 @@ if __name__ == "__main__":
         min_dist_range = [0.1]
 
     if args.run:
-        # run_viz(method_name, X, param_range, seed=args.seed)
+        run_viz(method_name, X, seed=42, embedding_dir=embedding_dir,
+                perplexity_range=perplexity_range, min_dist_range=min_dist_range)
         merge_embeddings(method_name,
-                         perplexity_range=perplexity_range, n_neighbors_range=perplexity_range,
-                         min_dist_range=min_dist_range)
+                         perplexity_range=perplexity_range, min_dist_range=min_dist_range)
 
     if args.plot:
         test_load_from_all_embeddings(method_name)
