@@ -39,9 +39,10 @@ def run_viz(method_name, X, seed=42, embedding_dir="",
         method_func(perp,  min_dist)
 
 
-def run_largevis(X, perplexity=30, seed=42, check_log=True, embedding_dir=""):
+def run_largevis(X, perplexity: int=30, seed: int=42,
+                 check_log: bool=True, embedding_dir: str=""):
     # https://github.com/lferry007/LargeVis
-
+    perplexity = int(perplexity)
     print(f"[Debug] LargeVis(perplexity={perplexity}, seed={seed}")
 
     embedded_file_name = f"{embedding_dir}/{perplexity}.z"
@@ -74,7 +75,10 @@ def run_largevis(X, perplexity=30, seed=42, check_log=True, embedding_dir=""):
     joblib.dump(Z, embedded_file_name)
     return Z
 
-def run_tsne(X, perplexity=30, seed=42, check_log=True, embedding_dir=""):
+
+def run_tsne(X, perplexity: int=30, seed: int=42,
+             check_log: bool=True, embedding_dir: str=""):
+    perplexity = int(perplexity)
     print(f"[Debug] MulticoreTSNE(perplexity={perplexity}, seed={seed})")
 
     embedded_file_name = f"{embedding_dir}/{perplexity}.z"
@@ -90,7 +94,9 @@ def run_tsne(X, perplexity=30, seed=42, check_log=True, embedding_dir=""):
     return Z
 
 
-def run_umap(X, n_neighbors=15, min_dist=0.1, seed=42, check_log=True, embedding_dir=""):
+def run_umap(X, n_neighbors: int=15, min_dist: float=0.1, seed: int=42,
+             check_log: bool=True, embedding_dir: str=""):
+    n_neighbors = int(n_neighbors)
     print(f"[Debug] UMAP(n_neighbors={n_neighbors}, min_dist={min_dist:.4f}, seed={seed})")
 
     embedded_file_name = f"{embedding_dir}/{n_neighbors}_{min_dist:.4f}.z"
@@ -184,8 +190,8 @@ if __name__ == "__main__":
     preprocessing_method = {
         'COIL20': None
     }.get(dataset_name, 'unitScale')  # default for image dataset
-
     X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method)
+
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
     plot_dir = f"./plots/{dataset_name}/{method_name}"
     for dir_path in [embedding_dir, plot_dir]:
