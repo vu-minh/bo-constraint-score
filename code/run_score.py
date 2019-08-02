@@ -73,28 +73,40 @@ def merge_all_score_files(method_name, score_name, list_n_labels_values,
         }, out_file)
 
 
-def plot_scores_with_std(method_name, score_name, list_n_labels_values,
-                         seed=42, n_repeat=1, degrees_of_freedom=1.0):
+def plot_scores_with_std(method_name, score_name, list_n_labels_values, degrees_of_freedom=1.0):
+    from matplotlib.ticker import FuncFormatter
+    plt.rcParams.update({'font.size': 16})
+
+    def log_e_format(x, pos):
+        """The two args are the value and tick position.
+        Label ticks with the product of the exponentiation
+        """
+        return int(x)
+
     with open(f"{score_dir}/dof{degrees_of_freedom}_all.txt", "r") as in_file:
         json_data = json.load(in_file)
 
     list_params = json_data['list_params']
     all_scores = json_data['all_scores']
 
-    def _plot_scores_with_variance(ax, scores):
+    def _plot_line_with_variance(ax, scores):
         mean = np.mean(scores, axis=0)
         sigma = np.std(scores, axis=0)
         ax.plot(mean)
-        ax.fill_between(np.array(list_params), mean + 2 * sigma, mean - 2 * sigma,
-                        fc="#CCDAF1", alpha=0.5)
+        ax.fill_between(np.array(list_params), mean + 2 * sigma, mean - 2 * sigma, fc="#CCDAF1", alpha=0.5)
         ax.axvline(np.argmax(mean), color='g', linestyle='--', alpha=0.5)
+        ax.set_xscale("log", basex=np.e)
+        ax.xaxis.set_major_formatter(FuncFormatter(log_e_format))
+        ax.set_xlabel('param in log-scale')
+        ax.set_ylabel('constraint score')
+        ax.yaxis.grid(linestyle='--')
 
-    n_rows = len(all_scores)
+    n_rows = len(list_n_labels_values)
     _, axes = plt.subplots(n_rows, 1, figsize=(16, 4*n_rows))
-    for ax, (n_labels_each_class, scores) in zip(np.array(axes).ravel(), all_scores.items()):
-        print(n_labels_each_class, len(scores))
-        _plot_scores_with_variance(ax, np.array(scores))
-        # ax.set_title(f"{n_labels_each_class} labels each class")
+
+    for ax, n_labels_each_class in zip(np.array(axes).ravel(), list_n_labels_values):
+        scores = all_scores[str(n_labels_each_class)]
+        _plot_line_with_variance(ax, np.array(scores))
 
     plt.tight_layout()
     plt.savefig(f"{plot_dir}/scores_with_std_dof{degrees_of_freedom}.png")
@@ -172,6 +184,5 @@ if __name__ == "__main__":
                               degrees_of_freedom=args.degrees_of_freedom)
 
     if args.plot:
-        plot_scores_with_std(method_name, score_name, list_n_labels_values, seed=args.seed,
-                             n_repeat=args.n_repeat,
+        plot_scores_with_std(method_name, score_name, list_n_labels_values,
                              degrees_of_freedom=args.degrees_of_freedom)
