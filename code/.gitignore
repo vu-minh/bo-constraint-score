@@ -4,3 +4,4 @@ __pycache__
 annoy_index_file
 temp*
 log*
+run_score.py.lprof
