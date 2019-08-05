@@ -145,7 +145,7 @@ def merge_embeddings(method_name, perplexity_range=[], min_dist_range=[0.1]):
 def test_load_from_all_embeddings(method_name, param1="30", param2="0.0010"):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
     print(f"Embedded keys: {str(list(all_embeddings.keys()))[:100]} ... ]")
-    
+
     if method_name in ['tsne', 'largevis']:
         embedding_index = str(param1)
     if method_name in ['umap']:
@@ -169,13 +169,13 @@ if __name__ == "__main__":
     ap.add_argument("-m", "--method_name", default="umap",
                     help="['tsne', 'umap', 'largevis']")
     ap.add_argument("-s", "--seed", default=2019, type=int)
-    ap.add_argument("--perp_scale", default="log2",
-                    help="perplexity scale, in ['log2', 'log10', 'linear', 'hardcoded']")
-    ap.add_argument("--min_dist_scale", default="log10",
-                    help="min_dist scale, in ['log2', 'log10', 'linear', 'hardcoded']")
+    ap.add_argument("--perp_scale", default="log",
+                    help="perplexity scale, in ['log', 'linear', 'hardcoded']"),
+    ap.add_argument("--min_dist_scale", default="log",
+                    help="min_dist scale, in ['log', 'linear', 'hardcoded']")
     ap.add_argument("--n_perp", default=200, type=int,
                     help="approximated number of perplexity to evaluate")
-    ap.add_argument("--n_min_dist", default=9, type=int,
+    ap.add_argument("--n_min_dist", default=10, type=int,
                     help="approximated number of min_dist to evaluate")
     ap.add_argument("--debug", action="store_true")
     ap.add_argument("--run", action="store_true", help="run method for all params")
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     else:
         min_perp, max_perp = 2, int(X.shape[0] // 3)
         perplexity_range = utils.generate_value_range(
-            args.perp_scale, min_perp, max_perp, num=args.n_perp, dtype=int)
+            min_perp, max_perp, range_type=args.perp_scale, num=args.n_perp, dtype=int)
         print(perplexity_range)
 
     if args.debug:
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     else:
         start_min_dist, stop_min_dist = 0.001, 1.0
         min_dist_range = utils.generate_value_range(
-            args.min_dist_scale, start_min_dist, stop_min_dist,
+            start_min_dist, stop_min_dist, range_type=args.min_dist_scale,
             num=args.n_min_dist, dtype=float)
         print(list(map("{:.4f}".format, min_dist_range)))
 
@@ -226,6 +226,6 @@ if __name__ == "__main__":
                 perplexity_range=perplexity_range, min_dist_range=min_dist_range)
         merge_embeddings(method_name,
                          perplexity_range=perplexity_range, min_dist_range=min_dist_range)
-        
+
     if args.plot:
-        test_load_from_all_embeddings(method_name)
+        test_load_from_all_embeddings(method_name, param1="30", param2="0.1000")
