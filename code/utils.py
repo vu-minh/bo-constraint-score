@@ -34,7 +34,7 @@ def _contrastive_score(Z, contrastive_constraints):
     return constraint_score.contrastive_score(Z, contrastive_constraints)
 
 
-def _qij_score(Z, sim_links, dis_links, degrees_of_freedom=0.5):
+def _qij_score(Z, sim_links, dis_links, degrees_of_freedom=1.0):
     Q = constraint_score.calculate_Q(Z, degrees_of_freedom)
     final_score, sim_scores, dis_scores = constraint_score.qij_based_scores(
         Q, sim_links, dis_links, normalized=False
@@ -42,7 +42,7 @@ def _qij_score(Z, sim_links, dis_links, degrees_of_freedom=0.5):
     return final_score
 
 
-def score_embedding(Z, score_name, constraints, degrees_of_freedom=0.5):
+def score_embedding(Z, score_name, constraints, degrees_of_freedom=1.0):
     score_func = {
         "contrastive": partial(_contrastive_score, **constraints),
         "qij": partial(_qij_score, degrees_of_freedom=degrees_of_freedom, **constraints)
@@ -50,25 +50,33 @@ def score_embedding(Z, score_name, constraints, degrees_of_freedom=0.5):
     return score_func(Z)
 
 
-def generate_value_range(range_type='linear', min_val=2, max_val=1000, num=100, dtype=int):
+def generate_value_range(min_val=2, max_val=1000, num=150, range_type="log", dtype=int):
     return {
-        'log2': _generate_log2_range,
-        'log10': _generate_log10_range,
+        'log': partial(_generate_log_range, base=math.e),
+        'log2': partial(_generate_log_range, base=2),
+        'log10': partial(_generate_log_range, base=10),
         'linear': _generate_linear_range,
-    }[range_type](min_val, max_val, num, dtype)
+    }[range_type](min_val, max_val, num=num, dtype=dtype)
 
 
 def _generate_linear_range(min_val=2, max_val=1000, num=100, dtype=int):
     return np.unique(np.linspace(min_val, max_val, num=num, dtype=dtype))
 
 
-def _generate_log2_range(min_val=2, max_val=1000, num=100, dtype=int):
-    min_exp = int(math.log2(min_val))
-    max_exp = int(math.log2(max_val))
-    return np.unique(np.logspace(min_exp, max_exp, num=num, base=2, dtype=dtype))
+def _generate_log_range(min_val=2, max_val=1000, num=150, dtype=int, base=math.e):
+    log_func = {
+        math.e: math.log,
+        2: math.log2,
+        10: math.log10
+    }[base]
+    min_exp = log_func(min_val)
+    max_exp = log_func(max_val)
+    range_values = np.logspace(min_exp, max_exp, num=num, base=base,  dtype=dtype)
+    return np.unique(range_values[np.where(range_values >= min_val)])
 
 
-def _generate_log10_range(min_val=1, max_val=1000, num=100, dtype=int):
-    min_exp = int(math.log10(min_val))
-    max_exp = int(math.log10(max_val))
-    return np.unique(np.logspace(min_exp, max_exp, num=num, base=10, dtype=dtype))
+if __name__ == "__main__":
+    values = generate_value_range(min_val=2, max_val=1796//3, num=150,
+                                  range_type="log", dtype=int)
+    print(len(values))
+    print(values)
