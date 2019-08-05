@@ -207,12 +207,40 @@ We can analyze the explainability of the score / the visual assessment of the qu
 \end{figure}
 
 \vspace{8pt} \par
-+ Variance / Stability of the score: analyze Fig.~\ref{fig:svar} and explain how BayOpt approach can take into account the variance (uncertainty) of the score.
-\begin{figure}
-\centering
-\includegraphics[scale=0.25]{sall_perp30.pdf}
-\caption{ML+CL agrees with AUC\_RNX score.}\label{fig:svar}
-\end{figure}
++ Variance / Stability of the score: analyze Fig.~\ref{fig:score_stability} and explain how BayOpt approach can take into account the variance (uncertainty) of the score.
+
+\begin{figure*}
+     \centering
+     \begin{subfigure}[b]{0.24\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{COIL20_tsne_scores}
+         \caption{t-SNE with COIL20}
+         \label{fig:s3}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.24\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{COIL20_umap_scores}
+         \caption{UMAP with COIL20}
+         \label{fig:s4}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.24\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{DIGITS_tsne_scores}
+         \caption{t-SNE with DIGITS}
+         \label{fig:s1}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.24\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{DIGITS_umap_scores}
+         \caption{UMAP with DIGITS}
+         \label{fig:s2}
+     \end{subfigure}
+     \caption{Stability of the constraint preserving scores with two methods t-SNE and UMAP for two datasets COIL20 and DIGITS}
+     \label{fig:score_stability}
+\end{figure*}
 
 
 \vspace{8pt} \par
