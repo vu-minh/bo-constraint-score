@@ -12,9 +12,6 @@ from common.dataset import dataset
 import utils
 
 
-plt.rcParams.update({'font.size': 16})
-
-
 # to profile with line_profiler, add @profile decoration to the target function
 # and run kernprof -l script.py -with --params
 
@@ -215,6 +212,9 @@ if __name__ == "__main__":
     list_n_labels_values = [3, 5, 10, 15] if args.debug else range(2, 16)
     list_perp_in_log_scale = utils.generate_value_range(
         min_val=2, max_val=X.shape[0]//3, range_type="log", num=150, dtype=int)
+
+    # note to make big font size for plots
+    plt.rcParams.update({'font.size': 22})
 
     if args.run:
         run_score(method_name, score_name, list_n_labels_values, seed=args.seed,
