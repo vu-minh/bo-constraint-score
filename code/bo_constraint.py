@@ -10,7 +10,7 @@ from bayes_opt.event import Events
 import utils
 from common.dataset import dataset
 from run_viz import run_tsne, run_largevis, run_umap
-from bo_plot import plot_bo_one_param
+from bo_plot import plot_bo_one_param_summary
 
 
 # transformation rules to transform the params in log scale to linear scale
@@ -145,8 +145,8 @@ def plot_bo(optimizer, list_perp_in_log_scale, true_score, bayopt_params={}, plo
     true_target = {'list_params': list_params, 'true_score': true_score}
     prediction = _posterior(optimizer, param_range=list_params, **observation)
 
-    plot_bo_one_param(optimizer, plot_dir=plot_dir,
-                      **observation, **true_target, **prediction, **bayopt_params)
+    plot_bo_one_param_summary(optimizer, plot_dir=plot_dir,
+                              **observation, **true_target, **prediction, **bayopt_params)
 
 
 if __name__ == "__main__":

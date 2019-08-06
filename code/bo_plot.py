@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 from matplotlib import gridspec
 
 from bayes_opt import UtilityFunction
+from utils import generate_value_range
 
 
 def _plot_acq_func(ax, util_func, list_params, utility_values, next_best_guess_param):
@@ -39,11 +41,11 @@ def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params):
     )
 
 
-def plot_bo_one_param(optimizer,
-                      x_obs, y_obs,  # the Observations
-                      list_params, true_score,  # the true target values
-                      pred_mu, pred_sigma,  # the predicted values
-                      util_func="ucb", kappa=5, xi=0.01, plot_dir=""):
+def plot_bo_one_param_detail(optimizer,
+                             x_obs, y_obs,  # the Observations
+                             list_params, true_score,  # the true target values
+                             pred_mu, pred_sigma,  # the predicted values
+                             util_func="ucb", kappa=5, xi=0.01, plot_dir=""):
     ''' Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real param in logscale)
     '''
@@ -93,4 +95,48 @@ def plot_bo_one_param(optimizer,
         f"{acq_method_name} after {len(optimizer.space)} steps"
         f" with best predicted param = {int(np.exp(current_best_param))}")
     plt.savefig(f"{plot_dir}/bo_detail.png", bbox_inches="tight")
+    plt.close()
+
+
+def plot_bo_one_param_summary(optimizer,
+                              x_obs, y_obs,  # the Observations
+                              list_params, true_score,  # the true target values
+                              pred_mu, pred_sigma,  # the predicted values
+                              param_name="perplexity",
+                              util_func="ucb", kappa=5, xi=0.01, plot_dir=""):
+    ''' Plot the prediction of BayOpt with GP model.
+    Note that all values of `list_params` are in log space (the real param in logscale)
+    '''
+    # note to make big font size for plots in the paper
+    plt.rcParams.update({'font.size': 22})
+    _, ax = plt.subplots(1, 1, figsize=(13, 6))
+
+    _plot_true_target_values(ax, list_params, true_score)
+    _plot_observed_points(ax, x_obs, y_obs)
+    _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params)
+
+    # draw indicator hline at the current  max value of the  target function
+    # ax.axhline([current_max_target_function], color='#A1AFF8', linestyle='--', alpha=0.7)
+
+    # draw indicator vline @ the best param
+    best_param = optimizer.max["params"]["perplexity"]
+    ax.axvline(best_param, color="green", linestyle='--', alpha=0.5,
+               marker="^", markersize=16, clip_on=False,
+               markeredgecolor="#FF8200", markerfacecolor="#FF8200", markevery=100)
+    ax.text(x=best_param, y=min(true_score), s=f"best {param_name}: {int(np.exp(best_param))}")
+
+    # set limit value for yaxis in gp prediction chart
+    ax.set_ylim((0.95 * y_obs.min(), 1.12 * y_obs.max()))  # make place for legend
+
+    list_params_to_show = generate_value_range(
+        min_val=min(list_params), max_val=max(list_params), num=20, range_type="log", dtype=int)
+    ax.set_xlim(left=min(list_params_to_show), right=max(list_params_to_show))
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: int(np.exp(x))))
+
+    ax.set_xlabel(f"{param_name} in log-scale")
+    ax.yaxis.grid(linestyle='--')
+
+    # set title and save figure
+    plt.legend(loc="upper center", ncol=4, prop={'size': 14})
+    plt.savefig(f"{plot_dir}/bo_summary.png", bbox_inches="tight")
     plt.close()
