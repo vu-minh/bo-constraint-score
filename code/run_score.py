@@ -99,7 +99,7 @@ def plot_scores_with_std(method_name, score_name, list_n_labels_values,
         best_param_value = list_params[best_param_index]
         ax.axvline(best_param_value, color='g', linestyle='--', alpha=0.5,
                    marker="^", markersize=16, clip_on=False,
-                   markeredgecolor="orange", markerfacecolor="orange", markevery=100)
+                   markeredgecolor="#FF8200", markerfacecolor="#FF8200", markevery=100)
         ax.text(x=best_param_index+3, y=min(mean_scores),
                 s=f"best {param_name} = {best_param_value}")
 
