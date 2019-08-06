@@ -1,5 +1,7 @@
 import math
+import joblib
 from functools import partial
+import numpy as np
 
 from bayes_opt import BayesianOptimization
 from bayes_opt.observer import JSONLogger
@@ -8,11 +10,46 @@ from bayes_opt.event import Events
 import utils
 from common.dataset import dataset
 from run_viz import run_tsne, run_largevis, run_umap
+from bo_plot import plot_bo_one_param
+
+
+# transformation rules to transform the params in log scale to linear scale
+transformation_rules = {
+    # 'param_name': (cast_type, transformation_func),
+    'perplexity': (int, math.exp),
+    'n_neighbors': (int, math.exp),
+    'min_dist': (float, math.exp)
+}
+
+
+def _target_func(method_name, X, check_log, seed, embedding_dir, **params_in_log_scale):
+    ''' The score function, calls viz method to obtain `Z` and calculates score on `Z`
+    The `params_in_log_scale` should be:
+        + log(`perplexity`) for tsne and largevis,
+        + log(`n_neighbors`, `min_dist`) for umap
+    '''
+    embedding_function = {
+        'tsne': run_tsne,
+        'umap': run_umap,
+        'largevis': run_largevis
+    }[method_name]
+
+    # transform and cast type the param in log scale into original linear scale
+    for param_name, (cast_type, transformation_func) in transformation_rules.items():
+        if param_name in params_in_log_scale:
+            params_in_log_scale[param_name] = cast_type(transformation_func(
+                params_in_log_scale[param_name]
+            ))
+
+    # get the embedding and calculate constraint score
+    Z = embedding_function(X=X, seed=seed, check_log=True, embedding_dir=embedding_dir,
+                           **params_in_log_scale)
+    return utils.score_embedding(Z, score_name, constraints)
 
 
 def bayopt_workflow(X, constraints,
-                    method_name: str, score_name: str,
-                    seed: int=42, embedding_dir: str="",
+                    method_name: str, score_name: str, seed: int=42,
+                    embedding_dir: str="", score_dir="", plot_dir="",
                     bayopt_params={}):
 
     # value range of params in original linear scale
@@ -23,14 +60,6 @@ def bayopt_workflow(X, constraints,
     perp_range = (math.log(min_perp), math.log(max_perp))
     min_dist_range = (math.log(start_min_dist), math.log(stop_min_dist))
 
-    # transformation rules to transform the params in log scale to linear scale
-    transformation_rules = {
-        # 'param_name': (cast_type, transformation_func),
-        'perplexity': (int, math.exp),
-        'n_neighbors': (int, math.exp),
-        'min_dist': (float, math.exp)
-    }
-
     # create 'logspace' for the parameters
     params_space = {
         'tsne': {'perplexity': perp_range},
@@ -39,44 +68,27 @@ def bayopt_workflow(X, constraints,
     }[method_name]
 
     # define the target function which will be maximize by BayOpt
-    def target_func(**params_in_log_scale):
-        '''The `params_in_log_scale` should be:
-        + log(`perplexity`) for tsne and largevis,
-        + log(`n_neighbors`, `min_dist`) for umap
-        '''
-        embedding_function = partial({
-            'tsne': run_tsne,
-            'umap': run_umap,
-            'largevis': run_largevis
-        }[method_name], X=X, seed=seed, check_log=True, embedding_dir=embedding_dir)
+    target_func = partial(_target_func, method_name=method_name,
+                          X=X, seed=seed, check_log=True, embedding_dir=embedding_dir)
 
-        # transform and cast type the param in log scale into original linear scale
-        for param_name, (cast_type, transformation_func) in transformation_rules.items():
-            if param_name in params_in_log_scale:
-                params_in_log_scale[param_name] = cast_type(transformation_func(
-                    params_in_log_scale[param_name]
-                ))
+    # run bayopt
+    optimizer = run_bo(target_func, params_space, **bayopt_params)
 
-        # get the embedding and calculate constraint score
-        Z = embedding_function(**params_in_log_scale)
-        return utils.score_embedding(Z, score_name, constraints)
-
-    # run bayopt and transform the best param to original linear scale
-    result = run_bo(target_func, params_space, **bayopt_params)
+    # transform the best param to original linear scale
+    result = optimizer.max
     for param_name, param_value in result['params'].items():
         cast_type, transformation_func = transformation_rules[param_name]
-        result['params'][param_name] = cast_type(transformation_func(param_value))
-    return result
+        result['params'][param_name] = cast_type(transformation_func(param_value))    
+    return result, optimizer
 
 
 def run_bo(target_func, params_space, seed=42, log_dir="",
-           n_total_runs=15, n_random_inits=5,
-           kappa=5, xi=0.025, util_func="ucb"):
+           n_total_runs=15, n_random_inits=5, kappa=5, xi=0.025, util_func="ucb"):
 
     # create BO object to find max of `target_func` in the domain of param `p`
     optimizer = BayesianOptimization(
-        target_func,
-        params_space,
+        f=target_func,
+        pbounds=params_space,
         random_state=seed,
     )
 
@@ -84,26 +96,57 @@ def run_bo(target_func, params_space, seed=42, log_dir="",
     log_name = f"{util_func}_k{kappa}_xi{xi}_n{n_total_runs}"
     logger = JSONLogger(path=f"{log_dir}/{log_name}.json")
     optimizer.subscribe(Events.OPTMIZATION_STEP, logger)
+
+    # specific params for GPs in BO: alpha controls noise level, default to 1e-10 (noise-free).
     optimizer_params = dict(alpha=1e-3, n_restarts_optimizer=5, random_state=seed)
 
-    # using `util_func`, evaluate the target function at some randomly initial points
-    optimizer.maximize(acq=util_func, init_points=n_random_inits, n_iter=0, kappa=kappa, xi=xi,
-                       **optimizer_params)
+    optimizer.maximize(acq=util_func, init_points=n_random_inits,
+                       n_iter=(n_total_runs - n_random_inits),
+                       kappa=kappa, xi=xi, **optimizer_params)
 
-    # then predict the next best param to evaluate
-    for i in range(n_total_runs - n_random_inits):
-        optimizer.maximize(acq=util_func, init_points=0, n_iter=1, kappa=kappa, xi=xi,
-                           **optimizer_params)
+    joblib.dump(optimizer, f"{log_dir}/{log_name}.z")
+    return optimizer
 
-    # log the internal calculated scores (which is the target_function value)
-    for res in optimizer.res:
-        with mlflow.start_run(nested=True):
-            mlflow.log_metric("target_func", res["target"])
-            for param_name, param_value in res["params"].items():
-                mlflow.log_param(param_name, param_value)
 
-    # TODO PLOT
-    return optimizer.max
+def _posterior(optimizer, x_obs, y_obs, param_range):
+    ''' Predict the mean and variance for each param value using the observed points'''
+    # from the observed points, update the GP model
+    optimizer._gp.fit(x_obs, y_obs)
+    # make predict for all value in `param_range`
+    mu, sigma = optimizer._gp.predict(param_range, return_std=True)
+    return {'pred_mu': mu, 'pred_sigma': sigma}
+
+
+def _calculate_score(method_name, list_perp_in_log_scale,
+                     default_min_dist=0.1, degrees_of_freedom=1.0, embedding_dir=""):
+    all_embeddings = joblib.load(f"{embedding_dir}/all.z")
+    scores = []
+    for perp in list_perp_in_log_scale:
+        if method_name in ['umap']:
+            key_name = f"{perp}_{default_min_dist:.4f}"
+        else:
+            key_name = str(perp)
+        embedding = all_embeddings[key_name]
+        score = utils.score_embedding(embedding, score_name, constraints,
+                                      degrees_of_freedom=degrees_of_freedom)
+        scores.append(score)
+    return scores
+
+
+def plot_bo(optimizer, list_perp_in_log_scale, true_score, bayopt_params={}, plot_dir=""):
+    # test in case 1D, only one param `perplexity`
+    # note that the observations are in logscale
+    x_obs = np.array([[res["params"]["perplexity"]] for res in optimizer.res])
+    y_obs = np.array([res["target"] for res in optimizer.res])
+    observation = {'x_obs': x_obs, 'y_obs': y_obs}
+
+    # convert `list_perp_in_log_scale` into exponential value by passing it to np.log
+    list_params = np.log(list_perp_in_log_scale).reshape(-1, 1)
+    true_target = {'list_params': list_params, 'true_score': true_score}
+    prediction = _posterior(optimizer, param_range=list_params, **observation)
+
+    plot_bo_one_param(optimizer, plot_dir=plot_dir,
+                      **observation, **true_target, **prediction, **bayopt_params)
 
 
 if __name__ == "__main__":
@@ -137,7 +180,7 @@ if __name__ == "__main__":
     args = ap.parse_args()
 
     # setup mlflow to trace the experiment
-    mlflow.set_experiment('BO-with-Constraint-Scores-v2')
+    mlflow.set_experiment('BO-with-Constraint-Scores-v3')
     for arg_key, arg_value in vars(args).items():
         mlflow.log_param(arg_key, arg_value)
 
@@ -150,10 +193,11 @@ if __name__ == "__main__":
     # prepare directory for data, log and plot
     dataset.set_data_home("./data")
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
-    plot_dir = f"./plots/{dataset_name}/{method_name}/{score_name}"
-    log_dir = f"./logs/{dataset_name}/{method_name}/{score_name}"
+
+    dir_pattern = f"{dataset_name}/{method_name}/{score_name}"
+    plot_dir, log_dir, score_dir = [f"./{dir_name}/{dir_pattern}"
+                                    for dir_name in ["plots", "logs", "scores"]]
     for dir_path in [plot_dir, log_dir, embedding_dir]:
-        print(dir_path)
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
@@ -182,8 +226,28 @@ if __name__ == "__main__":
     )
 
     # run bayopt workflow
-    best_result = bayopt_workflow(X, constraints, method_name, score_name,
-                                  seed=seed, embedding_dir=embedding_dir,
-                                  bayopt_params=bayopt_params)
-    print(best_result)
+    best_result, optimizer = bayopt_workflow(X, constraints, method_name, score_name,
+                                             seed=seed, embedding_dir=embedding_dir,
+                                             bayopt_params=bayopt_params)
+    mlflow.log_metric("score_func", best_result["target"])
+    for param_name, param_value in best_result["params"].items():
+        mlflow.log_metric(f"best_{param_name}", param_value)
+    print("Final result: ", best_result)
+
+    # plot true score values
+    # note that the true target is not in logscale, test convert by call np.log
+    list_perp_in_log_scale = utils.generate_value_range(
+        min_val=2, max_val=X.shape[0]//3, range_type="log", num=150, dtype=int)
+    true_score = _calculate_score(method_name, list_perp_in_log_scale,
+                                  embedding_dir=embedding_dir)
+
+    plot_bo(optimizer, list_perp_in_log_scale, true_score, plot_dir=plot_dir,
+            bayopt_params={'util_func': args.utility_function,
+                           'kappa': args.kappa, 'xi': args.xi})
+
     # python bo_constraint.py -d COIL20 -m umap -nr 100 -nl 5 --seed 2029
+
+    # python bo_constraint.py  -d COIL20 -m tsne --seed 1024 -k 5 (best = 36)
+
+    # python bo_constraint.py  -d DIGITS -m umap --seed 42 -k 5.0 -nr 35
+    # {'target': 2.1383999006985643, 'params': {'min_dist': 0.004450459827546657, 'n_neighbors': 11}}
