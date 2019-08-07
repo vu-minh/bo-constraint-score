@@ -98,7 +98,7 @@ def run_bo(target_func, params_space, seed=42, log_dir="",
     optimizer.subscribe(Events.OPTMIZATION_STEP, logger)
 
     # specific params for GPs in BO: alpha controls noise level, default to 1e-10 (noise-free).
-    optimizer_params = dict(alpha=1e-3, n_restarts_optimizer=5, random_state=seed)
+    optimizer_params = dict(alpha=1e-5, n_restarts_optimizer=3, random_state=seed)
 
     optimizer.maximize(acq=util_func, init_points=n_random_inits,
                        n_iter=(n_total_runs - n_random_inits),
@@ -177,6 +177,8 @@ if __name__ == "__main__":
     ap.add_argument("-x", "--xi", default=0.025, type=float,
                     help=("For EI/POI, small(1e-4)->exploitation, " +
                           "large(1e-1)->exploration, default 0.025"))
+    ap.add_argument("--run", action="store_true")
+    ap.add_argument("--plot", action="store_true")
     args = ap.parse_args()
 
     # setup mlflow to trace the experiment
@@ -225,25 +227,30 @@ if __name__ == "__main__":
         n_labels_each_class=args.n_labels_each_class
     )
 
-    # run bayopt workflow
-    best_result, optimizer = bayopt_workflow(X, constraints, method_name, score_name,
-                                             seed=seed, embedding_dir=embedding_dir,
-                                             bayopt_params=bayopt_params)
-    mlflow.log_metric("score_func", best_result["target"])
-    for param_name, param_value in best_result["params"].items():
-        mlflow.log_metric(f"best_{param_name}", param_value)
-    print("Final result: ", best_result)
+    if args.run:
+        # run bayopt workflow
+        best_result, optimizer = bayopt_workflow(X, constraints, method_name, score_name,
+                                                 seed=seed, embedding_dir=embedding_dir,
+                                                 bayopt_params=bayopt_params)
+        mlflow.log_metric("score_func", best_result["target"])
+        for param_name, param_value in best_result["params"].items():
+            mlflow.log_metric(f"best_{param_name}", param_value)
+            print("Final result: ", best_result)
 
-    # plot true score values
-    # note that the true target is not in logscale, test convert by call np.log
-    list_perp_in_log_scale = utils.generate_value_range(
-        min_val=2, max_val=X.shape[0]//3, range_type="log", num=150, dtype=int)
-    true_score = _calculate_score(method_name, list_perp_in_log_scale,
-                                  embedding_dir=embedding_dir)
+    if args.plot:
+        # plot true score values
+        # note that the true target is not in logscale, test convert by call np.log
+        list_perp_in_log_scale = utils.generate_value_range(
+            min_val=2, max_val=X.shape[0]//3, range_type="log", num=200, dtype=int)
+        true_score = _calculate_score(method_name, list_perp_in_log_scale,
+                                      embedding_dir=embedding_dir)
 
-    plot_bo(optimizer, list_perp_in_log_scale, true_score, plot_dir=plot_dir,
-            bayopt_params={'util_func': args.utility_function,
-                           'kappa': args.kappa, 'xi': args.xi})
+        # load optimizer object
+        log_name = f"{args.utility_function}_k{args.kappa}_xi{args.xi}_n{args.n_total_runs}"
+        optimizer = joblib.load(f"{log_dir}/{log_name}.z")
+        plot_bo(optimizer, list_perp_in_log_scale, true_score, plot_dir=plot_dir,
+                bayopt_params={'util_func': args.utility_function,
+                               'kappa': args.kappa, 'xi': args.xi})
 
     # python bo_constraint.py -d COIL20 -m umap -nr 100 -nl 5 --seed 2029
 
