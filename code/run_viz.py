@@ -17,26 +17,20 @@ import utils
 def run_viz(method_name, X, seed=42, embedding_dir="",
             perplexity_range=[], min_dist_range=[0.1]):
 
-    def _run_tsne(perp, min_dist):
-        run_tsne(X, perplexity=perp, seed=seed,
-                 check_log=True, embedding_dir=embedding_dir)
-
-    def _run_umap(perp, min_dist):
-        run_umap(X, n_neighbors=perp, min_dist=min_dist, seed=seed,
-                 check_log=True, embedding_dir=embedding_dir)
-
-    def _run_largevis(perp, min_dist):
-        run_largevis(X, perplexity=perp, seed=seed,
+    if method_name == "tsne":
+        for perp in perplexity_range:
+            run_tsne(X, perplexity=perp, seed=seed,
                      check_log=True, embedding_dir=embedding_dir)
 
-    method_func = {
-        'tsne': _run_tsne,
-        'umap': _run_umap,
-        'largevis': _run_largevis
-    }[method_name]
+    if method_name == "largevis":
+        for perp in perplexity_range:
+            run_largevis(X, perplexity=perp, seed=seed,
+                         check_log=True, embedding_dir=embedding_dir)
 
-    for perp, min_dist in product(perplexity_range, min_dist_range):
-        method_func(perp,  min_dist)
+    if method_name == "umap":
+        for perp, min_dist in product(perplexity_range, min_dist_range):
+            run_umap(X, n_neighbors=perp, min_dist=min_dist, seed=seed,
+                     check_log=True, embedding_dir=embedding_dir)
 
 
 def run_largevis(X, perplexity: int=30, seed: int=42,
@@ -168,7 +162,7 @@ if __name__ == "__main__":
     ap.add_argument("-d", "--dataset_name", default="")
     ap.add_argument("-m", "--method_name", default="umap",
                     help="['tsne', 'umap', 'largevis']")
-    ap.add_argument("-s", "--seed", default=2019, type=int)
+    ap.add_argument("-s", "--seed", default=42, type=int)
     ap.add_argument("--perp_scale", default="log",
                     help="perplexity scale, in ['log', 'linear', 'hardcoded']"),
     ap.add_argument("--min_dist_scale", default="log",
@@ -198,9 +192,7 @@ if __name__ == "__main__":
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
-    if args.debug:
-        perplexity_range = [30]
-    elif args.perp_scale == "hardcoded":
+    if args.perp_scale == "hardcoded":
         perplexity_range = [2, 3, 4, 10, 15, 20, 30, 50, 100, 200, 350, 500]
     else:
         min_perp, max_perp = 2, int(X.shape[0] // 3)
@@ -222,7 +214,7 @@ if __name__ == "__main__":
         print(list(map("{:.4f}".format, min_dist_range)))
 
     if args.run:
-        run_viz(method_name, X, seed=42, embedding_dir=embedding_dir,
+        run_viz(method_name, X, seed=args.seed, embedding_dir=embedding_dir,
                 perplexity_range=perplexity_range, min_dist_range=min_dist_range)
         merge_embeddings(method_name,
                          perplexity_range=perplexity_range, min_dist_range=min_dist_range)
