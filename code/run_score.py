@@ -83,83 +83,98 @@ def merge_all_score_files(method_name, score_name, list_n_labels_values,
         }, out_file)
 
 
-def plot_scores_with_std(method_name, score_name, list_n_labels_values,
+def _plot_line_with_variance(ax, score_mean, score_sigma, list_params):
+    # plot line of mean score
+    ax.plot(list_params, score_mean)
+
+    # fill the variance (mean +- sigma)
+    ax.fill_between(np.array(list_params),
+                    score_mean + score_sigma, score_mean - score_sigma,
+                    fc="#CCDAF1", alpha=0.5)
+
+    # custom xaxis in log scale
+    ax.set_xscale("log", basex=np.e)
+    ax.set_xlim(left=min(list_params), right=max(list_params))
+    ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+
+    # custom yaxis to show only 3 score values
+    ax.locator_params(axis='y', nbins=3)
+
+
+def _plot_best_param(ax, score_mean, list_params):
+    best_param_index = np.argmax(score_mean)
+    best_param_value = list_params[best_param_index]
+    ax.axvline(best_param_value, color='g', linestyle='--', alpha=0.5,
+               marker="^", markersize=16, clip_on=False,
+               markeredgecolor="#FF8200", markerfacecolor="#FF8200", markevery=100)
+    ax.text(x=best_param_value, y=min(score_mean), s=str(best_param_value))
+
+
+def _plot_best_range(ax, score_mean, list_params, param_name="", threshold=0.95):
+    pivot = threshold * score_mean.max()
+    (best_indices, ) = np.where(score_mean > pivot)
+    param_min = list_params[best_indices.min()]
+    param_max = list_params[best_indices.max()]
+    ax.axvspan(param_min, param_max, alpha=0.12, color="orange")
+
+    # horizontal line to indicate top 96% highest score
+    ax.axhline(pivot, linestyle="--", alpha=0.4)
+
+    # vertical line on the left
+    ax.axvline(param_min, color="orange", linestyle='--', alpha=0.4,
+               marker=">", markersize=14, clip_on=False,
+               markeredgecolor="orange", markerfacecolor="orange", markevery=100)
+    ax.text(x=param_min, y=min(score_mean), s=str(param_min), ha="right")
+
+    # vertical line on the right
+    ax.axvline(param_max, color="orange", linestyle='--', alpha=0.4,
+               marker="<", markersize=14, clip_on=False,
+               markeredgecolor="orange", markerfacecolor="orange", markevery=100)
+    ax.text(x=param_max, y=min(score_mean), s=str(param_max), ha="left")
+
+    # add text to show the best range
+    ax.text(x=1.0, y=1.025, transform=ax.transAxes, ha="right",
+            s=u"\u2199" + f" best {param_name} range: [{param_min}, {param_max}]")
+
+
+def plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_values,
                          degrees_of_freedom=1.0, param_name="param"):
     with open(f"{score_dir}/dof{degrees_of_freedom}_all.txt", "r") as in_file:
         json_data = json.load(in_file)
 
     list_params = list(map(int, json_data['list_params']))
+    list_params = np.array(list_params)
     all_scores = json_data['all_scores']
 
-    list_params_to_show = utils.generate_value_range(
-        min_val=min(list_params), max_val=max(list_params), num=10, range_type="log", dtype=int)
-
-    def _plot_best_param(ax, mean_scores, offset=3):
-        best_param_index = np.argmax(mean_scores)
-        best_param_value = list_params[best_param_index]
-        ax.axvline(best_param_value, color='g', linestyle='--', alpha=0.5,
-                   marker="^", markersize=16, clip_on=False,
-                   markeredgecolor="#FF8200", markerfacecolor="#FF8200", markevery=100)
-        ax.text(x=best_param_index+3, y=min(mean_scores),
-                s=f"best {param_name} = {best_param_value}")
-
-    def _plot_line_with_variance(ax, scores):
-        mean = np.mean(scores, axis=0)
-        sigma = np.std(scores, axis=0)
-
-        # plot score with variance
-        ax.plot(list_params, mean)
-        ax.fill_between(np.array(list_params), mean + sigma, mean - sigma,
-                        fc="#CCDAF1", alpha=0.5)
-
-        # custom xaxis in log scale
-        ax.set_xscale("log", basex=np.e)
-        ax.set_xticks(list_params_to_show)
-        ax.set_xlim(left=min(list_params), right=max(list_params))
-        ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
-
-        ax.set_xlabel(f"{param_name} in log-scale")
-        ax.set_ylabel('constraint score')
-        ax.yaxis.grid(linestyle='--')
-
-        # plot best_param in the same customized xaxis
-        _plot_best_param(ax, mean)
-
     n_rows = len(list_n_labels_values)
-    _, axes = plt.subplots(n_rows, 1, figsize=(10, 4*n_rows))
+    _, axes = plt.subplots(n_rows, 1, figsize=(12, 4*n_rows))
 
     for ax, n_labels_each_class in zip(np.array(axes).ravel(), sorted(list_n_labels_values)):
         ax.set_title(f"{n_labels_each_class} labels per class", loc="left")
         scores = all_scores[str(n_labels_each_class)]
-        _plot_line_with_variance(ax, np.array(scores))
+        score_mean, score_sigma = np.mean(scores, axis=0), np.std(scores, axis=0)
+
+        _plot_line_with_variance(ax, score_mean, score_sigma, list_params)
+
+        # plot bestparam in the same customized xaxis
+        _plot_best_param(ax, score_mean, list_params)
+
+        # plot also the range of best param, the top 96% scores
+        _plot_best_range(ax, score_mean, list_params, param_name, threshold=0.96)
+
+        # show label for params only for the last plot
+        if n_labels_each_class == max(list_n_labels_values):
+            ax.set_xlabel(f"{param_name} in log-scale")
+        ax.set_ylabel('constraint score')
+        # ax.yaxis.grid(linestyle='--')
+
+        # show dataset name for the first plot only
+        if n_labels_each_class == min(list_n_labels_values):
+            ax.text(x=0.985, y=0.875, s=dataset_name, transform=ax.transAxes, ha="right",
+                    bbox=dict(edgecolor='b', facecolor='w'))
 
     plt.tight_layout()
-    plt.savefig(f"{plot_dir}/scores_with_std_dof{degrees_of_freedom}.png")
-    plt.close()
-
-
-def plot_scores(method_name, score_name, list_n_labels_values,
-                seed=42, n_repeat=1, degrees_of_freedom=1.0):
-    with open(f"{score_dir}/dof{degrees_of_freedom}_all.txt", "r") as in_file:
-        json_data = json.load(in_file)
-
-    list_params = json_data['list_params']
-    all_scores = json_data['all_scores']
-
-    def _plot_scores_with_variance(ax, scores):
-        mean = np.mean(scores, axis=0)
-        sigma = np.std(scores, axis=0)
-        ax.plot(mean)
-        ax.fill_between(np.array(list_params), mean + 2 * sigma, mean - 2 * sigma,
-                        fc="#CCDAF1", alpha=0.5)
-        ax.axvline(np.argmax(mean), color='g', linestyle='--', alpha=0.5)
-
-    _, ax = plt.subplots(1, 1, figsize=(16, 8))
-    for n_labels_each_class, scores in all_scores.items():
-        _plot_scores_with_variance(ax, np.array(scores))
-
-    plt.tight_layout()
-    plt.savefig(f"{plot_dir}/all_scores_dof{degrees_of_freedom}.png")
+    plt.savefig(f"{plot_dir}/scores_with_std_dof{degrees_of_freedom}_test_best_range.png")
     plt.close()
 
 
@@ -214,17 +229,18 @@ if __name__ == "__main__":
         min_val=2, max_val=X.shape[0]//3, range_type="log", num=150, dtype=int)
 
     # note to make big font size for plots
-    plt.rcParams.update({'font.size': 22})
+    plt.rcParams.update({'font.size': 20})
 
     if args.run:
         run_score(method_name, score_name, list_n_labels_values, seed=args.seed,
                   n_repeat=args.n_repeat, degrees_of_freedom=args.degrees_of_freedom,
                   list_accepted_perp=list_perp_in_log_scale if args.use_log_scale else None)
     if args.plot:
-        plot_scores_with_std(method_name, score_name, list_n_labels_values,
+        plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_values,
                              param_name=default_param_name,
                              degrees_of_freedom=args.degrees_of_freedom)
 
     # reproduce by running
-    # python run_score.py  -d DIGITS -m umap --seed 2019 -nr 10 \
-    #                      --run --plot --debug --use_log_scale
+    # python run_score.py  -d DIGITS -m umap --seed 2019 \
+    #                      --use_log_scale --debug \
+    #                      --run -nr 10 --plot
