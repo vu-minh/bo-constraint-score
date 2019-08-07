@@ -71,7 +71,7 @@ def _generate_log_range(min_val=2, max_val=1000, num=150, dtype=int, base=math.e
     }[base]
     min_exp = log_func(min_val)
     max_exp = log_func(max_val)
-    range_values = np.logspace(min_exp, max_exp, num=num, base=base,  dtype=dtype)
+    range_values = np.logspace(min_exp, max_exp, num=num, base=base, dtype=dtype)
     return np.unique(range_values[np.where(range_values >= min_val)])
 
 
