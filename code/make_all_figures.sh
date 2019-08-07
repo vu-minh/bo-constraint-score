@@ -3,6 +3,7 @@
 
 # (1) figures to show the stability of the scores
 # all scores figures are created with seed 2019 and repeated 10 times
+# if want to re-run, add --run -nr 10
 python run_score.py  -d DIGITS -m umap --seed 2019 --plot --debug --use_log_scale
 python run_score.py  -d DIGITS -m tsne --seed 2019 --plot --debug --use_log_scale
 
@@ -12,6 +13,9 @@ python run_score.py  -d COIL20 -m tsne --seed 2019 --plot --debug --use_log_scal
 # for largevis with tsne, we repeat 15 times with different seed (with --run --nr 15 --seed 2020)
 python run_score.py  -d DIGITS -m largevis --seed 2020  --plot --debug --use_log_scale
 python run_score.py  -d COIL20 -m largevis --seed 2019  --plot --debug --use_log_scale
+
+# update FASHION1000 dataset
+python run_score.py -d FASHION1000 -m tsne --seed 2019 --use_log_scale --debug  --plot
 
 
 # copy for latex
