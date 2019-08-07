@@ -248,7 +248,9 @@ if __name__ == "__main__":
     }[method_name]
     list_n_labels_values = [3, 5, 10, 15] if args.debug else range(2, 16)
     list_perp_in_log_scale = utils.generate_value_range(
-        min_val=2, max_val=X.shape[0]//3, range_type="log", num=150, dtype=int)
+        min_val=2, max_val=X.shape[0]//3, range_type="log", num=200, dtype=int)
+    # hardcoded num of params to 200 for being consistant with default n_perp in run_viz
+    print(list_perp_in_log_scale)
 
     # note to make big font size for plots
     plt.rcParams.update({'font.size': 20})
