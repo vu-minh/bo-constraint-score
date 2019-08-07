@@ -21,19 +21,21 @@ def _plot_acq_func(ax, util_func, list_params, utility_values, next_best_guess_p
 
 def _plot_true_target_values(ax, list_params, true_score):
     ax.plot(list_params, true_score, color="#FF8200",
-            linestyle="--", linewidth=2, label="True target")
+            linestyle="--", linewidth=2.5, label="True target")
     ax.set_ylabel(f"Constraint preserving score")
 
 
 def _plot_observed_points(ax, x_obs, y_obs):
-    ax.plot(x_obs.flatten(), y_obs, "o", markersize=8, label="Observations", color="#1B365D")
+    ax.plot(x_obs.flatten(), y_obs, "o", markersize=7, label="Observations", color="#1B365D")
 
 
 def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params):
+    list_params = list_params.ravel()
     ax.plot(list_params, pred_mu, color="#0047BB", label="Prediction")
-    ax.fill(
-        np.concatenate([list_params, list_params[::-1]]),
-        np.concatenate([pred_mu - 1.9600 * pred_sigma, (pred_mu + 1.9600 * pred_sigma)[::-1]]),
+    ax.fill_between(
+        x=list_params,
+        y1=pred_mu + 1.96*pred_sigma,
+        y2=pred_mu - 1.96*pred_sigma,
         alpha=0.75,
         fc="#CCDAF1",
         ec="None",
