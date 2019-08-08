@@ -6,16 +6,17 @@ import joblib
 import collections
 import matplotlib.pyplot as plt
 
-from common.dataset import dataset
-from plot_score import plot_scores_with_std
 import utils
+from plot_score import plot_scores_with_std
+from common.dataset import dataset
+from common.metric.dr_metrics import DRMetric
 
 
 # to profile with line_profiler, add @profile decoration to the target function
 # and run kernprof -l script.py -with --params
 
 # @profile
-def run_qij_score(method_name, score_name, list_n_labels_values,
+def run_qij_score(method_name, list_n_labels_values,
                   seed=42, n_repeat=1, degrees_of_freedom=1.0,
                   list_accepted_perp=None, default_min_dist=0.1, score_dir=""):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
@@ -49,12 +50,23 @@ def run_qij_score(method_name, score_name, list_n_labels_values,
         with open(out_name, "w") as out_file:
             json.dump(scores, out_file)
 
-    merge_all_score_files(method_name, score_name, list_n_labels_values, seed=seed,
+    merge_all_score_files(method_name, list_n_labels_values, seed=seed,
                           n_repeat=n_repeat, degrees_of_freedom=degrees_of_freedom,
                           score_dir=score_dir)
 
 
-def merge_all_score_files(method_name, score_name, list_n_labels_values,
+def run_rnx_metric(method_name, X, score_dir=""):
+    # run all other metric
+    pass
+
+
+def run_all_quality_metric(method_name, X, score_dir=""):
+    all_embeddings = joblib.load(f"{embedding_dir}/all.z")
+
+    pass
+
+
+def merge_all_score_files(method_name, list_n_labels_values,
                           seed=42, n_repeat=1, degrees_of_freedom=1.0, score_dir=""):
     all_scores = collections.defaultdict(list)
     list_params = None
@@ -96,7 +108,7 @@ if __name__ == "__main__":
     ap.add_argument("-m", "--method_name", default="umap",
                     help="['tsne', 'umap', 'largevis']")
     ap.add_argument("-sc", "--score_name", default="qij",
-                    help=" in ['qij', 'contrastive', 'cosine']")
+                    help=" in ['qij', 'contrastive', 'cosine', 'rnx'], 'rnx' is John's metric")
     ap.add_argument("-nr", "--n_repeat", default=1, type=int,
                     help="number of times to repeat the score calculation")
     ap.add_argument("-nl", "--n_labels_each_class", default=5, type=int,
@@ -124,7 +136,6 @@ if __name__ == "__main__":
     for dir_path in [embedding_dir, plot_dir, score_dir]:
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
-        print(dir_path)
 
     default_param_name = {
         'tsne': 'perplexity', 'largevis': 'perplexity', 'umap': 'n_neighbors'
@@ -135,15 +146,22 @@ if __name__ == "__main__":
     # hardcoded num of params to 200 for being consistant with default n_perp in run_viz
     print(list_perp_in_log_scale)
 
-    # note to make big font size for plots
-    plt.rcParams.update({'font.size': 20})
-
     if args.run:
-        run_qij_score(method_name, score_name, list_n_labels_values, seed=args.seed,
-                      n_repeat=args.n_repeat, degrees_of_freedom=args.degrees_of_freedom,
-                      list_accepted_perp=list_perp_in_log_scale if args.use_log_scale else None,
-                      score_dir=score_dir)
+        if score_name == "qij":
+            run_qij_score(
+                method_name, list_n_labels_values, seed=args.seed,
+                n_repeat=args.n_repeat, degrees_of_freedom=args.degrees_of_freedom,
+                list_accepted_perp=list_perp_in_log_scale if args.use_log_scale else None,
+                score_dir=score_dir)
+        elif score_name == "rnx":
+            run_rnx_metric()
+        else:
+            raise ValueError(f"Invalid score name {score_name}, should be in ['qij', 'rnx']")
+
     if args.plot:
+        # note to make big font size for plots
+        plt.rcParams.update({'font.size': 20})
+
         plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_values,
                              param_name=default_param_name,
                              degrees_of_freedom=args.degrees_of_freedom,
