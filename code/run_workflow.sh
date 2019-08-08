@@ -57,22 +57,30 @@ function run_score {
 	   -m $METHOD \
 	   --debug \
 	   --use_log_scale \
-	   --run -nr 10 \
-	   --plot
+	   --plot \
+	   --run -nr 10 # comment out this param to make the plot
 }
 
 
-declare -a LIST_DATASETS=("FASHION1000") # ("DIGITS" "COIL20")
-declare -a LIST_METHODS=("tsne" "umap" "largevis")
+RUN_ALL=false
 
-for DATASET_NAME in "${LIST_DATASETS[@]}"
-do
-    for METHOD in "${LIST_METHODS[@]}"
-    do
-	run_viz   $DATASET_NAME $METHOD
+if [ $RUN_ALL = true ]; then
+    declare -a LIST_DATASETS=("DIGITS" "COIL20") # ("FASHION1000")
+    declare -a LIST_METHODS=("tsne" "umap" "largevis")
+else
+    declare -a LIST_DATASETS=("DIGITS")
+    declare -a LIST_METHODS=("tsne")
+fi
+
+for DATASET_NAME in "${LIST_DATASETS[@]}"; do
+    for METHOD in "${LIST_METHODS[@]}"; do
+	# echo        $DATASET_NAME $METHOD
+        run_viz   $DATASET_NAME $METHOD
 	run_score $DATASET_NAME $METHOD
     done
 done
 
-echo "Copy figures for latex"
-bash copy_figures_for_latex.sh
+if [ $RUN_ALL = true ]; then
+    echo "Copy figures for latex"
+    bash copy_figures_for_latex.sh
+fi
