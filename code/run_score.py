@@ -148,7 +148,7 @@ def plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_va
 
     # prepare subplots
     n_rows = len(list_n_labels_values)
-    _, axes = plt.subplots(n_rows, 1, figsize=(12, 4*n_rows))
+    _, axes = plt.subplots(n_rows, 1, figsize=(9.5, 4*n_rows))
 
     for ax, n_labels_each_class in zip(np.array(axes).ravel(), sorted(list_n_labels_values)):
         first_plot = n_labels_each_class == min(list_n_labels_values)
