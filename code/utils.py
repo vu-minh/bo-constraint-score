@@ -4,6 +4,7 @@ import math
 import numpy as np
 from common.dataset import constraint
 import constraint_score
+from common.metric.dr_metrics import DRMetric
 
 
 def generate_constraints(constraint_strategy, score_name, labels,
@@ -48,6 +49,15 @@ def score_embedding(Z, score_name, constraints, degrees_of_freedom=1.0):
         "qij": partial(_qij_score, degrees_of_freedom=degrees_of_freedom, **constraints)
     }[score_name]
     return score_func(Z)
+
+
+def calculate_all_metrics(X, Z):
+    results = {}
+    dr_metrics = DRMetric(X, Z)
+    for metric_name in DRMetric.metrics_names:
+        metric_method = getattr(dr_metrics, metric_name)
+        results[metric_name] = metric_method()
+    return results
 
 
 def generate_value_range(min_val=2, max_val=1000, num=150, range_type="log", dtype=int):
