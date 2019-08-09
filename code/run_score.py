@@ -5,11 +5,12 @@ import json
 import joblib
 import collections
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 import utils
 from plot_score import plot_scores_with_std
+from plot_score import plot_quality_metrics
 from common.dataset import dataset
-from common.metric.dr_metrics import DRMetric
 
 
 # to profile with line_profiler, add @profile decoration to the target function
@@ -18,7 +19,8 @@ from common.metric.dr_metrics import DRMetric
 # @profile
 def run_qij_score(method_name, list_n_labels_values,
                   seed=42, n_repeat=1, degrees_of_freedom=1.0,
-                  list_accepted_perp=None, default_min_dist=0.1, score_dir=""):
+                  list_accepted_perp=None, default_min_dist=0.1,
+                  embedding_dir="", score_dir=""):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
 
     for i in range(n_repeat):
@@ -26,7 +28,7 @@ def run_qij_score(method_name, list_n_labels_values,
         scores = collections.defaultdict(dict)
         run_index = seed + i
 
-        for n_labels_each_class in list_n_labels_values:
+        for n_labels_each_class in tqdm(list_n_labels_values, desc="n_labels per class"):
             constraints = utils.generate_constraints(
                 constraint_strategy="partial_labels", score_name=score_name,
                 labels=labels, seed=run_index,
@@ -36,7 +38,7 @@ def run_qij_score(method_name, list_n_labels_values,
                 print("# TODO deal with this case latter")
                 pass
 
-            for perp in list_accepted_perp:
+            for perp in tqdm(list_accepted_perp, desc="perplexity"):
                 if method_name in ['umap']:
                     key_name = f"{perp}_{default_min_dist:.4f}"
                 else:
@@ -50,24 +52,35 @@ def run_qij_score(method_name, list_n_labels_values,
         with open(out_name, "w") as out_file:
             json.dump(scores, out_file)
 
-    merge_all_score_files(method_name, list_n_labels_values, seed=seed,
-                          n_repeat=n_repeat, degrees_of_freedom=degrees_of_freedom,
-                          score_dir=score_dir)
+    merge_all_score_files(list_n_labels_values, seed=seed, n_repeat=n_repeat,
+                          degrees_of_freedom=degrees_of_freedom, score_dir=score_dir)
 
 
-def run_rnx_metric(method_name, X, score_dir=""):
-    # run all other metric
-    pass
-
-
-def run_all_quality_metric(method_name, X, score_dir=""):
+def run_all_quality_metric(X, list_perps, default_min_dist=0.1,
+                           embedding_dir="", score_dir=""):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
 
-    pass
+    # store the list of metric results for each metric name
+    all_metrics = collections.defaultdict(list)
+    all_metrics['list_params'] = list_perps.tolist()  # for serializable
+
+    for perp in tqdm(list_perps, desc="perplexity"):
+        if method_name in ['umap']:
+            key_name = f"{perp}_{default_min_dist:.4f}"
+        else:
+            key_name = str(perp)
+        embedding = all_embeddings[key_name]
+
+        metric_result = utils.calculate_all_metrics(X, embedding)
+        for metric_name, metric_value in metric_result.items():
+            all_metrics[metric_name].append(metric_value)
+
+    with open(f"{score_dir}/metrics.txt", 'w') as in_file:
+            json.dump(all_metrics, in_file)
 
 
-def merge_all_score_files(method_name, list_n_labels_values,
-                          seed=42, n_repeat=1, degrees_of_freedom=1.0, score_dir=""):
+def merge_all_score_files(list_n_labels_values, seed=42, n_repeat=1,
+                          degrees_of_freedom=1.0, score_dir=""):
     all_scores = collections.defaultdict(list)
     list_params = None
 
@@ -108,7 +121,7 @@ if __name__ == "__main__":
     ap.add_argument("-m", "--method_name", default="umap",
                     help="['tsne', 'umap', 'largevis']")
     ap.add_argument("-sc", "--score_name", default="qij",
-                    help=" in ['qij', 'contrastive', 'cosine', 'rnx'], 'rnx' is John's metric")
+                    help=" in ['qij', 'contrastive', 'cosine', 'metrics']")
     ap.add_argument("-nr", "--n_repeat", default=1, type=int,
                     help="number of times to repeat the score calculation")
     ap.add_argument("-nl", "--n_labels_each_class", default=5, type=int,
@@ -152,22 +165,28 @@ if __name__ == "__main__":
                 method_name, list_n_labels_values, seed=args.seed,
                 n_repeat=args.n_repeat, degrees_of_freedom=args.degrees_of_freedom,
                 list_accepted_perp=list_perp_in_log_scale if args.use_log_scale else None,
-                score_dir=score_dir)
-        elif score_name == "rnx":
-            run_rnx_metric()
+                embedding_dir=embedding_dir, score_dir=score_dir)
+        elif score_name == "metrics":
+            run_all_quality_metric(X, list_perps=list_perp_in_log_scale,
+                                   embedding_dir=embedding_dir, score_dir=score_dir)
         else:
-            raise ValueError(f"Invalid score name {score_name}, should be in ['qij', 'rnx']")
+            raise ValueError(f"Invalid score name {score_name}, should be ['qij', 'metrics']")
 
     if args.plot:
         # note to make big font size for plots
         plt.rcParams.update({'font.size': 20})
 
-        plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_values,
-                             param_name=default_param_name,
-                             degrees_of_freedom=args.degrees_of_freedom,
-                             score_dir=score_dir, plot_dir=plot_dir)
+        if score_name == "qij":
+            plot_scores_with_std(dataset_name, method_name, score_name,
+                                 list_n_labels_values,
+                                 param_name=default_param_name,
+                                 degrees_of_freedom=args.degrees_of_freedom,
+                                 score_dir=score_dir, plot_dir=plot_dir)
+        elif score_name == "metrics":
+            plot_quality_metrics(dataset_name, method_name, param_name=default_param_name,
+                                 score_dir=score_dir, plot_dir=plot_dir)
+        else:
+            raise ValueError(f"Invalid score name {score_name}, should be ['qij', 'metrics']")
 
-    # reproduce by running
-    # python run_score.py  -d DIGITS -m umap --seed 2019 \
-    #                      --use_log_scale --debug \
-    #                      --run -nr 10 --plot
+
+    # TODO : change --user_log_scale to --disable_log_scale

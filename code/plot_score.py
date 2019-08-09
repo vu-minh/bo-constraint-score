@@ -4,16 +4,16 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 import utils
+from common.metric.dr_metrics import DRMetric
 
 
-def _plot_line_with_variance(ax, score_mean, score_sigma, list_params):
-    # plot line of mean score
+def _plot_line_with_variance(ax, list_params, score_mean, score_sigma=None):
     ax.plot(list_params, score_mean)
-
-    # fill the variance (mean +- sigma)
-    ax.fill_between(np.array(list_params),
-                    score_mean + score_sigma, score_mean - score_sigma,
-                    fc="#CCDAF1", alpha=0.5)
+    if score_sigma is not None:
+        # fill the variance (mean +- sigma)
+        ax.fill_between(np.array(list_params),
+                        score_mean + score_sigma, score_mean - score_sigma,
+                        fc="#CCDAF1", alpha=0.5)
 
     # custom xaxis in log scale
     ax.set_xscale("log", basex=np.e)
@@ -94,7 +94,7 @@ def plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_va
         ax.axhline(pivot, linestyle="--", alpha=0.4)
 
         # main line of mean_score with variance
-        _plot_line_with_variance(ax, score_mean, score_sigma, list_params)
+        _plot_line_with_variance(ax, list_params, score_mean, score_sigma=score_sigma)
 
         # plot bestparam in the same customized xaxis
         # but do not show text if the best param is overlapped with the best range
@@ -126,3 +126,27 @@ def plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_va
     plt.tight_layout()
     plt.savefig(f"{plot_dir}/scores_with_std_dof{degrees_of_freedom}.png")
     plt.close()
+
+
+def plot_quality_metrics(dataset_name, method_name="", param_name="",
+                         score_dir="", plot_dir=""):
+    with open(f"{score_dir}/metrics.txt", "r") as in_file:
+        json_data = json.load(in_file)
+
+    list_params = list(map(int, json_data['list_params']))
+
+    for metric_name, metric_display_name in DRMetric.metrics_names.items():
+        _, ax = plt.subplots(1, 1, figsize=(9, 4.5))
+        _plot_line_with_variance(ax, list_params, score_sigma=None,
+                                 score_mean=json_data[metric_name])
+        ax.set_title(metric_display_name)
+        ax.text(x=0.985, y=0.875, s=f"{dataset_name}, {method_name}",
+                transform=ax.transAxes, ha="right",
+                bbox=dict(edgecolor='b', facecolor='w'))
+        ax.set_xlabel(f"{param_name} in log-scale")
+        # ax.set_ylabel(f"{metric_display_name} score")
+        ax.grid(which='major', axis='y', linestyle='--', alpha=0.5)
+
+        plt.tight_layout()
+        plt.savefig(f"{plot_dir}/{metric_name}.png")
+        plt.close()

@@ -1,9 +1,10 @@
+import math
 from functools import partial
 
-import math
 import numpy as np
-from common.dataset import constraint
+
 import constraint_score
+from common.dataset import constraint
 from common.metric.dr_metrics import DRMetric
 
 
