@@ -57,30 +57,65 @@ def _plot_best_range(ax, param_min, param_max, param_name="", text_y_pos=0.0):
             s=f" best {param_name} range: [{param_min}, {param_max}]")
 
 
-def plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_values,
-                         degrees_of_freedom=1.0, param_name="param", score_dir="", plot_dir=""):
-    # prepare score data
-    with open(f"{score_dir}/dof{degrees_of_freedom}_all.txt", "r") as in_file:
-        json_data = json.load(in_file)
+def _plot_score_with_best_param_and_range(ax, param_name, list_params, pivot,
+                                          param_best, param_min, param_max,
+                                          score_mean, score_sigma=None, text_y_pos=0):
+    # horizontal line to indicate top 96% highest score
+    ax.axhline(pivot, linestyle="--", alpha=0.4)
 
-    list_params = list(map(int, json_data['list_params']))
-    list_params = np.array(list_params)
-    all_scores = json_data['all_scores']
+    # main line of mean_score with variance
+    _plot_line_with_variance(ax, list_params, score_mean, score_sigma=score_sigma)
+
+    # plot bestparam in the same customized xaxis
+    # but do not show text if the best param is overlapped with the best range
+    if param_best == param_min or param_best == param_max:
+        text_align = None
+    else:
+        text_align = ("right" if (param_best - param_min) > (param_max - param_best)
+                      else "left")
+    _plot_best_param(ax, param_best, text_y_pos, text_align)
+
+    # plot also the best param range (the top 96% scores)
+    _plot_best_range(ax, param_min, param_max, param_name, text_y_pos)
+
+
+def plot_scores(dataset_name, method_name, score_name, list_n_labels_values,
+                param_name="", score_dir="", plot_dir="", compare_with_rnx=True):
+    # prepare qij score data
+    with open(f"{score_dir}/dof1.0_all.txt", "r") as in_file:
+        qij_score_data = json.load(in_file)
+        list_params = list(map(int, qij_score_data['list_params']))
+        all_scores = qij_score_data['all_scores']
+
+    # verify if the AUC_log_RNX score is valid
+    if compare_with_rnx:
+        with open(f"{score_dir}/../metrics/metrics.txt", "r") as in_file:
+            metric_data = json.load(in_file)
+        assert list_params == list(map(int, metric_data['list_params']))       
+        rnx_score = metric_data["auc_rnx"]
 
     # prepare threshold value to filter the top highest scores
     threshold = {'tsne': 0.96, 'umap': 0.96, 'largevis': 0.9}[method_name]
 
     # prepare subplots
-    n_rows = len(list_n_labels_values)
+    n_rows = len(list_n_labels_values) + (1 if compare_with_rnx else 0)
     _, axes = plt.subplots(n_rows, 1, figsize=(9.5, 4*n_rows))
 
-    for ax, n_labels_each_class in zip(np.array(axes).ravel(), sorted(list_n_labels_values)):
-        first_plot = n_labels_each_class == min(list_n_labels_values)
-        last_plot = n_labels_each_class == max(list_n_labels_values)
+    for ax, n_labels_each_class in zip(np.array(axes).ravel(),
+                                       sorted(list_n_labels_values) + ["rnx"]):
+        if n_labels_each_class == "rnx":  # AUC_log_RNX score, not the qij score
+            first_plot, last_plot = False, True
+            title, ylabel = "$AUC_{log}RNX$ score", "metric score"
+            score_mean, score_sigma = np.array(rnx_score), None
+        else:
+            first_plot = n_labels_each_class == min(list_n_labels_values)
+            last_plot = n_labels_each_class == max(list_n_labels_values)
+            title, ylabel = f"{n_labels_each_class} labels per class", "constraint score"
+            scores = all_scores[str(n_labels_each_class)]
+            score_mean, score_sigma = np.mean(scores, axis=0), np.std(scores, axis=0)
 
-        ax.set_title(f"{n_labels_each_class} labels per class", loc="left")
-        scores = all_scores[str(n_labels_each_class)]
-        score_mean, score_sigma = np.mean(scores, axis=0), np.std(scores, axis=0)
+        ax.set_title(title, loc="left")
+        ax.set_ylabel(ylabel)
         text_y_pos = min(score_mean)  # y-position to show text, e.g., value of best param
 
         # determine best param range and best param value
@@ -90,28 +125,13 @@ def plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_va
         param_max = list_params[best_indices.max()]
         param_best = list_params[np.argmax(score_mean)]
 
-        # horizontal line to indicate top 96% highest score
-        ax.axhline(pivot, linestyle="--", alpha=0.4)
-
-        # main line of mean_score with variance
-        _plot_line_with_variance(ax, list_params, score_mean, score_sigma=score_sigma)
-
-        # plot bestparam in the same customized xaxis
-        # but do not show text if the best param is overlapped with the best range
-        if param_best == param_min or param_best == param_max:
-            text_align = None
-        else:
-            text_align = ("right" if (param_best - param_min) > (param_max - param_best)
-                          else "left")
-        _plot_best_param(ax, param_best, text_y_pos, text_align)
-
-        # plot also the best param range (the top 96% scores)
-        _plot_best_range(ax, param_min, param_max, param_name, text_y_pos)
+        _plot_score_with_best_param_and_range(
+            ax, param_name, list_params, pivot, param_best, param_min, param_max,
+            score_mean=score_mean, score_sigma=score_sigma, text_y_pos=text_y_pos)
 
         # show label for params only for the last plot
         if last_plot:
             ax.set_xlabel(f"{param_name} in log-scale")
-        ax.set_ylabel('constraint score')
 
         # additional annotation for first plot
         if first_plot:
@@ -124,21 +144,19 @@ def plot_scores_with_std(dataset_name, method_name, score_name, list_n_labels_va
                     bbox=dict(edgecolor='b', facecolor='w'))
 
     plt.tight_layout()
-    plt.savefig(f"{plot_dir}/scores_with_std_dof{degrees_of_freedom}.png")
+    plt.savefig(f"{plot_dir}/scores.png")
     plt.close()
 
 
-def plot_quality_metrics(dataset_name, method_name="", param_name="",
-                         score_dir="", plot_dir=""):
+def plot_quality_metrics(dataset_name, method_name, param_name="", score_dir="", plot_dir=""):
     with open(f"{score_dir}/metrics.txt", "r") as in_file:
-        json_data = json.load(in_file)
-
-    list_params = list(map(int, json_data['list_params']))
+        metrics_data = json.load(in_file)
+        list_params = list(map(int, metrics_data['list_params']))
 
     for metric_name, metric_display_name in DRMetric.metrics_names.items():
         _, ax = plt.subplots(1, 1, figsize=(9, 4.5))
         _plot_line_with_variance(ax, list_params, score_sigma=None,
-                                 score_mean=json_data[metric_name])
+                                 score_mean=metrics_data[metric_name])
         ax.set_title(metric_display_name)
         ax.text(x=0.985, y=0.875, s=f"{dataset_name}, {method_name}",
                 transform=ax.transAxes, ha="right",
@@ -149,4 +167,5 @@ def plot_quality_metrics(dataset_name, method_name="", param_name="",
 
         plt.tight_layout()
         plt.savefig(f"{plot_dir}/{metric_name}.png")
-        plt.close()
+        plt.close()    
+

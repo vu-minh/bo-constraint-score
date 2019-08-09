@@ -58,7 +58,7 @@ function run_score {
 	   --debug \
 	   --use_log_scale \
 	   --plot \
-	   --run -nr 10 # comment out this param to make the plot
+	   # --run -nr 10 # comment out this param to make the plot
 }
 
 
@@ -74,7 +74,7 @@ function run_metric  {
 	   -sc metrics \
 	   --use_log_scale \
 	   --plot \
-	   --run
+	   # --run
 }
 
 
@@ -93,8 +93,8 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
     for METHOD in "${LIST_METHODS[@]}"; do
 	# echo        $DATASET_NAME $METHOD
         # run_viz    $DATASET_NAME $METHOD
-	# run_score  $DATASET_NAME $METHOD	
-	run_metric $DATASET_NAME $METHOD
+	run_score  $DATASET_NAME $METHOD	
+	# run_metric $DATASET_NAME $METHOD
     done
 done
 

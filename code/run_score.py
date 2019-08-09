@@ -8,8 +8,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 import utils
-from plot_score import plot_scores_with_std
-from plot_score import plot_quality_metrics
+from plot_score import plot_scores, plot_quality_metrics
 from common.dataset import dataset
 
 
@@ -177,16 +176,13 @@ if __name__ == "__main__":
         plt.rcParams.update({'font.size': 20})
 
         if score_name == "qij":
-            plot_scores_with_std(dataset_name, method_name, score_name,
-                                 list_n_labels_values,
-                                 param_name=default_param_name,
-                                 degrees_of_freedom=args.degrees_of_freedom,
-                                 score_dir=score_dir, plot_dir=plot_dir)
+            plot_scores(dataset_name, method_name, score_name, list_n_labels_values,
+                        param_name=default_param_name, score_dir=score_dir, plot_dir=plot_dir,
+                        compare_with_rnx=True)
         elif score_name == "metrics":
             plot_quality_metrics(dataset_name, method_name, param_name=default_param_name,
                                  score_dir=score_dir, plot_dir=plot_dir)
         else:
             raise ValueError(f"Invalid score name {score_name}, should be ['qij', 'metrics']")
-
 
     # TODO : change --user_log_scale to --disable_log_scale
