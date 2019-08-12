@@ -82,7 +82,7 @@ function run_metric  {
 RUN_ALL=true
 
 if [ $RUN_ALL = true ]; then
-    declare -a LIST_DATASETS=("DIGITS" "COIL20") # ("FASHION1000")
+    declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
     declare -a LIST_DATASETS=("DIGITS")

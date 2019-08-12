@@ -173,12 +173,12 @@ if __name__ == "__main__":
 
     if args.plot:
         # note to make big font size for plots
-        plt.rcParams.update({'font.size': 20})
+        plt.rcParams.update({'font.size': 24})
 
         if score_name == "qij":
             plot_scores(dataset_name, method_name, score_name, list_n_labels_values,
                         param_name=default_param_name, score_dir=score_dir, plot_dir=plot_dir,
-                        compare_with_rnx=True)
+                        compare_with_rnx=False)
         elif score_name == "metrics":
             plot_quality_metrics(dataset_name, method_name, param_name=default_param_name,
                                  score_dir=score_dir, plot_dir=plot_dir)
