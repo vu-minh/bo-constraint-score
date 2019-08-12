@@ -106,8 +106,6 @@ def plot_scores(dataset_name, method_name, score_name, list_n_labels_values,
         first_plot = n_labels_each_class == min(list_n_labels_values)
         last_plot = n_labels_each_class == (99 if compare_with_rnx
                                             else max(list_n_labels_values))
-        print(first_plot, last_plot, list_n_labels_values)
-        
         if n_labels_each_class == 99:  # AUC_log_RNX score, not the qij score
             title, ylabel = "$AUC_{log}RNX$ score", "metric score"
             score_mean, score_sigma = np.array(rnx_score), None

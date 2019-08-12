@@ -2,6 +2,7 @@
 
 import os
 import json
+import math
 import joblib
 import collections
 import matplotlib.pyplot as plt
@@ -61,7 +62,7 @@ def run_all_quality_metric(X, list_perps, default_min_dist=0.1,
 
     # store the list of metric results for each metric name
     all_metrics = collections.defaultdict(list)
-    all_metrics['list_params'] = list_perps.tolist()  # for serializable
+    all_metrics['list_params'] = list_perps
 
     for perp in tqdm(list_perps, desc="perplexity"):
         if method_name in ['umap']:
@@ -76,6 +77,30 @@ def run_all_quality_metric(X, list_perps, default_min_dist=0.1,
 
     with open(f"{score_dir}/metrics.txt", 'w') as in_file:
             json.dump(all_metrics, in_file)
+
+
+def run_BIC_score(X, list_perps, score_dir="", seed=42):
+    """Must re-run tsne for calculate BIC score exactly"""
+    from MulticoreTSNE import MulticoreTSNE
+
+    N = X.shape[0]
+    scores = {
+        'list_params': list_perps,
+        'tsne_loss': [],
+        'bic': []
+    }
+
+    for perp in tqdm(list_perps, desc="perplexity"):
+        tsne = MulticoreTSNE(perplexity=perp, n_iter=1500, n_jobs=-1, random_state=seed,
+                             n_iter_without_progress=1500, min_grad_norm=1e-32)
+        tsne.fit_transform(X)
+        loss = float(tsne.kl_divergence_)
+        bic = 2 * loss + math.log(N) * perp / N
+        scores['bic'].append(bic)
+        scores['tsne_loss'].append(loss)
+
+    with open(f"{score_dir}/BIC.txt", 'w') as in_file:
+        json.dump(scores, in_file)
 
 
 def merge_all_score_files(list_n_labels_values, seed=42, n_repeat=1,
@@ -120,7 +145,7 @@ if __name__ == "__main__":
     ap.add_argument("-m", "--method_name", default="umap",
                     help="['tsne', 'umap', 'largevis']")
     ap.add_argument("-sc", "--score_name", default="qij",
-                    help=" in ['qij', 'contrastive', 'cosine', 'metrics']")
+                    help=" in ['qij', 'contrastive', 'cosine', 'metrics', 'bic']")
     ap.add_argument("-nr", "--n_repeat", default=1, type=int,
                     help="number of times to repeat the score calculation")
     ap.add_argument("-nl", "--n_labels_each_class", default=5, type=int,
@@ -154,7 +179,7 @@ if __name__ == "__main__":
     }[method_name]
     list_n_labels_values = [3, 5, 10, 15] if args.debug else range(2, 16)
     list_perp_in_log_scale = utils.generate_value_range(
-        min_val=2, max_val=X.shape[0]//3, range_type="log", num=200, dtype=int)
+        min_val=2, max_val=X.shape[0]//3, range_type="log", num=200, dtype=int).tolist()
     # hardcoded num of params to 200 for being consistant with default n_perp in run_viz
     print(list_perp_in_log_scale)
 
@@ -168,6 +193,8 @@ if __name__ == "__main__":
         elif score_name == "metrics":
             run_all_quality_metric(X, list_perps=list_perp_in_log_scale,
                                    embedding_dir=embedding_dir, score_dir=score_dir)
+        elif score_name == "bic":
+            run_BIC_score(X, list_perp_in_log_scale, score_dir, seed=args.seed)
         else:
             raise ValueError(f"Invalid score name {score_name}, should be ['qij', 'metrics']")
 
