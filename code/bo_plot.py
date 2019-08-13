@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from matplotlib.ticker import FuncFormatter
 from matplotlib import gridspec
 
@@ -20,18 +21,20 @@ def _plot_acq_func(ax, util_func, list_params, utility_values, next_best_guess_p
 
 
 def _plot_true_target_values(ax, list_params, true_score):
-    ax.plot(list_params, true_score, color="#FF8200",
-            linestyle="--", linewidth=2.5, label="True target")
-    ax.set_ylabel(f"Constraint preserving score")
+    ax.plot(list_params, true_score, label="True target", marker='s', markersize=3,
+            color="#FF8200", alpha=0.75, linewidth=1.25)
+    ax.set_ylabel(f"constraint score")
 
 
 def _plot_observed_points(ax, x_obs, y_obs):
+    for x in x_obs:
+        print(x, np.exp(x))
     ax.plot(x_obs.flatten(), y_obs, "o", markersize=7, label="Observations", color="#1B365D")
 
 
 def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params):
     list_params = list_params.ravel()
-    ax.plot(list_params, pred_mu, color="#0047BB", label="Prediction")
+    ax.plot(list_params, pred_mu, color="#0047BB", linestyle="--", label="Prediction")
     ax.fill_between(
         x=list_params,
         y1=pred_mu + 1.96*pred_sigma,
@@ -51,7 +54,6 @@ def plot_bo_one_param_detail(optimizer,
     ''' Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real param in logscale)
     '''
-
     # note to make big font size for plots in the paper
     plt.rcParams.update({'font.size': 22})
 
@@ -107,11 +109,14 @@ def plot_bo_one_param_summary(optimizer,
                               param_name="perplexity",
                               util_func="ucb", kappa=5, xi=0.01, plot_dir=""):
     ''' Plot the prediction of BayOpt with GP model.
-    Note that all values of `list_params` are in log space (the real param in logscale)
-    '''
+    Note that all values of `list_params` are in log space (the real GP params are in logscale)
+    '''   
     # note to make big font size for plots in the paper
     plt.rcParams.update({'font.size': 22})
-    _, ax = plt.subplots(1, 1, figsize=(13, 6))
+    _, ax = plt.subplots(1, 1, figsize=(11, 5))
+
+    ax.set_xlim(left=list_params.min(), right=list_params.max())
+    ax.set_ylim(top=1.1*max(true_score), bottom=0.9*min(true_score))
 
     _plot_true_target_values(ax, list_params, true_score)
     _plot_observed_points(ax, x_obs, y_obs)
@@ -121,22 +126,32 @@ def plot_bo_one_param_summary(optimizer,
     # ax.axhline([current_max_target_function], color='#A1AFF8', linestyle='--', alpha=0.7)
 
     # draw indicator vline @ the best param
-    best_param = optimizer.max["params"]["perplexity"]
+    best_param = optimizer.max["params"][param_name]
     ax.axvline(best_param, color="green", linestyle='--', alpha=0.5,
                marker="^", markersize=16, clip_on=False,
                markeredgecolor="#FF8200", markerfacecolor="#FF8200", markevery=100)
-    ax.text(x=best_param, y=min(true_score), s=f"best {param_name}: {int(np.exp(best_param))}")
+    ax.text(x=best_param, y=1.1*min(true_score),
+            s=f"best {param_name}: {int(round(np.exp(best_param)))}")
 
     # set limit value for yaxis in gp prediction chart
-    ax.set_ylim((0.95 * y_obs.min(), 1.12 * y_obs.max()))  # make place for legend
+    # ax.set_ylim((0.95 * y_obs.min(), 1.12 * y_obs.max()))  # make place for legend
+    ax.locator_params(axis='y', nbins=4)
+    ax.yaxis.grid(linestyle="--")
+    ax.xaxis.grid(linestyle="--", alpha=0.4)
 
+    # force list params to show on axias
+#    list_params_to_show = generate_value_range(
+#        min_val=1.1, max_val=max(list_params), num=6, range_type="log", dtype=int)
+#    ax.set_xticks(list_params_to_show)
+#    ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+    
+    # show param in log scale in xaxis
     list_params_to_show = generate_value_range(
-        min_val=min(list_params), max_val=max(list_params), num=20, range_type="log", dtype=int)
-    ax.set_xlim(left=min(list_params_to_show), right=max(list_params_to_show))
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: int(np.exp(x))))
-
+        min_val=min(list_params), max_val=max(list_params), num=8, range_type="log", dtype=int)
+    ax.set_xlim(left=min(list_params), right=max(list_params))
+    ax.set_xticks(list_params_to_show)
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{np.exp(x):.2f}"))
     ax.set_xlabel(f"{param_name} in log-scale")
-    ax.yaxis.grid(linestyle='--')
 
     # set title and save figure
     plt.legend(loc="upper center", ncol=4, prop={'size': 14})

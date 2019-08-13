@@ -5,7 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from skopt.space import Real, Integer
-from skopt import gp_minimize
+from skopt import gp_minimize, forest_minimize
 from skopt.utils import use_named_args
 from skopt.plots import plot_convergence
 
@@ -18,10 +18,14 @@ def hyperopt_workflow(X, constraints,
                       method_name: str, score_name: str,
                       seed: int=42, embedding_dir: str=""):
     if method_name in ["tsne", "largevis"]:
-        space = [Real(2, 100, "log-uniform", name="perplexity")]
+        # space = [Real(2, X.shape[0]//3, "log-uniform", name="perplexity")]
+        space = [Integer(2, X.shape[0]//3, name="perplexity")]
     elif method_name in ["umap"]:
-        space = [Real(2, 100, "log-uniform", name="n_neighbors"),
-                 Real(0.001, 1.0, "log-uniform", name="min_dist")]
+        space = [
+            # Real(2, X.shape[0]//3, "log-uniform", name="n_neighbors"),
+            Integer(2, X.shape[0]//3, name="perplexity"),
+            Real(0.001, 1.0, "log-uniform", name="min_dist")
+        ]
     else:
         raise ValueError(f"Invalid method_name: {method_name}")
     print(space)
@@ -32,18 +36,19 @@ def hyperopt_workflow(X, constraints,
             'tsne': run_tsne,
             'umap': run_umap,
             'largevis': run_largevis
-        }[method_name], X=X, seed=seed, check_log=True, embedding_dir=embedding_dir)
-
+        }[method_name], X=X, seed=42, check_log=True, embedding_dir=embedding_dir)
         Z = embedding_function(**params)
         return -1.0 * score_embedding(Z, score_name, constraints)
 
-    res_gp = gp_minimize(objective, space, n_calls=30, random_state=seed)
+    from numpy.random import RandomState
+    res_gp = gp_minimize(objective, space,
+                         n_random_starts=5, n_calls=20, random_state=RandomState(seed=42))
+                         # acq_func="LCB", kappa=1.96)
+    # res_gp = forest_minimize(objective, space, n_calls=20, n_random_starts=5, random_state=42)
     best_score = res_gp.fun
     best_param = res_gp.x[0]
 
     print(best_param, best_score)
-    plot_convergence(res_gp)
-    plt.show()
     
 
 if __name__ == "__main__":
@@ -65,7 +70,7 @@ if __name__ == "__main__":
                     help="number of constraints each type")
     ap.add_argument("-nl", "--n_labels_each_class", default=5, type=int,
                     help="number of labelled points selected for each class")
-    ap.add_argument("-rs", "--random_seed", default=None)
+    ap.add_argument("--seed", default=42, type=int)
     ap.add_argument("-cp", "--constraint_proportion", default=1.0, type=float,
                     help="target_function = cp * user_constraint + (1-cp)* John's metric")
     ap.add_argument("-u", "--utility_function", default="ucb",
@@ -84,7 +89,6 @@ if __name__ == "__main__":
     dataset_name = args.dataset_name
     method_name = args.method_name
     score_name = args.score_name
-    rnd_seed = int(args.random_seed)
     
     # custom preprocessing method for each dataset
     preprocessing_method = {
@@ -99,10 +103,10 @@ if __name__ == "__main__":
             os.makedirs(dir_path)
     
     constraints = generate_constraints(
-        args.strategy, score_name, labels, seed=rnd_seed,
+        args.strategy, score_name, labels,
         n_constraints=args.n_constraints,
         n_labels_each_class=args.n_labels_each_class
     )
 
     hyperopt_workflow(X, constraints, method_name, score_name,
-                      seed=rnd_seed, embedding_dir=embedding_dir)
+                      seed=args.seed, embedding_dir=embedding_dir)

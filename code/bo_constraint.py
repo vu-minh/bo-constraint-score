@@ -42,6 +42,7 @@ def _target_func(method_name, X, check_log, seed, embedding_dir, **params_in_log
             ))
 
     # get the embedding and calculate constraint score
+    seed = 42
     Z = embedding_function(X=X, seed=seed, check_log=True, embedding_dir=embedding_dir,
                            **params_in_log_scale)
     return utils.score_embedding(Z, score_name, constraints)
@@ -136,12 +137,17 @@ def _calculate_score(method_name, list_perp_in_log_scale,
 def plot_bo(optimizer, list_perp_in_log_scale, true_score, bayopt_params={}, plot_dir=""):
     # test in case 1D, only one param `perplexity`
     # note that the observations are in logscale
+    print("List params for plotting (int real value: ")
+    print(min(list_perp_in_log_scale), max(list_perp_in_log_scale))
+    
     x_obs = np.array([[res["params"]["perplexity"]] for res in optimizer.res])
     y_obs = np.array([res["target"] for res in optimizer.res])
     observation = {'x_obs': x_obs, 'y_obs': y_obs}
 
     # convert `list_perp_in_log_scale` into exponential value by passing it to np.log
     list_params = np.log(list_perp_in_log_scale).reshape(-1, 1)
+    print("List param in log scale: ", min(list_params), max(list_params))
+    
     true_target = {'list_params': list_params, 'true_score': true_score}
     prediction = _posterior(optimizer, param_range=list_params, **observation)
 
@@ -168,7 +174,7 @@ if __name__ == "__main__":
                     help="number of constraints each type")
     ap.add_argument("-nl", "--n_labels_each_class", default=10, type=int,
                     help="number of labelled points selected for each class")
-    ap.add_argument("--seed", default=2019, type=int)
+    ap.add_argument("--seed", default=42, type=int)
     ap.add_argument("-u", "--utility_function", default="ucb",
                     help="in ['ucb', 'ei', 'poi']")
     ap.add_argument("-k", "--kappa", default=5.0, type=float,
@@ -258,3 +264,4 @@ if __name__ == "__main__":
 
     # python bo_constraint.py  -d DIGITS -m umap --seed 42 -k 5.0 -nr 35
     # {'target': 2.1383999006985643, 'params': {'min_dist': 0.004450459827546657, 'n_neighbors': 11}}
+

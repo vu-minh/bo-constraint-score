@@ -36,7 +36,7 @@ def run_viz(method_name, X, seed=42, embedding_dir="",
 def run_largevis(X, perplexity: int=30, seed: int=42,
                  check_log: bool=True, embedding_dir: str=""):
     # https://github.com/lferry007/LargeVis
-    perplexity = int(perplexity)
+    perplexity = int(round(perplexity))
     print(f"[Debug] LargeVis(perplexity={perplexity}, seed={seed}")
 
     embedded_file_name = f"{embedding_dir}/{perplexity}.z"
@@ -72,7 +72,7 @@ def run_largevis(X, perplexity: int=30, seed: int=42,
 
 def run_tsne(X, perplexity: int=30, seed: int=42,
              check_log: bool=True, embedding_dir: str=""):
-    perplexity = int(perplexity)
+    perplexity = int(round(perplexity))
     print(f"[Debug] MulticoreTSNE(perplexity={perplexity}, seed={seed})")
 
     embedded_file_name = f"{embedding_dir}/{perplexity}.z"
@@ -90,7 +90,7 @@ def run_tsne(X, perplexity: int=30, seed: int=42,
 
 def run_umap(X, n_neighbors: int=15, min_dist: float=0.1, seed: int=42,
              check_log: bool=True, embedding_dir: str=""):
-    n_neighbors = int(n_neighbors)
+    n_neighbors = int(round(n_neighbors))
     print(f"[Debug] UMAP(n_neighbors={n_neighbors}, min_dist={min_dist:.4f}, seed={seed})")
 
     embedded_file_name = f"{embedding_dir}/{n_neighbors}_{min_dist:.4f}.z"
