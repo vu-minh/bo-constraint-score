@@ -23,10 +23,10 @@ function run_viz {
 	   --seed $DEFAULT_SEED \
 	   -d $DATASET_NAME \
 	   -m $METHOD \
-	   --perp_scale linear \
 	   --n_perp 5000 \
 	   --run \
-	   --debug # only for umap
+	   # --debug # only for umap
+	   # --perp_scale linear \
 }
 
 
@@ -58,7 +58,7 @@ function run_score {
 	   --debug \
 	   --use_log_scale \
 	   --plot \
-	   # --run -nr 10 # comment out this param to make the plot
+	   --run -nr 10 # comment out this param to make the plot
 }
 
 
@@ -74,27 +74,27 @@ function run_metric  {
 	   -sc metrics \
 	   --use_log_scale \
 	   --plot \
-	   # --run
+	   --run
 }
 
 
 ############################################################################
-RUN_ALL=true
+RUN_ALL=false
 
 if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("DIGITS")
-    declare -a LIST_METHODS=("tsne")
+    declare -a LIST_DATASETS=("BREAST_CANCER" "FASHION500")
+    declare -a LIST_METHODS=("umap" "tsne")
 fi
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
     for METHOD in "${LIST_METHODS[@]}"; do
-	# echo        $DATASET_NAME $METHOD
-        # run_viz    $DATASET_NAME $METHOD
+	echo        $DATASET_NAME $METHOD
+        run_viz    $DATASET_NAME $METHOD
 	run_score  $DATASET_NAME $METHOD	
-	# run_metric $DATASET_NAME $METHOD
+        run_metric $DATASET_NAME $METHOD
     done
 done
 

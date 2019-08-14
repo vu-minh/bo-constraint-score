@@ -20,7 +20,7 @@ Time-stamp: <2019-07-09 16:04:24 vmvu>
     - Using constraint score -> not clear what it is
     - Bayesian Optimization -> too technique
     - Missing: interpretable / explainable score.
-
+      
 * Material for writing
 
 ** Intro BayesianOptimization
@@ -41,7 +41,30 @@ The goal of each of these methods is to find the global optima of hyperparameter
 + Slide 28/83 https://www.slideshare.net/SigOpt/mlconf-2016-sigopt-talk-by-scott-clark
 *Overfit* a GP model.
 
+** High-level intro BO
+take from https://towardsdatascience.com/a-conceptual-explanation-of-bayesian-model-based-hyperparameter-optimization-for-machine-learning-b8172278050f
+In contrast to random search or grid search, BO keeps track of
+all past evaluation results to build a probabilistic model,
+mapping hyperparameter to a probability of a score on this objective function:
+$P(score | hyperparameter)$
+, which is called /surrogate/ model.
 
+** Grid search / random search:
++ make a list of all alternative values for each hyper-param
+and try all possible combinations.
+(each hyper param to search is an axis / dimension,
+if it has less effect, moving along that axis help nothing)
+
++ random search: sampling random combinations, 
+it is much better if some hyperparameters have no effect.
+
+** BO
++ look at the results so far,
++ predict regions of hyperparameter that might give better results
++ need to predict how well a new combination will do and also model
+the uncertainty of that prediction.
++ what kind of model? GP
++ GP assume that similar inputs give similar outputs
 
 * IDEAS
 

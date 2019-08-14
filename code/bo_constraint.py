@@ -155,6 +155,16 @@ def plot_bo(optimizer, list_perp_in_log_scale, true_score, bayopt_params={}, plo
                               **observation, **true_target, **prediction, **bayopt_params)
 
 
+def test_skopt_plot(optimizer):
+    from matplotlib import pyplot as plt
+    from bo_utils import bayes2skopt
+    from skopt.plots import plot_convergence, plot_objective
+    
+    optimizer = bayes2skopt(optimizer)
+    plot_objective(optimizer)
+    plt.show()
+
+    
 if __name__ == "__main__":
     import argparse
     import mlflow
@@ -254,9 +264,10 @@ if __name__ == "__main__":
         # load optimizer object
         log_name = f"{args.utility_function}_k{args.kappa}_xi{args.xi}_n{args.n_total_runs}"
         optimizer = joblib.load(f"{log_dir}/{log_name}.z")
-        plot_bo(optimizer, list_perp_in_log_scale, true_score, plot_dir=plot_dir,
-                bayopt_params={'util_func': args.utility_function,
-                               'kappa': args.kappa, 'xi': args.xi})
+        #plot_bo(optimizer, list_perp_in_log_scale, true_score, plot_dir=plot_dir,
+        #        bayopt_params={'util_func': args.utility_function,
+        #                       'kappa': args.kappa, 'xi': args.xi})
+        test_skopt_plot(optimizer)
 
     # python bo_constraint.py -d COIL20 -m umap -nr 100 -nl 5 --seed 2029
 
@@ -264,4 +275,3 @@ if __name__ == "__main__":
 
     # python bo_constraint.py  -d DIGITS -m umap --seed 42 -k 5.0 -nr 35
     # {'target': 2.1383999006985643, 'params': {'min_dist': 0.004450459827546657, 'n_neighbors': 11}}
-

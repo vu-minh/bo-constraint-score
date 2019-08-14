@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from skopt.space import Real, Integer
 from skopt import gp_minimize, forest_minimize
 from skopt.utils import use_named_args
-from skopt.plots import plot_convergence
+from skopt.plots import plot_convergence, plot_objective
 
 from utils import generate_constraints, score_embedding
 from common.dataset import dataset
@@ -16,14 +16,13 @@ from run_viz import run_tsne, run_largevis, run_umap
 
 def hyperopt_workflow(X, constraints,
                       method_name: str, score_name: str,
-                      seed: int=42, embedding_dir: str=""):
+                      seed: int=42, embedding_dir: str="",
+                      n_total_runs=20, acq_func="EI", kappa=5.0, xi=0.01):
     if method_name in ["tsne", "largevis"]:
-        # space = [Real(2, X.shape[0]//3, "log-uniform", name="perplexity")]
-        space = [Integer(2, X.shape[0]//3, name="perplexity")]
+        space = [Real(2, X.shape[0]//3, "log-uniform", name="perplexity")]
     elif method_name in ["umap"]:
         space = [
-            # Real(2, X.shape[0]//3, "log-uniform", name="n_neighbors"),
-            Integer(2, X.shape[0]//3, name="perplexity"),
+            Real(2, X.shape[0]//3, "log-uniform", name="n_neighbors"),
             Real(0.001, 1.0, "log-uniform", name="min_dist")
         ]
     else:
@@ -42,18 +41,24 @@ def hyperopt_workflow(X, constraints,
 
     from numpy.random import RandomState
     res_gp = gp_minimize(objective, space,
-                         n_random_starts=5, n_calls=20, random_state=RandomState(seed=42))
-                         # acq_func="LCB", kappa=1.96)
+                         n_random_starts=min(5, int(0.1 * n_total_runs)), n_calls=n_total_runs,
+                         random_state=RandomState(seed=42),
+                         acq_func=acq_func, kappa=kappa, xi=xi)
     # res_gp = forest_minimize(objective, space, n_calls=20, n_random_starts=5, random_state=42)
     best_score = res_gp.fun
     best_param = res_gp.x[0]
 
     print(best_param, best_score)
-    
+
+    plot_convergence(res_gp)
+    plt.savefig(f"{plot_dir}/convergence.png")
+
+    plot_objective(res_gp)
+    plt.savefig(f"{plot_dir}/objective.png")
+
 
 if __name__ == "__main__":
     import argparse
-    import mlflow
     import os
 
     ap = argparse.ArgumentParser()
@@ -89,10 +94,11 @@ if __name__ == "__main__":
     dataset_name = args.dataset_name
     method_name = args.method_name
     score_name = args.score_name
-    
+
     # custom preprocessing method for each dataset
     preprocessing_method = {
-        'COIL20': None
+        'COIL20': None,
+        'WINE': 'standardizer',
     }.get(dataset_name, 'unitScale')  # default for image dataset
 
     X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method)

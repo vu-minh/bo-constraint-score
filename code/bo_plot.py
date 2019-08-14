@@ -144,7 +144,7 @@ def plot_bo_one_param_summary(optimizer,
 #        min_val=1.1, max_val=max(list_params), num=6, range_type="log", dtype=int)
 #    ax.set_xticks(list_params_to_show)
 #    ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
-    
+
     # show param in log scale in xaxis
     list_params_to_show = generate_value_range(
         min_val=min(list_params), max_val=max(list_params), num=8, range_type="log", dtype=int)
