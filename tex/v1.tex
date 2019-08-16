@@ -27,8 +27,10 @@ But there are some hyper-parameters which have large effect and others which hav
 If we move along the axes of the no-effect hyperparameters, we do not learn at all.
 Thus the question is how to jointly tune many hyperparameters at the same time
 with as few evaluations as possible.
+Bayesian optimization (BayOpt) is an anwser to our question.
+We first explain the BayOpt approach in general, then explain how it fits to the hyperparameter tuning problem.
 
-Bayesian optimization (BayOpt) is a strategy for finding the extremum (minimum or maximum) of an objective function $f$~\cite{mockus1975on}.
+BayOpt is a strategy for finding the extremum (minimum or maximum) of an objective function $f$~\cite{mockus1975on}.
 The objective function can be any complex non-convex blackbox function which does not have closed-form expression or its derivative is not accessible.
 Thus finding directly the extremum of this kind of function is impossible.
 However, we can observe the function values (possibly noisy) for some sampled input values.
@@ -36,15 +38,15 @@ The goal of BayOpt is not to approximate the unknown objective function $f$ but 
 estimate its extremum (generally speaking, its maximum) from the ensemble of observations
 in form of pair of input sample $x$ and function values $f(x)$.
 
+Let define $f(x_i)$ as the observation of the target function for the $i^{th}$ sample $x_i$.
+BayOpt constructs a statistical model describing the relationship between
+the tuning hypyerparamters and the target function.
+
 BayOpt has been applied successfully to the problem of hyperparameters tuning \cite{snoek2012practical} or experimental design / randomized experiments \cite{letham2019constrained}.
 We can consider the unknown objective function is our target function (score function) for all combinations of the hyperparameters.
 Since we can not evaluate all combinations of the hyperparameters,
 the target function is obviously unknown.
 The goal is thus to find a best combination that maximize the target function.
-Let define $f(x_i)$ as the observation of the target function for the $i^{th}$ sample $x_i$.
-
-BayOpt constructs a statistical model describing the relationship between
-the tuning hypyerparamters and the target function.
 
 
 \section{Constraint Preserving Score}
