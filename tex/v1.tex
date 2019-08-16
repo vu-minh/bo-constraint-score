@@ -1,0 +1,62 @@
+\section{Introduction}
+
+
+\section{Background and Related Work}
+
+\subsection{Automatic Hyperparameter Tuning with Bayesian Optimization}
+
+The machine learning methods in general are controlled by one or many hyperparameters.
+To use these methods efficiently, it requires a lot of skill to set hyperparameters.
+The efficiency of a method is usually evaluated by a score,
+e.g., F1-score for classification task, V-Measure score for clustering task or
+visualization quality metric for DR task.
+The goal is to jointy tune the ensemble of hyperparameters to
+make the model output the highest score.
+Trial-and-error method is typically used to test several common combinations of the parameters
+but it is not a systematic way to tune the hyperparameters.
+
+One common approach to solve this problem is naive grid search.
+By making a list of discrete values for each hyperparameter,
+we can try to evaluate all possible combinations.
+The parameter space growns exponentially w.r.t. the number of hyperparameters
+and the number of values for each one.
+A better approach is random search \cite{bergstra2011algorithms}, in which we sample randomly the combinations.
+From the list of alternative values for the hyper-parameters,
+pick randomly one value for each hyper-parameter to create one combination.
+But there are some hyper-parameters which have large effect and others which have no effect.
+If we move along the axes of the no-effect hyperparameters, we do not learn at all.
+Thus the question is how to jointly tune many hyperparameters at the same time
+with as few evaluations as possible.
+
+Bayesian optimization (BayOpt) is a strategy for finding the extremum (minimum or maximum) of an objective function $f$~\cite{mockus1975on}.
+The objective function can be any complex non-convex blackbox function which does not have closed-form expression or its derivative is not accessible.
+Thus finding directly the extremum of this kind of function is impossible.
+However, we can observe the function values (possibly noisy) for some sampled input values.
+The goal of BayOpt is not to approximate the unknown objective function $f$ but instead
+estimate its extremum (generally speaking, its maximum) from the ensemble of observations
+in form of pair of input sample $x$ and function values $f(x)$.
+
+BayOpt has been applied successfully to the problem of hyperparameters tuning \cite{snoek2012practical} or experimental design / randomized experiments \cite{letham2019constrained}.
+We can consider the unknown objective function is our target function (score function) for all combinations of the hyperparameters.
+Since we can not evaluate all combinations of the hyperparameters,
+the target function is obviously unknown.
+The goal is thus to find a best combination that maximize the target function.
+Let define $f(x_i)$ as the observation of the target function for the $i^{th}$ sample $x_i$.
+
+BayOpt constructs a statistical model describing the relationship between
+the tuning hypyerparamters and the target function.
+
+
+\section{Constraint Preserving Score}
+
+
+\section{Constraint-based Score as Target in Bayesian Optimization Approach}
+
+
+\section{Experimental Results}
+
+
+\section{Discussion}
+
+
+\section{Conclusion and Future Work}

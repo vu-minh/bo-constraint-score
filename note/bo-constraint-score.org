@@ -66,6 +66,13 @@ the uncertainty of that prediction.
 + what kind of model? GP
 + GP assume that similar inputs give similar outputs
 
+** Advantage:
+4 Advantages of BO taken from https://research.fb.com/blog/2018/09/efficient-tuning-of-online-systems-using-bayesian-optimization/
++ Better scaling with parameter dimensionality
++ Reduced number of Experiments
++ Better experiment outcomes
++ Understand the parameter space.
+
 * IDEAS
 
 ** TODO Portablability and Scalability
