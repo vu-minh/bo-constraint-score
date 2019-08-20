@@ -23,7 +23,7 @@ function run_viz {
 	   --seed $DEFAULT_SEED \
 	   -d $DATASET_NAME \
 	   -m $METHOD \
-	   --n_perp 5000 \
+	   --n_perp 200 \
 	   --run \
 	   # --debug # only for umap
 	   # --perp_scale linear \
@@ -85,7 +85,7 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("BREAST_CANCER" "FASHION500")
+    declare -a LIST_DATASETS=("20NEWS")
     declare -a LIST_METHODS=("umap" "tsne")
 fi
 
