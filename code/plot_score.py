@@ -37,7 +37,7 @@ def _plot_best_param(ax, best_param_value, text_y_pos=0.0, text_align=None):
         ax.text(x=best_param_value, y=text_y_pos, s=str(best_param_value), ha=text_align)
 
 
-def _plot_best_range(ax, param_min, param_max, param_name="", text_y_pos=0.0):
+def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0):
     ax.axvspan(param_min, param_max, alpha=0.12, color="orange")
 
     # vertical line on the left
@@ -57,7 +57,7 @@ def _plot_best_range(ax, param_min, param_max, param_name="", text_y_pos=0.0):
             s=f"[{param_min}, {param_max}]", color="#0047BB")
 
 
-def _plot_score_with_best_param_and_range(ax, param_name, list_params, pivot,
+def _plot_score_with_best_param_and_range(ax, list_params, pivot,
                                           param_best, param_min, param_max,
                                           score_mean, score_sigma=None, text_y_pos=0):
     # horizontal line to indicate top 96% highest score
@@ -76,7 +76,7 @@ def _plot_score_with_best_param_and_range(ax, param_name, list_params, pivot,
     _plot_best_param(ax, param_best, text_y_pos, text_align)
 
     # plot also the best param range (the top 96% scores)
-    _plot_best_range(ax, param_min, param_max, param_name, text_y_pos)
+    _plot_best_range(ax, param_min, param_max, text_y_pos)
 
 
 def plot_scores(dataset_name, method_name, score_name, list_n_labels_values,
@@ -95,7 +95,7 @@ def plot_scores(dataset_name, method_name, score_name, list_n_labels_values,
         rnx_score = metric_data["auc_rnx"]
 
     # prepare threshold value to filter the top highest scores
-    threshold = {'tsne': 0.95, 'umap': 0.95, 'largevis': 0.90}[method_name]
+    threshold = {'tsne': 0.96, 'umap': 0.96, 'largevis': 0.90}[method_name]
 
     # prepare subplots
     n_rows = len(list_n_labels_values) + (1 if compare_with_rnx else 0)
@@ -128,7 +128,7 @@ def plot_scores(dataset_name, method_name, score_name, list_n_labels_values,
         param_best = list_params[np.argmax(score_mean)]
 
         _plot_score_with_best_param_and_range(
-            ax, param_name, list_params, pivot, param_best, param_min, param_max,
+            ax, list_params, pivot, param_best, param_min, param_max,
             score_mean=score_mean, score_sigma=score_sigma, text_y_pos=text_y_pos)
 
         # additional annotation for the first plot and the last plot
@@ -138,13 +138,13 @@ def plot_scores(dataset_name, method_name, score_name, list_n_labels_values,
                     transform=ax.transAxes, ha="right",
                     bbox=dict(edgecolor='b', facecolor='w'))
             # hint text for the top hightest scores horizontal line
-            ax.text(x=min(list_params), y=pivot*1.03, ha="left", va="bottom",
+            ax.text(x=min(list_params), y=pivot*1.01, ha="left", va="bottom",
                     s=u"\u2199" + f"{threshold} max(score)", color="#0047BB")
         if last_plot:
             # hint xlabel param in log-scale
             ax.set_xlabel(f"{param_name} in log-scale")
             # hint text for the top hightest scores horizontal line
-            ax.text(x=max(list_params), y=pivot*1.03, ha="right", va="bottom",
+            ax.text(x=max(list_params), y=pivot*1.01, ha="right", va="bottom",
                     s=f"{threshold} max(score)" + u"\u2198", color="#0047BB")
 
     plt.tight_layout()

@@ -66,10 +66,8 @@ def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold = 
     param_best = int(np.exp(list_params[np.argmax(pred_mu)]))
     print("Debug best param: ", param_best, np.max(pred_mu))
     # plot best predicted range
-    text_y_pos = 0.92 * min(pred_mu - 1.96 * pred_sigma)
-
     ax.axhline(pivot, linestyle="--", alpha=0.4)
-    _plot_best_range(ax, param_min, param_max, "", text_y_pos)
+    _plot_best_range(ax, param_min, param_max)
 
 
 def plot_bo_one_param_detail(optimizer,
@@ -128,6 +126,31 @@ def plot_bo_one_param_detail(optimizer,
     plt.close()
 
 
+def _plot_best_range(ax, param_min, param_max):
+    ax.axvspan(param_min, param_max, alpha=0.12, color="#CCDAF1")
+
+    value_min = int(np.exp(param_min))
+    value_max = int(np.exp(param_max))
+    text_y_pos = ax.get_ylim()[0] * 1.1
+
+    # vertical line on the left
+    ax.axvline(param_min, color="#CCDAF1", linestyle='--', alpha=0.6,
+               marker=">", markersize=14, clip_on=False,
+               markeredgecolor="#CCDAF1", markerfacecolor="#CCDAF1", markevery=100)
+    ax.text(x=param_min, y=text_y_pos, s=str(value_min), ha="right")
+
+    # vertical line on the right
+    ax.axvline(param_max, color="#CCDAF1", linestyle='--', alpha=0.6,
+               marker="<", markersize=14, clip_on=False,
+               markeredgecolor="#CCDAF1", markerfacecolor="#CCDAF1", markevery=100)
+    ax.text(x=param_max, y=text_y_pos, s=str(value_max), ha="left")
+
+    # add text to show the best range
+    ax.text(x=1.0, y=1.065, transform=ax.transAxes, ha="right", va="center",
+            s=f"Predicted best range: [{value_min}, {value_max}]",
+            color="#0047BB", fontsize=18)
+
+
 def plot_bo_one_param_summary(optimizer,
                               x_obs, y_obs,  # the Observations
                               list_params, true_score,  # the true target values
@@ -168,43 +191,18 @@ def plot_bo_one_param_summary(optimizer,
         min_val=min(list_params), max_val=max(list_params), num=9, range_type="log", dtype=int)
     ax.set_xlim(left=min(list_params), right=max(list_params))
     ax.set_xticks(list_params_to_show)
-    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{np.exp(x):.2f}"))
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(round(np.exp(x)))}"))
     ax.set_xlabel(f"{param_name} in log-scale")
 
     # plot text for best param
-    text_y_pos = 0.92 * min(pred_mu - 1.96 * pred_sigma)
-    ax.text(x=best_param, y=text_y_pos, ha="center", s=f"{int(np.exp(best_param))}")
+    ax.text(x=best_param, y=1.1*ax.get_ylim()[0], ha="center", s=f"{int(np.exp(best_param))}")
 
     # hint text for the top hightest scores horizontal line
     pivot = threshold * max(pred_mu)
-    ax.text(x=min(list_params), y=pivot*1.03, ha="left", va="bottom", fontsize=18,
+    ax.text(x=min(list_params), y=pivot*1.01, ha="left", va="bottom", fontsize=18,
             s=u"\u2199" + f"{threshold} max(score)", color="#0047BB")
     
     # set title and save figure
     plt.legend(loc="upper center", ncol=4, prop={'size': 14})
     plt.savefig(f"{plot_dir}/bo_summary.png", bbox_inches="tight")
     plt.close()
-
-
-def _plot_best_range(ax, param_min, param_max, param_name="", text_y_pos=0.0):
-    ax.axvspan(param_min, param_max, alpha=0.12, color="#CCDAF1")
-
-    value_min = int(np.exp(param_min))
-    value_max = int(np.exp(param_max))
-
-    # vertical line on the left
-    ax.axvline(param_min, color="#CCDAF1", linestyle='--', alpha=0.6,
-               marker=">", markersize=14, clip_on=False,
-               markeredgecolor="#CCDAF1", markerfacecolor="#CCDAF1", markevery=100)
-    ax.text(x=param_min, y=text_y_pos, s=str(value_min), ha="right")
-
-    # vertical line on the right
-    ax.axvline(param_max, color="#CCDAF1", linestyle='--', alpha=0.6,
-               marker="<", markersize=14, clip_on=False,
-               markeredgecolor="#CCDAF1", markerfacecolor="#CCDAF1", markevery=100)
-    ax.text(x=param_max, y=text_y_pos, s=str(value_max), ha="left")
-
-    # add text to show the best range
-    ax.text(x=1.0, y=1.065, transform=ax.transAxes, ha="right", va="center",
-            s=f"Predicted best range: [{value_min}, {value_max}]",
-            color="#0047BB", fontsize=18)

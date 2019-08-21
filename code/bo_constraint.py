@@ -239,7 +239,8 @@ if __name__ == "__main__":
 
     # generate constraints according to the choosen strategy
     constraints = utils.generate_constraints(
-        args.strategy, score_name, labels, seed=seed,
+        args.strategy, score_name, labels,
+        seed=42, # test stability by fixing this seed and change seed for BayOpt
         n_constraints=args.n_constraints,
         n_labels_each_class=args.n_labels_each_class
     )
@@ -263,7 +264,7 @@ if __name__ == "__main__":
                                       embedding_dir=embedding_dir)
 
         # prepare threshold value to filter the top highest scores
-        threshold = {'tsne': 0.95, 'umap': 0.95, 'largevis': 0.90}[method_name]
+        threshold = {'tsne': 0.96, 'umap': 0.96, 'largevis': 0.90}[method_name]
 
         # load optimizer object
         log_name = f"{args.utility_function}_k{args.kappa}_xi{args.xi}_n{args.n_total_runs}"
@@ -280,3 +281,8 @@ if __name__ == "__main__":
 
     # python bo_constraint.py  -d DIGITS -m umap --seed 42 -k 5.0 -nr 35
     # {'target': 2.1383999006985643, 'params': {'min_dist': 0.004450459827546657, 'n_neighbors': 11}}
+
+    # REPRODUCE
+    # can prove stability of BayOpt by fixing seed for constraint generation change change seed for BayOpt
+    # python bo_constraint.py -d DIGITS -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 42
+    # python bo_constraint.py -d DIGITS -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 2018
