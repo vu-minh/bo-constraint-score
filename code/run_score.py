@@ -174,6 +174,9 @@ if __name__ == "__main__":
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
+    default_min_dist = 0.1
+    # ['0.0010', '0.0022', '0.0046', '0.0100', '0.0215', '0.0464', '0.1000', '0.2154', '0.4642', '1.0000']
+
     default_param_name = {
         'tsne': 'perplexity', 'largevis': 'perplexity', 'umap': 'n_neighbors'
     }[method_name]
@@ -189,10 +192,12 @@ if __name__ == "__main__":
                 method_name, list_n_labels_values, seed=args.seed,
                 n_repeat=args.n_repeat, degrees_of_freedom=args.degrees_of_freedom,
                 list_accepted_perp=list_perp_in_log_scale if args.use_log_scale else None,
-                embedding_dir=embedding_dir, score_dir=score_dir)
+                embedding_dir=embedding_dir, score_dir=score_dir,
+                default_min_dist=default_min_dist)
         elif score_name == "metrics":
             run_all_quality_metric(X, list_perps=list_perp_in_log_scale,
-                                   embedding_dir=embedding_dir, score_dir=score_dir)
+                                   embedding_dir=embedding_dir, score_dir=score_dir,
+                                   default_min_dist=default_min_dist)
         elif score_name == "bic":
             run_BIC_score(X, list_perp_in_log_scale, score_dir, seed=args.seed)
         else:

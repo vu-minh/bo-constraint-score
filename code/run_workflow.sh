@@ -85,15 +85,15 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("20NEWS")
-    declare -a LIST_METHODS=("umap" "tsne")
+    declare -a LIST_DATASETS=("PBMC_5K") # "QPCR"
+    declare -a LIST_METHODS=("tsne" "umap")
 fi
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
     for METHOD in "${LIST_METHODS[@]}"; do
 	echo        $DATASET_NAME $METHOD
         run_viz    $DATASET_NAME $METHOD
-	run_score  $DATASET_NAME $METHOD	
+	    run_score  $DATASET_NAME $METHOD	
         run_metric $DATASET_NAME $METHOD
     done
 done
