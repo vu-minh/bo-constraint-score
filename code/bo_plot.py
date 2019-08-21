@@ -20,19 +20,31 @@ def _plot_acq_func(ax, util_func, list_params, utility_values, next_best_guess_p
             s=f"Next best guess param: {int(np.exp(next_best_guess_param))}")
 
 
-def _plot_true_target_values(ax, list_params, true_score):
+def _plot_true_target_values(ax, list_params, true_score, threshold=0.95):
     ax.plot(list_params, true_score, label="True target", marker='s', markersize=3,
             color="#FF8200", alpha=0.75, linewidth=1.25)
     ax.set_ylabel(f"constraint score")
 
+    # determine true best range
+    pivot = threshold * max(true_score)
+    (best_indices, ) = np.where(true_score > pivot)
+    param_min = list_params[best_indices.min()][0]
+    param_max = list_params[best_indices.max()][0]
+    # plt.arrow(x=param_min, y=ax.get_ylim()[0], dx=param_max-param_min, dy=0,
+    #     width=0.005, color="orange", length_includes_head=True)
+
+    # add text to show the best range
+    value_min = int(np.exp(param_min))
+    value_max = int(np.exp(param_max))
+    ax.text(x=0.0, y=1.065, transform=ax.transAxes, ha="left", va="center",
+            s=f"True best range: [{value_min}, {value_max}]", fontsize=18)
+
 
 def _plot_observed_points(ax, x_obs, y_obs):
-    for x in x_obs:
-        print(x, np.exp(x))
     ax.plot(x_obs.flatten(), y_obs, "o", markersize=7, label="Observations", color="#1B365D")
 
 
-def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params):
+def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold = 0.95):
     list_params = list_params.ravel()
     ax.plot(list_params, pred_mu, color="#0047BB", linestyle="--", label="Prediction")
     ax.fill_between(
@@ -44,6 +56,20 @@ def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params):
         ec="None",
         label="95% confidence",
     )
+
+    # determine best param range and best param value
+    pivot = threshold * max(pred_mu)
+    (best_indices, ) = np.where(pred_mu > pivot)
+    param_min = list_params[best_indices.min()]
+    param_max = list_params[best_indices.max()]
+    # note best param here is max(pred_mu), should take into account the uncertainty in this prediction
+    param_best = int(np.exp(list_params[np.argmax(pred_mu)]))
+    print("Debug best param: ", param_best, np.max(pred_mu))
+    # plot best predicted range
+    text_y_pos = 0.92 * min(pred_mu - 1.96 * pred_sigma)
+
+    ax.axhline(pivot, linestyle="--", alpha=0.4)
+    _plot_best_range(ax, param_min, param_max, "", text_y_pos)
 
 
 def plot_bo_one_param_detail(optimizer,
@@ -106,7 +132,7 @@ def plot_bo_one_param_summary(optimizer,
                               x_obs, y_obs,  # the Observations
                               list_params, true_score,  # the true target values
                               pred_mu, pred_sigma,  # the predicted values
-                              param_name="perplexity",
+                              param_name="perplexity", threshold=0.95,
                               util_func="ucb", kappa=5, xi=0.01, plot_dir=""):
     ''' Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real GP params are in logscale)
@@ -118,9 +144,9 @@ def plot_bo_one_param_summary(optimizer,
     ax.set_xlim(left=list_params.min(), right=list_params.max())
     ax.set_ylim(top=1.1*max(true_score), bottom=0.9*min(true_score))
 
-    _plot_true_target_values(ax, list_params, true_score)
     _plot_observed_points(ax, x_obs, y_obs)
-    _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params)
+    _plot_true_target_values(ax, list_params, true_score, threshold=threshold)
+    _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold=threshold)
 
     # draw indicator hline at the current  max value of the  target function
     # ax.axhline([current_max_target_function], color='#A1AFF8', linestyle='--', alpha=0.7)
@@ -130,30 +156,55 @@ def plot_bo_one_param_summary(optimizer,
     ax.axvline(best_param, color="green", linestyle='--', alpha=0.5,
                marker="^", markersize=16, clip_on=False,
                markeredgecolor="#FF8200", markerfacecolor="#FF8200", markevery=100)
-    ax.text(x=best_param, y=1.1*min(true_score),
-            s=f"best {param_name}: {int(round(np.exp(best_param)))}")
 
     # set limit value for yaxis in gp prediction chart
     # ax.set_ylim((0.95 * y_obs.min(), 1.12 * y_obs.max()))  # make place for legend
     ax.locator_params(axis='y', nbins=4)
-    ax.yaxis.grid(linestyle="--")
-    ax.xaxis.grid(linestyle="--", alpha=0.4)
-
-    # force list params to show on axias
-#    list_params_to_show = generate_value_range(
-#        min_val=1.1, max_val=max(list_params), num=6, range_type="log", dtype=int)
-#    ax.set_xticks(list_params_to_show)
-#    ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+    # ax.yaxis.grid(linestyle="--")
+    # ax.xaxis.grid(linestyle="--", alpha=0.3)
 
     # show param in log scale in xaxis
     list_params_to_show = generate_value_range(
-        min_val=min(list_params), max_val=max(list_params), num=8, range_type="log", dtype=int)
+        min_val=min(list_params), max_val=max(list_params), num=9, range_type="log", dtype=int)
     ax.set_xlim(left=min(list_params), right=max(list_params))
     ax.set_xticks(list_params_to_show)
     ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{np.exp(x):.2f}"))
     ax.set_xlabel(f"{param_name} in log-scale")
 
+    # plot text for best param
+    text_y_pos = 0.92 * min(pred_mu - 1.96 * pred_sigma)
+    ax.text(x=best_param, y=text_y_pos, ha="center", s=f"{int(np.exp(best_param))}")
+
+    # hint text for the top hightest scores horizontal line
+    pivot = threshold * max(pred_mu)
+    ax.text(x=min(list_params), y=pivot*1.03, ha="left", va="bottom", fontsize=18,
+            s=u"\u2199" + f"{threshold} max(score)", color="#0047BB")
+    
     # set title and save figure
     plt.legend(loc="upper center", ncol=4, prop={'size': 14})
     plt.savefig(f"{plot_dir}/bo_summary.png", bbox_inches="tight")
     plt.close()
+
+
+def _plot_best_range(ax, param_min, param_max, param_name="", text_y_pos=0.0):
+    ax.axvspan(param_min, param_max, alpha=0.12, color="#CCDAF1")
+
+    value_min = int(np.exp(param_min))
+    value_max = int(np.exp(param_max))
+
+    # vertical line on the left
+    ax.axvline(param_min, color="#CCDAF1", linestyle='--', alpha=0.6,
+               marker=">", markersize=14, clip_on=False,
+               markeredgecolor="#CCDAF1", markerfacecolor="#CCDAF1", markevery=100)
+    ax.text(x=param_min, y=text_y_pos, s=str(value_min), ha="right")
+
+    # vertical line on the right
+    ax.axvline(param_max, color="#CCDAF1", linestyle='--', alpha=0.6,
+               marker="<", markersize=14, clip_on=False,
+               markeredgecolor="#CCDAF1", markerfacecolor="#CCDAF1", markevery=100)
+    ax.text(x=param_max, y=text_y_pos, s=str(value_max), ha="left")
+
+    # add text to show the best range
+    ax.text(x=1.0, y=1.065, transform=ax.transAxes, ha="right", va="center",
+            s=f"Predicted best range: [{value_min}, {value_max}]",
+            color="#0047BB", fontsize=18)

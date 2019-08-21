@@ -85,8 +85,8 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("PBMC_5K") # "QPCR"
-    declare -a LIST_METHODS=("tsne" "umap")
+    declare -a LIST_DATASETS=("QPCR") # "PBMC_5K"
+    declare -a LIST_METHODS=("umap")
 fi
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do

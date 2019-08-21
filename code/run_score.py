@@ -174,7 +174,7 @@ if __name__ == "__main__":
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
 
-    default_min_dist = 0.1
+    default_min_dist = 1.0
     # ['0.0010', '0.0022', '0.0046', '0.0100', '0.0215', '0.0464', '0.1000', '0.2154', '0.4642', '1.0000']
 
     default_param_name = {

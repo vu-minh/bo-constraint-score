@@ -99,6 +99,9 @@ if __name__ == "__main__":
     preprocessing_method = {
         'COIL20': None,
         'WINE': 'standardizer',
+        'QPCR': None,
+        'PBMC_5K': None,
+        'PBMC_2K': None,
     }.get(dataset_name, 'unitScale')  # default for image dataset
 
     X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method)

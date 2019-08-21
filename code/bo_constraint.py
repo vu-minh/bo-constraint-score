@@ -134,7 +134,8 @@ def _calculate_score(method_name, list_perp_in_log_scale,
     return scores
 
 
-def plot_bo(optimizer, list_perp_in_log_scale, true_score, bayopt_params={}, plot_dir=""):
+def plot_bo(optimizer, list_perp_in_log_scale, true_score,
+            threshold=0.95, bayopt_params={}, plot_dir=""):
     # test in case 1D, only one param `perplexity`
     # note that the observations are in logscale
     print("List params for plotting (int real value: ")
@@ -151,7 +152,7 @@ def plot_bo(optimizer, list_perp_in_log_scale, true_score, bayopt_params={}, plo
     true_target = {'list_params': list_params, 'true_score': true_score}
     prediction = _posterior(optimizer, param_range=list_params, **observation)
 
-    plot_bo_one_param_summary(optimizer, plot_dir=plot_dir,
+    plot_bo_one_param_summary(optimizer, plot_dir=plot_dir, threshold=threshold,
                               **observation, **true_target, **prediction, **bayopt_params)
 
 
@@ -261,13 +262,17 @@ if __name__ == "__main__":
         true_score = _calculate_score(method_name, list_perp_in_log_scale,
                                       embedding_dir=embedding_dir)
 
+        # prepare threshold value to filter the top highest scores
+        threshold = {'tsne': 0.95, 'umap': 0.95, 'largevis': 0.90}[method_name]
+
         # load optimizer object
         log_name = f"{args.utility_function}_k{args.kappa}_xi{args.xi}_n{args.n_total_runs}"
         optimizer = joblib.load(f"{log_dir}/{log_name}.z")
-        #plot_bo(optimizer, list_perp_in_log_scale, true_score, plot_dir=plot_dir,
-        #        bayopt_params={'util_func': args.utility_function,
-        #                       'kappa': args.kappa, 'xi': args.xi})
-        test_skopt_plot(optimizer)
+        plot_bo(optimizer, list_perp_in_log_scale, true_score, plot_dir=plot_dir,
+                threshold=threshold,
+                bayopt_params={'util_func': args.utility_function,
+                               'kappa': args.kappa, 'xi': args.xi})
+        # test_skopt_plot(optimizer)
 
     # python bo_constraint.py -d COIL20 -m umap -nr 100 -nl 5 --seed 2029
 
