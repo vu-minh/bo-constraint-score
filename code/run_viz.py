@@ -81,7 +81,7 @@ def run_tsne(X, perplexity: int=30, seed: int=42,
         return joblib.load(embedded_file_name)
 
     Z = MulticoreTSNE(
-        perplexity=perplexity, n_iter=1500, n_jobs=2, random_state=seed,
+        perplexity=perplexity, n_iter=1500, n_jobs=-1, random_state=seed,
         n_iter_without_progress=1500, min_grad_norm=1e-32,
     ).fit_transform(X)
     joblib.dump(Z, embedded_file_name)

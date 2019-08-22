@@ -1,8 +1,12 @@
+import json
+
 import numpy as np
-import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 import matplotlib as mpl
-from matplotlib.ticker import FuncFormatter
+import matplotlib.pyplot as plt
 from matplotlib import gridspec
+from matplotlib.ticker import FuncFormatter
 
 from bayes_opt import UtilityFunction
 from utils import generate_value_range
@@ -206,3 +210,77 @@ def plot_bo_one_param_summary(optimizer,
     plt.legend(loc="upper center", ncol=4, prop={'size': 14})
     plt.savefig(f"{plot_dir}/bo_summary.png", bbox_inches="tight")
     plt.close()
+
+
+def plot_density_2D(input_score_name: str="umap_scores", target_key_name: str="qij_score",
+                    title: str="", log_dir: str="", score_dir: str="", plot_dir: str=""):
+    # plot contour/contourf guide:
+    # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
+
+    df = pd.read_csv(f"{score_dir}/{input_score_name}.csv")
+    print(df)
+
+    Z = df.pivot(index="min_dist", columns="n_neighbors", values=target_key_name)
+    print(Z)
+
+    min_dist_values = Z.index.to_numpy()
+    n_neighbors_values = Z.columns.to_numpy()
+    Z = Z.to_numpy()
+    print(Z.shape, min_dist_values.shape, n_neighbors_values.shape)
+
+    # get the row of max value
+    best_param = df.loc[df[target_key_name].idxmax()]
+    print("Print: best params: ",best_param)
+    best_n_neighbors = best_param['n_neighbors']
+    best_min_dist = best_param['min_dist']
+    best_score = best_param[target_key_name]
+    print(best_n_neighbors, best_min_dist, best_score)
+    
+    X, Y = np.meshgrid(n_neighbors_values, min_dist_values)
+    print(X.shape, Y.shape)
+
+    fig, ax = plt.subplots(1, 1, figsize=(6.5, 3))
+    ax.set_title(f"[{dataset_name}] {title} for UMAP embeddings")
+
+    # contour for score
+    ax.contour(X, Y, Z, levels=10, linewidths=0.5, colors='k')
+    cntr1 = ax.contourf(X, Y, Z, levels=10, cmap="RdBu_r")
+    fig.colorbar(cntr1, ax=ax)
+
+    # grid of sampled points
+    ax.plot(df.n_neighbors, df.min_dist, '.w', ms=1)
+
+    # custom axes
+    ax.set_xscale("log", basex=np.e)
+    ax.set_xlabel("n_neighbors in log-scale")
+    ax.set_yscale("log", basey=np.e)
+    ax.set_ylabel("min_dist in log-scale")
+    
+    # show ticks values in log scale
+    ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+    ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+    ax.set_yticks([0.001, 0.01, 0.1, 1.0] + [best_min_dist] * 2)
+    ax.set_xticks(np.append(ax.get_xticks(), [best_n_neighbors] * 2))
+
+    # plot best param
+    ax.plot(best_n_neighbors, best_min_dist, 's', c="orange")
+
+    plt.tight_layout()
+    plt.savefig(f"{plot_dir}/2D/{target_key_name}.png")
+
+
+if __name__ == "__main__":
+    dataset_name = "DIGITS"
+    method_name = "umap"
+    score_name = "qij"
+    log_dir = f"./logs/{dataset_name}/{method_name}/{score_name}"
+    score_dir = f"./scores/{dataset_name}/{method_name}/{score_name}"
+    plot_dir = f"./plots/{dataset_name}/{method_name}"
+
+    plot_density_2D(input_score_name="umap_scores", target_key_name="qij_score",
+                    title="Constraint preserving score",
+                    log_dir=log_dir, score_dir=score_dir, plot_dir=plot_dir)
+
+    plot_density_2D(input_score_name="umap_metrics", target_key_name="auc_rnx",
+                    title="$AUC_{log}RNX$ score",
+                    log_dir=log_dir, score_dir=score_dir, plot_dir=plot_dir)

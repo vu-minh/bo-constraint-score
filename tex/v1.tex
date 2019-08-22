@@ -339,6 +339,42 @@ To present and analyze the results, we can present following points (but we stil
 \caption{TODO: Produce a figure similar to this one with 2 params of umap.}\label{fig:umap2}
 \end{figure*}
 
+
+\begin{figure*}
+     \centering
+     \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{DIGITS_umap_qij_score}
+         \caption{UMAP with DIGITS constraint score}
+         \label{fig:s4}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{DIGITS_umap_auc_rnx}
+         \caption{t-SNE with DIGITS John's score}
+         \label{fig:s3}
+     \end{subfigure}
+
+     \vfill
+
+    \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{COIL20_umap_qij_score}
+         \caption{UMAP with COIL20 constraint score}
+         \label{fig:s4}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{COIL20_umap_auc_rnx}
+         \caption{t-SNE with COIL20 John's score}
+         \label{fig:s3}
+     \end{subfigure}
+     \caption{BayOpt with UMAP(nneighbors, mindist)}
+     \label{fig:umap2}
+\end{figure*}
+
 \vspace{8pt} \par
 (2) Visualization of the violated constraints. (Doing, a draft version looks like
 Fig.\ref{fig:viz-score})
@@ -459,6 +495,8 @@ The violated constraints in our methods correspond to the shortcomming of t-SNE 
 t-SNE can not preserve the within-cluster distances and between-clusters distances.
 [TODO: Add reproduced figures].
 The $q_{ij}$-based score can help to understand the defective of the visualization.
+(E.g., can compare with google's embedding project, vis the neighbors in HD and LD, but it still hard to understand the model.
+With our score, it is easier to visualize the violated constraints).
 
 \par
 Add discussion for UMAP.

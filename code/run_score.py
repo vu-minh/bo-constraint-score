@@ -1,11 +1,14 @@
 # run score function for all pre-calculate embeddings
 
 import os
+import sys
 import json
 import math
 import joblib
 import collections
+from itertools import product
 import matplotlib.pyplot as plt
+import pandas as pd
 from tqdm import tqdm
 
 import utils
@@ -54,6 +57,48 @@ def run_qij_score(method_name, list_n_labels_values,
 
     merge_all_score_files(list_n_labels_values, seed=seed, n_repeat=n_repeat,
                           degrees_of_freedom=degrees_of_freedom, score_dir=score_dir)
+
+
+def run_all_score_umap(X, list_n_neighbors, list_min_dist,
+                       n_repeat=1, n_labels_each_class=10, seed=42,
+                       embedding_dir: str="", score_dir: str="", score_name="qij"):
+    # prepare different list constraints with different seed
+    list_constraints = [ utils.generate_constraints(
+        constraint_strategy="partial_labels", score_name=score_name,
+        labels=labels, seed=seed+i,
+        n_labels_each_class=n_labels_each_class
+    ) for i in range(n_repeat)]
+
+    all_scores = []
+    all_metrics = []
+
+    for n_neighbors, min_dist in product(list_n_neighbors, list_min_dist):
+        key_name = f"{n_neighbors}_{min_dist:.4f}"
+        file_name = f"{embedding_dir}/{key_name}.z"
+        if not os.path.exists(file_name):
+            print(file_name, " does not exist")
+        else:
+            print("Working: ", file_name)
+        
+        # get the embedding and calculate qij_score and all metrics
+        embedding = joblib.load(file_name)
+
+        metric_result = utils.calculate_all_metrics(X, embedding)
+        metric_result['n_neighbors'] = n_neighbors
+        metric_result['min_dist'] = min_dist
+        all_metrics.append(metric_result)
+
+        score = sum([utils.score_embedding(embedding, score_name, constraints)
+                     for constraints in list_constraints]) / n_repeat  # average score
+        all_scores.append({
+            'n_neighbors': n_neighbors,
+            'min_dist': min_dist,
+            'qij_score': score,
+        })
+
+    # save data to dataframe and then persistant to csv file
+    pd.DataFrame(all_scores).to_csv(f"{score_dir}/umap_scores.csv")
+    pd.DataFrame(all_metrics).to_csv(f"{score_dir}/umap_metrics.csv")
 
 
 def run_all_quality_metric(X, list_perps, default_min_dist=0.1,
@@ -152,7 +197,9 @@ if __name__ == "__main__":
                     help="number of labelled points selected for each class")
     ap.add_argument("-dof", "--degrees_of_freedom", default=1.0, type=float,
                     help="degrees_of_freedom for qij_based score")
-    ap.add_argument("--seed", default=2019, type=int)
+    ap.add_argument("--seed", default=42, type=int)
+    ap.add_argument("--run_score_umap", action="store_true",
+                    help="Run score only for UMAP w.r.t its 2 params")
     ap.add_argument("--use_log_scale", action="store_true",
                     help="use the param values in log scale")
     ap.add_argument("--debug", action="store_true", help="run score for debugging")
@@ -185,6 +232,19 @@ if __name__ == "__main__":
         min_val=2, max_val=X.shape[0]//3, range_type="log", num=200, dtype=int).tolist()
     # hardcoded num of params to 200 for being consistant with default n_perp in run_viz
     print(list_perp_in_log_scale)
+
+    if args.run_score_umap:
+        # list min_dist values in log scale
+        start_min_dist, stop_min_dist = 0.001, 1.0
+        min_dist_range = utils.generate_value_range(
+            start_min_dist, stop_min_dist, range_type="log", num=10, dtype=float)
+        print(list(map("{:.4f}".format, min_dist_range)))
+
+        run_all_score_umap(
+            X, list_n_neighbors=list_perp_in_log_scale, list_min_dist=min_dist_range,
+            n_repeat=10, n_labels_each_class=10, seed=args.seed,
+            embedding_dir=embedding_dir, score_dir=score_dir, score_name=score_name)
+        sys.exit(0)
 
     if args.run:
         if score_name == "qij":
