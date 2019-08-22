@@ -1,0 +1,28 @@
+-*- mode: org -*-
+
+* Introduction to Bayesian Optimization
+
+The machine learning methods in general are controlled by one or many hyper-parameters.
+To use these methods efficiently, it requires a lot of skill to set hyper-parameters.
+The efficiency of a method is usually evaluated by a score,
+e.g., F1-score for classification task, V-Measure score for clustering task or
+visualization quality metric for DR task.
+The goal is to jointy tune the ensemble of hyper-parameters to
+make the model output the highest score.
+Trial-and-error method is typically used to test several common combinations of the parameters
+but it is not a systematic way to tune the hyper-parameters.
+One common approach to solve this problem is naive grid search.
+By making a list of discrete values for each hyper-parameter,
+we can try to evaluate all possible combinations.
+The parameter space growns exponentially w.r.t. the number of hyper-parameters
+and the number of values for each one.
+A better approach is random search, in which we sample randomly the combinations.
+From the list of alternative values for the hyper-parameters,
+pick randomly one value for each hyper-parameter to create one combination.
+But there are some hyper-parameters which have large effect and others which have no effect.
+If we move along the axes of the no-effect hyper-parameters, we do not learn at all.
+Thus the question is how to jointly tune many hyper-parameters at the same time
+with fewer evaluations as possible.
+Let denote the function to evaluate the performance of a machine learning model as a target function.
+
+
