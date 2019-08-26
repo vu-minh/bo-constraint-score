@@ -226,6 +226,7 @@ if __name__ == "__main__":
         'QPCR': None,
         'PBMC_5K': None,
         'PBMC_2K': None,
+        'NEURON_1K': None,
     }.get(dataset_name, 'unitScale')  # default for image dataset
     X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method)
 

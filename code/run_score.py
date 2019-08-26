@@ -124,7 +124,7 @@ def run_all_quality_metric(X, list_perps, default_min_dist=0.1,
             json.dump(all_metrics, in_file)
 
 
-def run_BIC_score(X, list_perps, score_dir="", seed=42):
+def run_BIC_score(X, list_perps, seed=42, score_dir="", embedding_dir=""):
     """Must re-run tsne for calculate BIC score exactly"""
     from MulticoreTSNE import MulticoreTSNE
 
@@ -138,7 +138,9 @@ def run_BIC_score(X, list_perps, score_dir="", seed=42):
     for perp in tqdm(list_perps, desc="perplexity"):
         tsne = MulticoreTSNE(perplexity=perp, n_iter=1500, n_jobs=-1, random_state=seed,
                              n_iter_without_progress=1500, min_grad_norm=1e-32)
-        tsne.fit_transform(X)
+        Z = tsne.fit_transform(X)
+        joblib.dump(Z, f"{embedding_dir}/{perp}.z")
+
         loss = float(tsne.kl_divergence_)
         bic = 2 * loss + math.log(N) * perp / N
         scores['bic'].append(bic)
@@ -259,7 +261,8 @@ if __name__ == "__main__":
                                    embedding_dir=embedding_dir, score_dir=score_dir,
                                    default_min_dist=default_min_dist)
         elif score_name == "bic":
-            run_BIC_score(X, list_perp_in_log_scale, score_dir, seed=args.seed)
+            run_BIC_score(X, list_perp_in_log_scale, seed=args.seed,
+                          score_dir=score_dir, embedding_dir=embedding_dir)
         else:
             raise ValueError(f"Invalid score name {score_name}, should be ['qij', 'metrics']")
 
