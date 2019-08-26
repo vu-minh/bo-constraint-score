@@ -186,6 +186,7 @@ if __name__ == "__main__":
         'PBMC5_2K':  None,
         'PBMC5_1K':  None,
         'QPCR': None,
+        'NEURON_1K': None,
     }.get(dataset_name, 'unitScale')  # default for image dataset
     X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method)
 
@@ -198,7 +199,7 @@ if __name__ == "__main__":
     if args.perp_scale == "hardcoded":
         perplexity_range = [2, 3, 4, 10, 15, 20, 30, 50, 100, 200, 350, 500]
     else:
-        min_perp, max_perp = 2, int(X.shape[0] // 3)
+        min_perp, max_perp = 2, int(X.shape[0] // 2)
         perplexity_range = utils.generate_value_range(
             min_perp, max_perp, range_type=args.perp_scale, num=args.n_perp, dtype=int)
         print(perplexity_range)
