@@ -10,7 +10,7 @@ from bayes_opt.event import Events
 import utils
 from common.dataset import dataset
 from run_viz import run_tsne, run_largevis, run_umap
-from bo_plot import plot_bo_one_param_summary
+from bo_plot import plot_bo_one_param_summary, plot_prediction_density_2D
 
 
 # transformation rules to transform the params in log scale to linear scale
@@ -22,7 +22,7 @@ transformation_rules = {
 }
 
 
-def _target_func(method_name, X, check_log, seed, embedding_dir, **params_in_log_scale):
+def _target_func(method_name, X, check_log, embedding_dir, seed=42, **params_in_log_scale):
     ''' The score function, calls viz method to obtain `Z` and calculates score on `Z`
     The `params_in_log_scale` should be:
         + log(`perplexity`) for tsne and largevis,
@@ -42,7 +42,6 @@ def _target_func(method_name, X, check_log, seed, embedding_dir, **params_in_log
             ))
 
     # get the embedding and calculate constraint score
-    seed = 42
     Z = embedding_function(X=X, seed=seed, check_log=True, embedding_dir=embedding_dir,
                            **params_in_log_scale)
     return utils.score_embedding(Z, score_name, constraints)
@@ -70,7 +69,7 @@ def bayopt_workflow(X, constraints,
 
     # define the target function which will be maximize by BayOpt
     target_func = partial(_target_func, method_name=method_name,
-                          X=X, seed=seed, check_log=True, embedding_dir=embedding_dir)
+                          X=X, check_log=True, embedding_dir=embedding_dir)
 
     # run bayopt
     optimizer = run_bo(target_func, params_space, **bayopt_params)
@@ -156,6 +155,14 @@ def plot_bo(optimizer, list_perp_in_log_scale, true_score,
                               **observation, **true_target, **prediction, **bayopt_params)
 
 
+def plot_bo_2D(optimizer, list_n_neigbors, list_min_dist, plot_dir: str=""):
+    # plot with manual contour plot
+    print(list_n_neigbors)
+    print(list_min_dist)
+    plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
+                               title="GP Prediction", plot_dir=plot_dir)
+    
+
 def test_skopt_plot(optimizer):
     from matplotlib import pyplot as plt
     from bo_utils import bayes2skopt
@@ -233,7 +240,10 @@ if __name__ == "__main__":
 
     # custom preprocessing method for each dataset
     preprocessing_method = {
-        'COIL20': None
+        'COIL20': None,
+        'QPCR': None,
+        'PBMC_5K': None,
+        'PBMC_2K': None,
     }.get(dataset_name, 'unitScale')  # default for image dataset
     X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method)
 
@@ -260,6 +270,9 @@ if __name__ == "__main__":
         # note that the true target is not in logscale, test convert by call np.log
         list_perp_in_log_scale = utils.generate_value_range(
             min_val=2, max_val=X.shape[0]//3, range_type="log", num=200, dtype=int)
+        list_min_dist_in_log_scale = utils.generate_value_range(
+            min_val=0.001, max_val=1.0, range_type="log", num=10, dtype=float)
+
         true_score = _calculate_score(method_name, list_perp_in_log_scale,
                                       embedding_dir=embedding_dir)
 
@@ -269,10 +282,12 @@ if __name__ == "__main__":
         # load optimizer object
         log_name = f"{args.utility_function}_k{args.kappa}_xi{args.xi}_n{args.n_total_runs}"
         optimizer = joblib.load(f"{log_dir}/{log_name}.z")
-        plot_bo(optimizer, list_perp_in_log_scale, true_score, plot_dir=plot_dir,
-                threshold=threshold,
-                bayopt_params={'util_func': args.utility_function,
-                               'kappa': args.kappa, 'xi': args.xi})
+        # plot_bo(optimizer, list_perp_in_log_scale, true_score, plot_dir=plot_dir,
+        #         threshold=threshold,
+        #         bayopt_params={'util_func': args.utility_function,
+        #                        'kappa': args.kappa, 'xi': args.xi})
+        plot_bo_2D(optimizer, list_perp_in_log_scale, list_min_dist_in_log_scale,
+                   plot_dir=plot_dir)
         # test_skopt_plot(optimizer)
 
     # python bo_constraint.py -d COIL20 -m umap -nr 100 -nl 5 --seed 2029

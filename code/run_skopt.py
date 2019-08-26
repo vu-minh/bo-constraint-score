@@ -7,11 +7,12 @@ from matplotlib import pyplot as plt
 from skopt.space import Real, Integer
 from skopt import gp_minimize, forest_minimize
 from skopt.utils import use_named_args
-from skopt.plots import *
+# from skopt.plots import *
 
 from utils import generate_constraints, score_embedding
 from common.dataset import dataset
 from run_viz import run_tsne, run_largevis, run_umap
+from bo_plot import plot_prediction_density_2D
 
 
 def hyperopt_workflow(X, constraints,
@@ -51,17 +52,22 @@ def hyperopt_workflow(X, constraints,
     print("Best params: ", best_param)
     print("Best score: ", -best_score)
 
-    plot_convergence(res_gp)
-    plt.savefig(f"{plot_dir}/convergence.png")
+    print(res_gp)
+    print(list(res_gp.keys()))
+    print(space)
+    # plot_prediction_density_2D(res_gp, )
 
-    plot_regret(res_gp)
-    plt.savefig(f"{plot_dir}/regret.png")
+    # plot_convergence(res_gp)
+    # plt.savefig(f"{plot_dir}/convergence.png")
 
-    plot_objective(res_gp, size=3)
-    plt.savefig(f"{plot_dir}/objective.png")
+    # plot_regret(res_gp)
+    # plt.savefig(f"{plot_dir}/regret.png")
 
-    plot_evaluations(res_gp)
-    plt.savefig(f"{plot_dir}/evaluation.png")
+    # plot_objective(res_gp, size=3)
+    # plt.savefig(f"{plot_dir}/objective.png")
+
+    # plot_evaluations(res_gp)
+    # plt.savefig(f"{plot_dir}/evaluation.png")
 
 
 if __name__ == "__main__":
@@ -127,3 +133,11 @@ if __name__ == "__main__":
     hyperopt_workflow(X, constraints, method_name, score_name,
                       n_total_runs=args.n_total_runs,
                       seed=args.seed, embedding_dir=embedding_dir)
+
+# REPRODURE
+
+# python run_skopt.py --seed 1042 -d QPCR -m umap -nr 40 -u ei -x 0.1
+# Best params:  [16.794853401731043, 0.001008290248796128]
+
+# python run_skopt.py --seed 2019 -d DIGITS -m umap -nr 35 -u ei -x 0.1
+# Best params:  [15.002642991448084, 0.0025464075839833236]

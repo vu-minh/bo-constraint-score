@@ -1,4 +1,5 @@
 import json
+from itertools import product
 
 import numpy as np
 import pandas as pd
@@ -67,8 +68,9 @@ def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold = 
     param_min = list_params[best_indices.min()]
     param_max = list_params[best_indices.max()]
     # note best param here is max(pred_mu), should take into account the uncertainty in this prediction
-    param_best = int(np.exp(list_params[np.argmax(pred_mu)]))
-    print("Debug best param: ", param_best, np.max(pred_mu))
+    # param_best = int(np.exp(list_params[np.argmax(pred_mu)]))
+    # print("Debug best param: ", param_best, np.max(pred_mu))
+
     # plot best predicted range
     ax.axhline(pivot, linestyle="--", alpha=0.4)
     _plot_best_range(ax, param_min, param_max)
@@ -239,12 +241,12 @@ def plot_density_2D(input_score_name: str="umap_scores", target_key_name: str="q
     X, Y = np.meshgrid(n_neighbors_values, min_dist_values)
     print(X.shape, Y.shape)
 
-    fig, ax = plt.subplots(1, 1, figsize=(6.5, 3))
+    fig, ax = plt.subplots(1, 1, figsize=(8, 3))
     ax.set_title(f"[{dataset_name}] {title} for UMAP embeddings")
 
     # contour for score
     ax.contour(X, Y, Z, levels=10, linewidths=0.5, colors='k')
-    cntr1 = ax.contourf(X, Y, Z, levels=10, cmap="RdBu_r")
+    cntr1 = ax.contourf(X, Y, Z, levels=10, cmap="YlGn")
     fig.colorbar(cntr1, ax=ax)
 
     # grid of sampled points
@@ -269,8 +271,88 @@ def plot_density_2D(input_score_name: str="umap_scores", target_key_name: str="q
     plt.savefig(f"{plot_dir}/2D/{target_key_name}.png")
 
 
+def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
+                               title: str="", log_dir: str="", score_dir: str="", plot_dir: str=""):
+    # plot contour/contourf guide:
+    # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
+
+    # workflow for plot the density of the prediction
+
+    # sample gird of points for two input params
+    # the grid in linear space
+    # that mean the plot must be in linear space
+    print(f"Input params: list_n_neigbors {len(list_n_neigbors)}, list_min_dist {len(list_min_dist)}")
+    X, Y = np.meshgrid(list_n_neigbors, list_min_dist)
+    print("Grid size: ", X.shape, Y.shape)
+
+    # get observation from optimizer and retrain the GP model in the optimizer
+    # note that, optimizer._gp always work on log-scale 
+    print(optimizer._gp.X_train_, optimizer._gp.y_train_)
+    X_obs = np.array([[obs['params']['min_dist'], obs['params']['n_neighbors']]
+                      for obs in optimizer.res])
+    y_obs = np.array([obs['target'] for obs in optimizer.res])
+    gp = optimizer._gp
+    gp.fit(X_obs, y_obs)
+    
+    # feed the list of pairs of 2 input into GP of optimizer model
+    # and get the predicted mean (and sigma) score for each pair
+    # since the input_grid in linear-space, it must be transformed to log-space
+    input_grid = np.log(list(product(list_min_dist, list_n_neigbors)))
+    predicted = gp.predict(input_grid)
+    Z = predicted.reshape(X.shape)
+
+    # plot contour and contourf for the sampled grid
+    fig, ax = plt.subplots(1, 1, figsize=(8, 3))
+    ax.set_title(f"{title} xxx")
+
+    # grid of sampled points in the grid
+    ax.plot(X, Y, '.w', ms=0.5)
+
+    # contour for the prediction (in linear space)
+    ax.contour(X, Y, Z, levels=10, linewidths=0.5, colors='k')
+    cntr1 = ax.contourf(X, Y, Z, levels=10, cmap="YlGn")
+    fig.colorbar(cntr1, ax=ax)
+
+    # scatter plot the selected points in optimizer
+    # encode their score values as color
+    # the observations selected by optimizer._gp are in log space
+    # they must be transformed to linear space by np.exp
+    ax.scatter(np.exp(X_obs[:, 1]), np.exp(X_obs[:, 0]),
+               c=y_obs, cmap="YlGn", edgecolors="white")
+    
+    # evaluate the correctness of the viz by evaluating the corresponding color
+    # of the sampled points (OK)
+    
+    # get the row of max value
+    best_param = optimizer.max["params"]
+    print("Print: best params: ", best_param)
+    best_n_neighbors = np.exp(best_param['n_neighbors'])
+    best_min_dist = np.exp(best_param['min_dist'])
+    best_score = optimizer.max['target']
+    print(best_n_neighbors, best_min_dist, best_score)
+
+    # custom axes
+    ax.set_xscale("log", basex=np.e)
+    ax.set_xlabel("n_neighbors in log-scale")
+    ax.set_yscale("log", basey=np.e)
+    ax.set_ylabel("min_dist in log-scale")
+    
+    # show ticks values in log scale
+    ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+    ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+    ax.set_yticks([0.001, 0.01, 0.1, 1.0]) #  + [best_min_dist] * 2)
+    # ax.set_xticks(np.append(ax.get_xticks(), [best_n_neighbors] * 2))
+
+    # plot best param
+    ax.plot(np.log(best_n_neighbors), np.log(best_min_dist),
+            marker='o', markeredgecolor="white")
+
+    plt.tight_layout()
+    plt.savefig(f"{plot_dir}/predicted_score.png")
+
+
 if __name__ == "__main__":
-    dataset_name = "DIGITS"
+    dataset_name = "QPCR"
     method_name = "umap"
     score_name = "qij"
     log_dir = f"./logs/{dataset_name}/{method_name}/{score_name}"
