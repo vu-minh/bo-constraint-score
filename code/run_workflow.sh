@@ -11,7 +11,7 @@ DEFAULT_SEED=42
 function run_viz {
     DATASET_NAME=$1
     METHOD=$2
-    
+
     # run viz, merge all viz with selected params (in log scale) to one .z file
     echo "RUN VIZ for ${DATASET_NAME} with ${METHOD}"
 
@@ -49,12 +49,13 @@ function run_score {
     DATASET_NAME=$1
     METHOD=$2
     echo "RUN SCORE for ${DATASET_NAME} with ${METHOD}"
-    
+
     # always run in debug mode for fixed number of labels per class (3, 5, 10, 15)
     python run_score.py \
 	   --seed $DEFAULT_SEED \
 	   -d $DATASET_NAME \
 	   -m $METHOD \
+	   -sc $SCORE_NAME \
 	   --debug \
 	   --use_log_scale \
 	   --plot \
@@ -66,12 +67,26 @@ function run_metric  {
     DATASET_NAME=$1
     METHOD=$2
     echo "RUN METRIC for $DATASET_NAME with $METHOD"
-    
+
     python run_score.py \
 	   --seed $DEFAULT_SEED \
 	   -d $DATASET_NAME \
 	   -m $METHOD \
 	   -sc metrics \
+	   --use_log_scale \
+	   --plot \
+	   --run
+}
+
+function run_bic {
+    DATASET_NAME=$1
+    echo "RUN METRIC for $DATASET_NAME (only support tsne)"
+
+    python run_score.py \
+	   --seed $DEFAULT_SEED \
+	   -d $DATASET_NAME \
+	   -m tsne \
+	   -sc bic \
 	   --use_log_scale \
 	   --plot \
 	   --run
@@ -85,16 +100,17 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("DIGITS" "COIL20") #  ("QPCR" "PBMC_5K")
-    declare -a LIST_METHODS=("umap")
+    declare -a LIST_DATASETS=("DIGITS" "COIL20") # ("FASHION1000" "BREAST_CANCER" "QPCR" "PBMC_2K")
+    declare -a LIST_METHODS=("tsne")
 fi
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
     for METHOD in "${LIST_METHODS[@]}"; do
 	echo        $DATASET_NAME $METHOD
-        run_viz    $DATASET_NAME $METHOD
-	    # run_score  $DATASET_NAME $METHOD	
+        # run_viz    $DATASET_NAME $METHOD
+	# run_score  $DATASET_NAME $METHOD
         # run_metric $DATASET_NAME $METHOD
+	run_bic $DATASET_NAME
     done
 done
 

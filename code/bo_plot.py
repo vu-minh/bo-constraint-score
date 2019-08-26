@@ -1,9 +1,7 @@
-import json
 from itertools import product
 
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
@@ -49,7 +47,7 @@ def _plot_observed_points(ax, x_obs, y_obs):
     ax.plot(x_obs.flatten(), y_obs, "o", markersize=7, label="Observations", color="#1B365D")
 
 
-def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold = 0.95):
+def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold=0.95):
     list_params = list_params.ravel()
     ax.plot(list_params, pred_mu, color="#0047BB", linestyle="--", label="Prediction")
     ax.fill_between(
@@ -67,7 +65,8 @@ def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold = 
     (best_indices, ) = np.where(pred_mu > pivot)
     param_min = list_params[best_indices.min()]
     param_max = list_params[best_indices.max()]
-    # note best param here is max(pred_mu), should take into account the uncertainty in this prediction
+    # note best param here is max(pred_mu), should take into account
+    # the uncertainty in this prediction
     # param_best = int(np.exp(list_params[np.argmax(pred_mu)]))
     # print("Debug best param: ", param_best, np.max(pred_mu))
 
@@ -165,7 +164,7 @@ def plot_bo_one_param_summary(optimizer,
                               util_func="ucb", kappa=5, xi=0.01, plot_dir=""):
     ''' Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real GP params are in logscale)
-    '''   
+    '''
     # note to make big font size for plots in the paper
     plt.rcParams.update({'font.size': 22})
     _, ax = plt.subplots(1, 1, figsize=(11, 5))
@@ -207,7 +206,7 @@ def plot_bo_one_param_summary(optimizer,
     pivot = threshold * max(pred_mu)
     ax.text(x=min(list_params), y=pivot*1.01, ha="left", va="bottom", fontsize=18,
             s=u"\u2199" + f"{threshold} max(score)", color="#0047BB")
-    
+
     # set title and save figure
     plt.legend(loc="upper center", ncol=4, prop={'size': 14})
     plt.savefig(f"{plot_dir}/bo_summary.png", bbox_inches="tight")
@@ -232,12 +231,12 @@ def plot_density_2D(input_score_name: str="umap_scores", target_key_name: str="q
 
     # get the row of max value
     best_param = df.loc[df[target_key_name].idxmax()]
-    print("Print: best params: ",best_param)
+    print("Print: best params: ", best_param)
     best_n_neighbors = best_param['n_neighbors']
     best_min_dist = best_param['min_dist']
     best_score = best_param[target_key_name]
     print(best_n_neighbors, best_min_dist, best_score)
-    
+
     X, Y = np.meshgrid(n_neighbors_values, min_dist_values)
     print(X.shape, Y.shape)
 
@@ -257,7 +256,7 @@ def plot_density_2D(input_score_name: str="umap_scores", target_key_name: str="q
     ax.set_xlabel("n_neighbors in log-scale")
     ax.set_yscale("log", basey=np.e)
     ax.set_ylabel("min_dist in log-scale")
-    
+
     # show ticks values in log scale
     ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
     ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
@@ -269,10 +268,10 @@ def plot_density_2D(input_score_name: str="umap_scores", target_key_name: str="q
 
     plt.tight_layout()
     plt.savefig(f"{plot_dir}/2D/{target_key_name}.png")
-
-
-def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
-                               title: str="", log_dir: str="", score_dir: str="", plot_dir: str=""):
+    
+    
+def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist, title: str="",
+                               log_dir: str="", score_dir: str="", plot_dir: str=""):
     # plot contour/contourf guide:
     # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
 
@@ -281,19 +280,19 @@ def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
     # sample gird of points for two input params
     # the grid in linear space
     # that mean the plot must be in linear space
-    print(f"Input params: list_n_neigbors {len(list_n_neigbors)}, list_min_dist {len(list_min_dist)}")
+    print(f"Input params: list_n_neigbors {len(list_n_neigbors)},"
+          f" list_min_dist {len(list_min_dist)}")
     X, Y = np.meshgrid(list_n_neigbors, list_min_dist)
     print("Grid size: ", X.shape, Y.shape)
 
     # get observation from optimizer and retrain the GP model in the optimizer
-    # note that, optimizer._gp always work on log-scale 
-    print(optimizer._gp.X_train_, optimizer._gp.y_train_)
+    # note that, optimizer._gp always work on log-scale
     X_obs = np.array([[obs['params']['min_dist'], obs['params']['n_neighbors']]
                       for obs in optimizer.res])
     y_obs = np.array([obs['target'] for obs in optimizer.res])
     gp = optimizer._gp
     gp.fit(X_obs, y_obs)
-    
+
     # feed the list of pairs of 2 input into GP of optimizer model
     # and get the predicted mean (and sigma) score for each pair
     # since the input_grid in linear-space, it must be transformed to log-space
@@ -302,8 +301,10 @@ def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
     Z = predicted.reshape(X.shape)
 
     # plot contour and contourf for the sampled grid
-    fig, ax = plt.subplots(1, 1, figsize=(8, 3))
-    ax.set_title(f"{title} xxx")
+    fig = plt.figure(figsize=(6+3, 3+1.5))
+    gs = gridspec.GridSpec(2, 2, height_ratios=[1, 2], width_ratios=[3, 1],
+                           wspace=0.22, hspace=0.2)
+    ax = plt.subplot(gs[1, 0])
 
     # grid of sampled points in the grid
     ax.plot(X, Y, '.w', ms=0.5)
@@ -311,7 +312,6 @@ def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
     # contour for the prediction (in linear space)
     ax.contour(X, Y, Z, levels=10, linewidths=0.5, colors='k')
     cntr1 = ax.contourf(X, Y, Z, levels=10, cmap="YlGn")
-    fig.colorbar(cntr1, ax=ax)
 
     # scatter plot the selected points in optimizer
     # encode their score values as color
@@ -319,10 +319,10 @@ def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
     # they must be transformed to linear space by np.exp
     ax.scatter(np.exp(X_obs[:, 1]), np.exp(X_obs[:, 0]),
                c=y_obs, cmap="YlGn", edgecolors="white")
-    
+
     # evaluate the correctness of the viz by evaluating the corresponding color
     # of the sampled points (OK)
-    
+
     # get the row of max value
     best_param = optimizer.max["params"]
     print("Print: best params: ", best_param)
@@ -331,28 +331,55 @@ def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
     best_score = optimizer.max['target']
     print(best_n_neighbors, best_min_dist, best_score)
 
-    # custom axes
-    ax.set_xscale("log", basex=np.e)
-    ax.set_xlabel("n_neighbors in log-scale")
-    ax.set_yscale("log", basey=np.e)
-    ax.set_ylabel("min_dist in log-scale")
-    
-    # show ticks values in log scale
-    ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
-    ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
-    ax.set_yticks([0.001, 0.01, 0.1, 1.0]) #  + [best_min_dist] * 2)
-    # ax.set_xticks(np.append(ax.get_xticks(), [best_n_neighbors] * 2))
-
     # plot best param
-    ax.plot(np.log(best_n_neighbors), np.log(best_min_dist),
-            marker='o', markeredgecolor="white")
+    ax.plot(best_n_neighbors, best_min_dist, marker='s', color="orange", markersize=8)
 
-    plt.tight_layout()
-    plt.savefig(f"{plot_dir}/predicted_score.png")
+    # custom axes: show ticks values in log scale, add best param indicator
+    ax.set_xlabel("n_neighbors in log-scale")
+    ax.set_xscale("log", basex=np.e)
+    ax.set_xticks(np.append(ax.get_xticks(), [best_n_neighbors] * 2))
+    ax.set_xlim(list_n_neigbors.min(), list_n_neigbors.max())
+    ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+
+    ax.set_ylabel("min_dist in log-scale")
+    ax.set_yscale("log", basey=np.e)
+    ax.set_yticks([0.001, 0.01, 0.1, 1.0] + [best_min_dist] * 2)
+    ax.set_ylim(list_min_dist.min(), list_min_dist.max())
+    ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
+
+    # show xaxis on top and yaxis on the right
+    ax.xaxis.tick_top()   
+    ax.yaxis.tick_right()
+
+    # partial dependence: plot score by n_neighbors
+    ax0 = plt.subplot(gs[0, 0], sharex=ax)
+    ax0.set_ylabel("Score by n_neighbors")
+    ax0.yaxis.set_label_position("right")
+    plt_score_by_n_neighbors, = ax0.plot(list_n_neigbors, Z.mean(axis=0), 'o-g', ms=2,
+                                         label="Score by n_neighbors")
+    plt.setp(ax0.get_xticklabels(), visible=False)
+
+    # partial dependence: plot score by min_dist
+    ax1 = plt.subplot(gs[1, 1], sharey=ax)
+    ax1.set_xlabel("Score by min_dist")
+    ax1.xaxis.set_label_position("top")
+    plt_score_by_min_dist, = ax1.plot(Z.mean(axis=1), list_min_dist, 's--b', ms=2,
+                                      label="Score by min_dist")
+    plt.setp(ax1.get_yticklabels(), visible=False)
+
+    # for plotting colorbar and legend
+    ax2 = plt.subplot(gs[0, 1])
+    cbar = fig.colorbar(cntr1, ax=ax2, orientation="horizontal")
+    cbar.set_label("Score value")
+    ax2.legend((plt_score_by_min_dist, plt_score_by_n_neighbors), loc="upper center", ncol=1)
+    ax2.axis("off")
+
+    # plt.tight_layout()
+    plt.savefig(f"{plot_dir}/predicted_score.png", bbox_inches='tight')
 
 
 if __name__ == "__main__":
-    dataset_name = "QPCR"
+    dataset_name = "PBMC_5K"
     method_name = "umap"
     score_name = "qij"
     log_dir = f"./logs/{dataset_name}/{method_name}/{score_name}"

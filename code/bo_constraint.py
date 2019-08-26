@@ -78,7 +78,7 @@ def bayopt_workflow(X, constraints,
     result = optimizer.max
     for param_name, param_value in result['params'].items():
         cast_type, transformation_func = transformation_rules[param_name]
-        result['params'][param_name] = cast_type(transformation_func(param_value))    
+        result['params'][param_name] = cast_type(transformation_func(param_value))
     return result, optimizer
 
 
@@ -139,7 +139,7 @@ def plot_bo(optimizer, list_perp_in_log_scale, true_score,
     # note that the observations are in logscale
     print("List params for plotting (int real value: ")
     print(min(list_perp_in_log_scale), max(list_perp_in_log_scale))
-    
+
     x_obs = np.array([[res["params"]["perplexity"]] for res in optimizer.res])
     y_obs = np.array([res["target"] for res in optimizer.res])
     observation = {'x_obs': x_obs, 'y_obs': y_obs}
@@ -147,7 +147,7 @@ def plot_bo(optimizer, list_perp_in_log_scale, true_score,
     # convert `list_perp_in_log_scale` into exponential value by passing it to np.log
     list_params = np.log(list_perp_in_log_scale).reshape(-1, 1)
     print("List param in log scale: ", min(list_params), max(list_params))
-    
+
     true_target = {'list_params': list_params, 'true_score': true_score}
     prediction = _posterior(optimizer, param_range=list_params, **observation)
 
@@ -155,24 +155,6 @@ def plot_bo(optimizer, list_perp_in_log_scale, true_score,
                               **observation, **true_target, **prediction, **bayopt_params)
 
 
-def plot_bo_2D(optimizer, list_n_neigbors, list_min_dist, plot_dir: str=""):
-    # plot with manual contour plot
-    print(list_n_neigbors)
-    print(list_min_dist)
-    plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
-                               title="GP Prediction", plot_dir=plot_dir)
-    
-
-def test_skopt_plot(optimizer):
-    from matplotlib import pyplot as plt
-    from bo_utils import bayes2skopt
-    from skopt.plots import plot_convergence, plot_objective
-    
-    optimizer = bayes2skopt(optimizer)
-    plot_objective(optimizer)
-    plt.show()
-
-    
 if __name__ == "__main__":
     import argparse
     import mlflow
@@ -286,8 +268,10 @@ if __name__ == "__main__":
         #         threshold=threshold,
         #         bayopt_params={'util_func': args.utility_function,
         #                        'kappa': args.kappa, 'xi': args.xi})
-        plot_bo_2D(optimizer, list_perp_in_log_scale, list_min_dist_in_log_scale,
-                   plot_dir=plot_dir)
+        plot_prediction_density_2D(optimizer,
+                                   list_n_neigbors=list_perp_in_log_scale,
+                                   list_min_dist=list_min_dist_in_log_scale,
+                                   title="GP Prediction", plot_dir=plot_dir)
         # test_skopt_plot(optimizer)
 
     # python bo_constraint.py -d COIL20 -m umap -nr 100 -nl 5 --seed 2029
