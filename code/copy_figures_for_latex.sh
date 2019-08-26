@@ -19,3 +19,7 @@ cp plots/DIGITS/umap/2D/auc_rnx.png ../tex/figures/DIGITS_umap_auc_rnx.png
 cp plots/COIL20/umap/2D/qij_score.png ../tex/figures/COIL20_umap_qij_score.png
 cp plots/COIL20/umap/2D/auc_rnx.png ../tex/figures/COIL20_umap_auc_rnx.png
 
+
+# (3) figures contour predicted score from BO
+cp plots/DIGITS/umap/qij/predicted_score.png ../tex/figures/DIGITS_umap_predicted_score.png
+cp plots/COIL20/umap/qij/predicted_score.png ../tex/figures/COIL20_umap_predicted_score.png

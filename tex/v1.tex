@@ -342,35 +342,50 @@ To present and analyze the results, we can present following points (but we stil
 
 \begin{figure*}
      \centering
-     \begin{subfigure}[b]{0.48\textwidth}
+     \begin{subfigure}[b]{0.45\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{DIGITS_umap_auc_rnx}
+         \caption{UMAP with DIGITS John's score}
+         \label{fig:s3}
+     \end{subfigure}
+     \vfill
+     \begin{subfigure}[b]{0.45\textwidth}
          \centering
          \includegraphics[width=\textwidth]{DIGITS_umap_qij_score}
          \caption{UMAP with DIGITS constraint score}
          \label{fig:s4}
      \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.48\textwidth}
+     \vfill
+     \begin{subfigure}[b]{0.45\textwidth}
          \centering
-         \includegraphics[width=\textwidth]{DIGITS_umap_auc_rnx}
-         \caption{t-SNE with DIGITS John's score}
+         \includegraphics[width=\textwidth]{DIGITS_umap_predicted_score}
+         \caption{BO predicted score DIGITS}
          \label{fig:s3}
      \end{subfigure}
 
-     \vfill
+     \hfill
 
-    \begin{subfigure}[b]{0.48\textwidth}
+     \begin{subfigure}[b]{0.45\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{COIL20_umap_auc_rnx}
+         \caption{UMAP with COIL20 John's score}
+         \label{fig:s3}
+     \end{subfigure}
+     \vfill
+     \begin{subfigure}[b]{0.45\textwidth}
          \centering
          \includegraphics[width=\textwidth]{COIL20_umap_qij_score}
          \caption{UMAP with COIL20 constraint score}
          \label{fig:s4}
      \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.48\textwidth}
+     \vfill
+     \begin{subfigure}[b]{0.45\textwidth}
          \centering
-         \includegraphics[width=\textwidth]{COIL20_umap_auc_rnx}
-         \caption{t-SNE with COIL20 John's score}
-         \label{fig:s3}
+         \includegraphics[width=\textwidth]{COIL20_umap_predicted_score}
+         \caption{BO predicted score COIL20}
+         \label{fig:s4}
      \end{subfigure}
+
      \caption{BayOpt with UMAP(nneighbors, mindist)}
      \label{fig:umap2}
 \end{figure*}

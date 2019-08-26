@@ -268,9 +268,10 @@ def plot_density_2D(input_score_name: str="umap_scores", target_key_name: str="q
 
     plt.tight_layout()
     plt.savefig(f"{plot_dir}/2D/{target_key_name}.png")
-    
-    
-def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist, title: str="",
+
+
+def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist,
+                               title: str="", threshold=0.96,
                                log_dir: str="", score_dir: str="", plot_dir: str=""):
     # plot contour/contourf guide:
     # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
@@ -301,9 +302,9 @@ def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist, title:
     Z = predicted.reshape(X.shape)
 
     # plot contour and contourf for the sampled grid
-    fig = plt.figure(figsize=(6+3, 3+1.5))
+    fig = plt.figure(figsize=(6+3, 2.5+1.5))
     gs = gridspec.GridSpec(2, 2, height_ratios=[1, 2], width_ratios=[3, 1],
-                           wspace=0.22, hspace=0.2)
+                           wspace=0.22, hspace=0.22)
     ax = plt.subplot(gs[1, 0])
 
     # grid of sampled points in the grid
@@ -328,8 +329,6 @@ def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist, title:
     print("Print: best params: ", best_param)
     best_n_neighbors = np.exp(best_param['n_neighbors'])
     best_min_dist = np.exp(best_param['min_dist'])
-    best_score = optimizer.max['target']
-    print(best_n_neighbors, best_min_dist, best_score)
 
     # plot best param
     ax.plot(best_n_neighbors, best_min_dist, marker='s', color="orange", markersize=8)
@@ -348,33 +347,50 @@ def plot_prediction_density_2D(optimizer, list_n_neigbors, list_min_dist, title:
     ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
 
     # show xaxis on top and yaxis on the right
-    ax.xaxis.tick_top()   
+    ax.xaxis.tick_top()
     ax.yaxis.tick_right()
 
     # partial dependence: plot score by n_neighbors
     ax0 = plt.subplot(gs[0, 0], sharex=ax)
-    ax0.set_ylabel("Score by n_neighbors")
-    ax0.yaxis.set_label_position("right")
-    plt_score_by_n_neighbors, = ax0.plot(list_n_neigbors, Z.mean(axis=0), 'o-g', ms=2,
-                                         label="Score by n_neighbors")
+    ax0.set_title("Score by n_neighbors")
+    score_by_n_neighbors = Z.mean(axis=0)
+    plt_score_by_n_neighbors, = ax0.plot(list_n_neigbors, score_by_n_neighbors)
     plt.setp(ax0.get_xticklabels(), visible=False)
+
+    # determine best param range and best param value
+    pivot = threshold * max(score_by_n_neighbors)
+    (best_indices, ) = np.where(score_by_n_neighbors > pivot)
+    param_min0 = list_n_neigbors[best_indices.min()]
+    param_max0 = list_n_neigbors[best_indices.max()]
+    ax0.axvspan(xmin=param_min0, xmax=param_max0, alpha=0.1, ls="--", lw=2, edgecolor="blue")
+    ax0.axvline(best_n_neighbors, ls="--", c="orange")
 
     # partial dependence: plot score by min_dist
     ax1 = plt.subplot(gs[1, 1], sharey=ax)
-    ax1.set_xlabel("Score by min_dist")
-    ax1.xaxis.set_label_position("top")
-    plt_score_by_min_dist, = ax1.plot(Z.mean(axis=1), list_min_dist, 's--b', ms=2,
-                                      label="Score by min_dist")
+    ax1.set_title("Score by min_dist")
+    score_by_min_dist = Z.mean(axis=1)
+    plt_score_by_min_dist, = ax1.plot(score_by_min_dist, list_min_dist)
     plt.setp(ax1.get_yticklabels(), visible=False)
 
-    # for plotting colorbar and legend
-    ax2 = plt.subplot(gs[0, 1])
-    cbar = fig.colorbar(cntr1, ax=ax2, orientation="horizontal")
-    cbar.set_label("Score value")
-    ax2.legend((plt_score_by_min_dist, plt_score_by_n_neighbors), loc="upper center", ncol=1)
-    ax2.axis("off")
+    # determine best param range and best param value
+    pivot = threshold * max(score_by_min_dist)
+    (best_indices, ) = np.where(score_by_min_dist > pivot)
+    param_min1 = list_min_dist[best_indices.min()]
+    param_max1 = list_min_dist[best_indices.max()]
+    ax1.axhspan(ymin=param_min1, ymax=param_max1, alpha=0.1, ls="--", lw=2, edgecolor="blue")
+    ax1.axhline(best_min_dist, ls="--", c="orange")
 
-    # plt.tight_layout()
+    # for plotting colorbar and legend
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+    ax2 = plt.subplot(gs[0, 1])
+    ax2.axis("off")
+    cax2 = inset_axes(ax2, width="100%", height="20%", loc="upper center")
+    cbar = fig.colorbar(cntr1, cax=cax2, orientation="horizontal")
+    cbar.ax.set_title("Score value")
+
+    # ax2.legend((plt_score_by_min_dist, plt_score_by_n_neighbors),
+    #           ("Score by min_dis", "Score by n_neighbors"), loc="lower center")
+
     plt.savefig(f"{plot_dir}/predicted_score.png", bbox_inches='tight')
 
 
