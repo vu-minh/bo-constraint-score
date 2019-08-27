@@ -55,11 +55,25 @@ function run_score {
 	   --seed $DEFAULT_SEED \
 	   -d $DATASET_NAME \
 	   -m $METHOD \
-	   -sc $SCORE_NAME \
+	   -sc qij \
 	   --debug \
 	   --use_log_scale \
 	   --plot \
 	   --run -nr 10 # comment out this param to make the plot
+}
+
+
+function run_score_umap_2D {
+    DATASET_NAME=$1
+    echo "RUN SCORE for ${DATASET_NAME} with UMAP (2 params)"
+
+    # always run in debug mode for fixed number of labels per class (3, 5, 10, 15)
+    python run_score.py \
+       --seed $DEFAULT_SEED \
+       -d $DATASET_NAME \
+       -m umap \
+       -sc qij \
+       --run_score_umap
 }
 
 
@@ -100,18 +114,23 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("NEURON_1K") # ("FASHION1000" "BREAST_CANCER" "QPCR" "PBMC_2K")
+    declare -a LIST_DATASETS=("HEART_1K") # ("FASHION1000" "BREAST_CANCER" "QPCR" "PBMC_2K")
     declare -a LIST_METHODS=("tsne" "umap")
 fi
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
     for METHOD in "${LIST_METHODS[@]}"; do
-	echo $DATASET_NAME $METHOD
-        run_bic $DATASET_NAME # run BIC first to generate tsne embeddings
+	    echo $DATASET_NAME $METHOD
+        if [ $METHOD == "tsne" ]; then
+            run_bic $DATASET_NAME # run BIC first to generate tsne embeddings
+        fi
         run_viz    $DATASET_NAME $METHOD
 	    run_score  $DATASET_NAME $METHOD
         run_metric $DATASET_NAME $METHOD
-	   
+
+        if [ $METHOD == "umap" ]; then
+	       run_score_umap_2D $DATASET_NAME
+        fi
     done
 done
 

@@ -12,7 +12,7 @@ from sklearn.preprocessing import MinMaxScaler, Normalizer, StandardScaler
 MACHINE_EPSILON = np.finfo(np.double).eps
 
 
-def calculate_Q(Z, degrees_of_freedom: float=1.0):
+def calculate_Q(Z, degrees_of_freedom: float = 1.0):
     """Calculate matrix Q for the embedding Z as in t-SNE
     q_ij: probability that a point i being neighbor of a point j
 
@@ -39,7 +39,7 @@ def calculate_Q(Z, degrees_of_freedom: float=1.0):
     The general t-distribution with ν degrees of freedom:
         $$ pdf(x) =  \frac{1}{(1 + \frac{x^2}{\nu})^{\frac{(\nu+1)}{2}}} $$
     """
-    power = - (degrees_of_freedom + 1.0) / 2.0
+    power = -(degrees_of_freedom + 1.0) / 2.0
     dist = pdist(Z, "sqeuclidean")
     dist /= degrees_of_freedom
     dist += 1.0
@@ -49,7 +49,7 @@ def calculate_Q(Z, degrees_of_freedom: float=1.0):
     return squareform(Q)
 
 
-def _qij_based_scores(Q, links, normalize_Q: bool=False, link_type: str=""):
+def _qij_based_scores(Q, links, normalize_Q: bool = False, link_type: str = ""):
     """Vectorized code for fast calculate the score.
     $$
     S_{\mathcal{M}} = \frac{1}{|\mathcal{M}|}
@@ -69,13 +69,13 @@ def _qij_based_scores(Q, links, normalize_Q: bool=False, link_type: str=""):
         # just re-normalize them into [0, 1] range.
         Q = squareform(Q)  # square matrix Q to array
         Q = MinMaxScaler(feature_range=(0.01, 0.99)).fit_transform(Q.reshape(-1, 1))
-        Q = squareform(Q.reshape(-1,))  # array back to square matrix
+        Q = squareform(Q.reshape(-1))  # array back to square matrix
 
     factor = {"sim": 1.0, "dis": -1.0}[link_type]
     return factor * np.log(Q[links[:, 0], links[:, 1]])
 
 
-def qij_based_scores(Q, sim, dis, normalized: bool=False):
+def qij_based_scores(Q, sim, dis, normalized: bool = False):
     """Calculate the constraint score based on q_ij.
 
     Args:
@@ -120,4 +120,4 @@ def contrastive_score(Z, contrastive_constraints):
         numerator = math.exp(pos)
         denominator = math.exp(pos) + math.exp(neg)
         score += math.log(numerator / (denominator + eps))
-    return - score / len(contrastive_constraints)
+    return -score / len(contrastive_constraints)
