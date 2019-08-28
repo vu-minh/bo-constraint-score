@@ -8,6 +8,7 @@ import joblib
 import collections
 from itertools import product
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
@@ -239,7 +240,7 @@ if __name__ == "__main__":
     ap.add_argument(
         "-nl",
         "--n_labels_each_class",
-        default=5,
+        default=10,
         type=int,
         help="number of labelled points selected for each class",
     )
@@ -262,17 +263,37 @@ if __name__ == "__main__":
     ap.add_argument("--debug", action="store_true", help="run score for debugging")
     ap.add_argument("--run", action="store_true", help="run score function")
     ap.add_argument("--plot", action="store_true", help="plot score function")
+    ap.add_argument(
+        "--use_other_label",
+        default=None,
+        help=(
+            "Use other target labels,"
+            " should give the target name to load the corresponding labels"
+        ),
+    )
     args = ap.parse_args()
 
     dataset.set_data_home("./data")
     dataset_name = args.dataset_name
     method_name = args.method_name
     score_name = args.score_name
-    X_origin, X, labels = dataset.load_dataset(dataset_name)
+    X_origin, X, default_labels = dataset.load_dataset(dataset_name)
+
+    target_label_name = args.use_other_label
+    if target_label_name is not None:
+        labels, des = dataset.load_additional_labels(dataset_name, target_label_name)
+        if labels is None:
+            raise ValueError("Fail to load additional labels: " + des)
+        aux_folder = "/other_target"
+        print("Using additional labels: ", target_label_name)
+        print(np.unique(labels, return_counts=True))
+    else:
+        labels = default_labels
+        aux_folder = ""
 
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
-    plot_dir = f"./plots/{dataset_name}/{method_name}"
-    score_dir = f"./scores/{dataset_name}/{method_name}/{score_name}"
+    plot_dir = f"./plots/{dataset_name}/{method_name}{aux_folder}"
+    score_dir = f"./scores/{dataset_name}/{method_name}/{score_name}{aux_folder}"
 
     for dir_path in [embedding_dir, plot_dir, score_dir]:
         if not os.path.exists(dir_path):
@@ -305,8 +326,8 @@ if __name__ == "__main__":
             X,
             list_n_neighbors=list_perp_in_log_scale,
             list_min_dist=min_dist_range,
-            n_repeat=10,
-            n_labels_each_class=10,
+            n_repeat=args.n_repeat,
+            n_labels_each_class=args.n_labels_each_class,
             seed=args.seed,
             embedding_dir=embedding_dir,
             score_dir=score_dir,
