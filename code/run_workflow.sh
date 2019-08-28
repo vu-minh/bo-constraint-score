@@ -114,7 +114,7 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("HEART_1K") # ("FASHION1000" "BREAST_CANCER" "QPCR" "PBMC_2K")
+    declare -a LIST_DATASETS=("FASHION_MOBILENET") # ("FASHION1000" "BREAST_CANCER" "QPCR" "PBMC_2K")
     declare -a LIST_METHODS=("tsne" "umap")
 fi
 
@@ -124,8 +124,8 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
         if [ $METHOD == "tsne" ]; then
             run_bic $DATASET_NAME # run BIC first to generate tsne embeddings
         fi
-        run_viz    $DATASET_NAME $METHOD
-	    run_score  $DATASET_NAME $METHOD
+        run_viz $DATASET_NAME $METHOD
+	    run_score $DATASET_NAME $METHOD
         run_metric $DATASET_NAME $METHOD
 
         if [ $METHOD == "umap" ]; then

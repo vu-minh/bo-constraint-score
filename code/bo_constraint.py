@@ -285,17 +285,7 @@ if __name__ == "__main__":
         "seed": args.seed,
     }
 
-    # custom preprocessing method for each dataset
-    preprocessing_method = {
-        "COIL20": None,
-        "QPCR": None,
-        "PBMC_5K": None,
-        "PBMC_2K": None,
-        "NEURON_1K": None,
-    }.get(
-        dataset_name, "unitScale"
-    )  # default unitScale (divided by 255) for image dataset
-    X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method)
+    X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method=auto)
 
     # generate constraints according to the choosen strategy
     constraints = utils.generate_constraints(
