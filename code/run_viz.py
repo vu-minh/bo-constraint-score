@@ -260,5 +260,42 @@ if __name__ == "__main__":
             method_name, perplexity_range=perplexity_range, min_dist_range=min_dist_range
         )
 
-    if args.plot:
-        test_load_from_all_embeddings(method_name, param1="30", param2="0.1000")
+    if args.debug and args.plot:
+        # test_load_from_all_embeddings(method_name, param1="30", param2="0.1000")
+        from matplotlib import pyplot as plt
+        from itertools import product
+
+        def plot_2_labels(Z, labels, other_labels, out_name):
+            _, [ax0, ax1] = plt.subplots(1, 2, figsize=(12, 6))
+            ax0.scatter(Z[:, 0], Z[:, 1], c=labels, cmap="Spectral", alpha=0.5)
+            ax1.scatter(Z[:, 0], Z[:, 1], c=other_labels, cmap="Spectral", alpha=0.5)
+            plt.savefig(out_name)
+            plt.close()
+
+        other_labels, des = dataset.load_additional_labels(
+            dataset_name, label_name="class_matcat"
+        )
+        print(des)
+
+        list_min_dist = [0.001, 0.01, 0.1, 0.5, 1.0]
+        list_n_neighbors = [5, 10, 15, 20, 30, 50, 100]
+
+        for min_dist, n_neighbors in [
+            (0.01, 45),
+            (0.17, 18),
+        ]:  # product(list_min_dist, list_n_neighbors):
+            Z = run_umap(
+                X,
+                n_neighbors=n_neighbors,
+                min_dist=min_dist,
+                seed=42,
+                embedding_dir=embedding_dir,
+                check_log=True,
+            )
+            out_name = f"{plot_dir}/test_umap{n_neighbors}_{min_dist:.4f}.png"
+            plot_2_labels(Z, labels, other_labels, out_name)
+
+        # for perp in [120]:  # list_n_neighbors:
+        #     Z = run_tsne(X, perp, seed=42, check_log=False, embedding_dir=embedding_dir)
+        #     out_name = f"{plot_dir}/test_tsne{perp}.png"
+        #     plot_2_labels(Z, labels, other_labels, out_name)
