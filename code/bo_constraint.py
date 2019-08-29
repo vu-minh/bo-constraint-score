@@ -249,6 +249,14 @@ if __name__ == "__main__":
     )
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--plot", action="store_true")
+    ap.add_argument(
+        "--use_other_label",
+        default=None,
+        help=(
+            "Use other target labels,"
+            " should give the target name to load the corresponding labels"
+        ),
+    )
     args = ap.parse_args()
 
     # setup mlflow to trace the experiment
@@ -266,7 +274,22 @@ if __name__ == "__main__":
     dataset.set_data_home("./data")
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
 
-    dir_pattern = f"{dataset_name}/{method_name}/{score_name}"
+    _, X, default_labels = dataset.load_dataset(dataset_name, preprocessing_method="auto")
+
+    target_label_name = args.use_other_label
+    if target_label_name is not None:
+        labels, des = dataset.load_additional_labels(dataset_name, target_label_name)
+        if labels is None:
+            raise ValueError("Fail to load additional labels: " + des)
+        aux_folder = "/other_target"
+        print("Using additional labels: ", target_label_name)
+        print(np.unique(labels, return_counts=True))
+    else:
+        labels = default_labels
+        aux_folder = ""
+
+    # config dir for plot, log and score files
+    dir_pattern = f"{dataset_name}/{method_name}/{score_name}{aux_folder}"
     plot_dir, log_dir, score_dir = [
         f"./{dir_name}/{dir_pattern}" for dir_name in ["plots", "logs", "scores"]
     ]
@@ -284,8 +307,6 @@ if __name__ == "__main__":
         "n_random_inits": 5,
         "seed": args.seed,
     }
-
-    X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method=auto)
 
     # generate constraints according to the choosen strategy
     constraints = utils.generate_constraints(
