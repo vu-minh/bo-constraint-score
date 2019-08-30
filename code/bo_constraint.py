@@ -313,7 +313,7 @@ if __name__ == "__main__":
         args.strategy,
         score_name,
         labels,
-        seed=1024,  # test stability by fixing this seed and change seed for BayOpt
+        seed=42,  # test stability by fixing this seed and change seed for BayOpt
         n_constraints=args.n_constraints,
         n_labels_each_class=args.n_labels_each_class,
     )
@@ -390,3 +390,8 @@ if __name__ == "__main__":
 # can prove stability of BayOpt by fixing seed for constraint generation change change seed for BayOpt
 # python bo_constraint.py -d DIGITS -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 42
 # python bo_constraint.py -d DIGITS -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 2018
+
+
+# DEMO Flexible score:
+# python bo_constraint.py --seed 42 -d NEURON_1K -m tsne -u ei -x 0.1 --plot --run -nr 15 --use_other_label umi
+# get perp=257 vs perp=68 (normal case)
