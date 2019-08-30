@@ -295,7 +295,7 @@ if __name__ == "__main__":
             out_name = f"{plot_dir}/test_umap{n_neighbors}_{min_dist:.4f}.png"
             plot_2_labels(Z, labels, other_labels, out_name)
 
-        # for perp in [120]:  # list_n_neighbors:
-        #     Z = run_tsne(X, perp, seed=42, check_log=False, embedding_dir=embedding_dir)
-        #     out_name = f"{plot_dir}/test_tsne{perp}.png"
-        #     plot_2_labels(Z, labels, other_labels, out_name)
+        for perp in [10, 15, 30, 60, 150]:  # list_n_neighbors:
+            Z = run_tsne(X, perp, seed=42, check_log=True, embedding_dir=embedding_dir)
+            out_name = f"{plot_dir}/test_tsne{perp}.png"
+            plot_2_labels(Z, labels, None, out_name)
