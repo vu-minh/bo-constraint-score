@@ -14,6 +14,7 @@ from tqdm import tqdm
 
 import utils
 from plot_score import plot_scores, plot_quality_metrics, plot_bic_scores
+from plot_score import plot_compare_qij_rnx_bic
 from common.dataset import dataset
 
 
@@ -263,6 +264,8 @@ if __name__ == "__main__":
     ap.add_argument("--debug", action="store_true", help="run score for debugging")
     ap.add_argument("--run", action="store_true", help="run score function")
     ap.add_argument("--plot", action="store_true", help="plot score function")
+    ap.add_argument("--plot_compare", action="store_true", help="plot comparing scores")
+
     ap.add_argument(
         "--use_other_label",
         default=None,
@@ -307,33 +310,12 @@ if __name__ == "__main__":
         "largevis": "perplexity",
         "umap": "n_neighbors",
     }[method_name]
-    list_n_labels_values = [3, 5, 10, 15] if args.debug else range(2, 16)
+    list_n_labels_values = [3, 5, 10, 15, 20] if args.debug else range(2, 16)
     list_perp_in_log_scale = utils.generate_value_range(
         min_val=2, max_val=X.shape[0] // 3, range_type="log", num=200, dtype=int
     ).tolist()
     # hardcoded num of params to 200 for being consistant with default n_perp in run_viz
     print(list_perp_in_log_scale)
-
-    if args.run_score_umap:
-        # list min_dist values in log scale
-        start_min_dist, stop_min_dist = 0.001, 1.0
-        min_dist_range = utils.generate_value_range(
-            start_min_dist, stop_min_dist, range_type="log", num=10, dtype=float
-        )
-        print(list(map("{:.4f}".format, min_dist_range)))
-
-        run_all_score_umap(
-            X,
-            list_n_neighbors=list_perp_in_log_scale,
-            list_min_dist=min_dist_range,
-            n_repeat=args.n_repeat,
-            n_labels_each_class=args.n_labels_each_class,
-            seed=args.seed,
-            embedding_dir=embedding_dir,
-            score_dir=score_dir,
-            score_name=score_name,
-        )
-        sys.exit(0)
 
     if args.run:
         if score_name == "qij":
@@ -405,4 +387,52 @@ if __name__ == "__main__":
                 f"Invalid score name {score_name}," f" should be ['qij', 'metrics', 'bic']"
             )
 
+    if args.run_score_umap:
+        # list min_dist values in log scale
+        start_min_dist, stop_min_dist = 0.001, 1.0
+        min_dist_range = utils.generate_value_range(
+            start_min_dist, stop_min_dist, range_type="log", num=10, dtype=float
+        )
+        print(list(map("{:.4f}".format, min_dist_range)))
+
+        run_all_score_umap(
+            X,
+            list_n_neighbors=list_perp_in_log_scale,
+            list_min_dist=min_dist_range,
+            n_repeat=args.n_repeat,
+            n_labels_each_class=args.n_labels_each_class,
+            seed=args.seed,
+            embedding_dir=embedding_dir,
+            score_dir=score_dir,
+            score_name=score_name,
+        )
+        sys.exit(0)
+
+    if args.plot_compare:
+        # note to make big font size for plots
+        plt.rcParams.update({"font.size": 24})
+        list_score_names = ["Constraint score", "$AUC_{log}RNX$"]
+        if method_name == "tsne":
+            list_score_names += ["BIC"]
+
+        plot_compare_qij_rnx_bic(
+            dataset_name,
+            n_labels_each_class=10,
+            threshold=0.96,
+            param_name=default_param_name,
+            score_dir=score_dir,
+            plot_dir=plot_dir,
+            list_score_names=list_score_names,
+        )
+        sys.exit(0)
+
     # TODO : change --user_log_scale to --disable_log_scale
+
+# Example command to run score with UMAP(n_neighbors, min_dist)
+# python run_score.py --seed 1024 -d QPCR -m umap --run_score_umap -nl 10 -nr 10 --plot --run
+
+# To plot bic score
+# python run_score.py --seed 1024 -d DIGITS -m tsne -sc bic --plot --use_log_scale
+
+# To plot comparing the scores (3 scores for tsne)
+# python run_score.py --seed 1024 -d DIGITS -m tsne --plot_compare --use_log_scale

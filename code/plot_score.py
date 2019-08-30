@@ -51,7 +51,7 @@ def _plot_best_param(ax, best_param_value, text_y_pos=0.0, text_align=None):
         ax.text(x=best_param_value, y=text_y_pos, s=str(best_param_value), ha=text_align)
 
 
-def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0):
+def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0, best_param=None):
     ax.axvspan(param_min, param_max, alpha=0.12, color="orange")
 
     # vertical line on the left
@@ -84,14 +84,14 @@ def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0):
     )
     ax.text(x=param_max, y=text_y_pos, s=str(param_max), ha="left")
 
-    # add text to show the best range
+    # add text to show the best range on top right of figure
     ax.text(
         x=1.0,
         y=1.065,
         transform=ax.transAxes,
         ha="right",
         va="center",
-        s=f"[{param_min}, {param_max}]",
+        s=f"[{param_min}, {param_max}]" + ("" if best_param is None else f", ({best_param})"),
         color="#0047BB",
     )
 
@@ -122,7 +122,14 @@ def _plot_score_with_best_param_and_range(
     _plot_best_param(ax, param_best, text_y_pos, text_align)
 
     # plot also the best param range (the top 96% scores)
-    _plot_best_range(ax, param_min, param_max, text_y_pos)
+    show_best_param_on_top = text_y_pos < 10
+    _plot_best_range(
+        ax,
+        param_min,
+        param_max,
+        text_y_pos,
+        best_param=None if not show_best_param_on_top else param_best,
+    )
 
 
 def plot_scores(
@@ -271,20 +278,111 @@ def plot_bic_scores(dataset_name, method_name, param_name="", score_dir="", plot
             continue
 
         _, ax = plt.subplots(1, 1, figsize=(9, 4.5))
-        _plot_line_with_variance(ax, list_params, score_sigma=None, score_mean=score_data)
-        ax.set_title(score_key_name)
-        ax.text(
-            x=0.985,
-            y=0.875,
-            s=f"{dataset_name}, {method_name}",
-            transform=ax.transAxes,
-            ha="right",
-            bbox=dict(edgecolor="b", facecolor="w"),
+
+        # determine best param range and best param value
+        score_data = np.array(score_data)
+        # filter the point above the min value with a margin of 0.04
+        threshold = 1.04
+
+        pivot = threshold * min(score_data)
+        (best_indices,) = np.where(score_data < pivot)
+        param_min = list_params[best_indices.min()]
+        param_max = list_params[best_indices.max()]
+        param_best = list_params[np.argmin(score_data)]
+
+        _plot_score_with_best_param_and_range(
+            ax,
+            list_params,
+            pivot,
+            param_best,
+            param_min,
+            param_max,
+            score_mean=score_data,
+            score_sigma=None,
+            text_y_pos=0,
         )
-        ax.set_xlabel(f"{param_name} in log-scale")
-        # ax.set_ylabel(f"{metric_display_name} score")
-        ax.grid(which="major", axis="y", linestyle="--", alpha=0.5)
+        ax.set_title(score_key_name)
+
+        # _plot_line_with_variance(ax, list_params, score_sigma=None, score_mean=score_data)
+        # ax.set_title(score_key_name)
+        # ax.text(
+        #     x=0.985,
+        #     y=0.875,
+        #     s=f"{dataset_name}, {method_name}",
+        #     transform=ax.transAxes,
+        #     ha="right",
+        #     bbox=dict(edgecolor="b", facecolor="w"),
+        # )
+        # ax.set_xlabel(f"{param_name} in log-scale")
+        # # ax.set_ylabel(f"{metric_display_name} score")
+        # ax.grid(which="major", axis="y", linestyle="--", alpha=0.5)
 
         plt.tight_layout()
         plt.savefig(f"{plot_dir}/{score_key_name}.png")
         plt.close()
+
+
+def plot_compare_qij_rnx_bic(
+    dataset_name,
+    n_labels_each_class=10,
+    threshold=0.96,
+    param_name="",
+    score_dir="",
+    plot_dir="",
+    list_score_names=["Constraint score", "$AUC_{log}RNX$", "BIC"],
+):
+    # prepare subplots
+    n_rows = len(list_score_names)
+    _, axes = plt.subplots(n_rows, 1, figsize=(7.2, 4 * n_rows))
+    plt.subplots_adjust(hspace=0.4)
+
+    for ax, title in zip(axes.ravel(), list_score_names):
+        ax.set_title(title, loc="left")
+
+        # prepare score data
+        if title == "BIC":
+            with open(f"{score_dir}/../bic/BIC.txt", "r") as in_file_bic:
+                bic_data = json.load(in_file_bic)
+                list_params = list(map(int, bic_data["list_params"]))
+                score_data = np.array(bic_data["bic"])
+
+        if title == "$AUC_{log}RNX$":
+            with open(f"{score_dir}/../metrics/metrics.txt", "r") as in_file_metric:
+                metrics_data = json.load(in_file_metric)
+                list_params = list(map(int, metrics_data["list_params"]))
+                score_data = np.array(metrics_data["auc_rnx"])
+
+        if title == "Constraint score":
+            # get qij score for 10 labeled points per class
+            with open(f"{score_dir}/../qij/dof1.0_all.txt", "r") as in_file_qij:
+                qij_score_data = json.load(in_file_qij)
+                list_params = list(map(int, qij_score_data["list_params"]))
+                all_scores = qij_score_data["all_scores"]
+                score_data = np.mean(all_scores[str(n_labels_each_class)], axis=0)
+
+        # find best param range
+        if title == "BIC":  # need to find the min
+            threshold = 1.0 + (1.0 - threshold)
+            pivot = threshold * min(score_data)
+            (best_indices,) = np.where(score_data < pivot)
+            param_best = list_params[np.argmin(score_data)]
+        else:  # need to find the max
+            pivot = threshold * score_data.max()
+            (best_indices,) = np.where(score_data > pivot)
+            param_best = list_params[np.argmax(score_data)]
+        param_min = list_params[best_indices.min()]
+        param_max = list_params[best_indices.max()]
+
+        _plot_score_with_best_param_and_range(
+            ax,
+            list_params,
+            pivot,
+            param_best,
+            param_min,
+            param_max,
+            score_mean=score_data,
+            score_sigma=None,
+            text_y_pos=-10,
+        )
+
+    plt.savefig(f"{plot_dir}/plot_compare.png")
