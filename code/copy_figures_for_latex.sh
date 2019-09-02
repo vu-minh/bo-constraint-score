@@ -1,7 +1,13 @@
+#!/bin/bash -x
+
 # Generate all figures,
 # then copy them from code folder to tex/figures folder
 
-# (1) figures to show the stability of the scores
+LIST_DATASETS=("DIGITS" "COIL20" "FASHION1000" "FASHION_MOBILENET" "NEURON_1K") # "20NEWS5"
+LIST_METHODS=("tsne" "umap")
+TARGET_DIR="../tex/figures"
+
+# # (1) figures to show the stability of the scores
 
 cp plots/COIL20/umap/scores.png ../tex/figures/COIL20_umap_scores.png
 cp plots/COIL20/tsne/scores.png ../tex/figures/COIL20_tsne_scores.png
@@ -12,7 +18,7 @@ cp plots/DIGITS/tsne/scores.png ../tex/figures/DIGITS_tsne_scores.png
 cp plots/DIGITS/largevis/scores.png ../tex/figures/DIGITS_largevis_scores.png
 
 
-# (2) figures contour score for UMAP 2D
+# # (2) figures contour score for UMAP 2D
 cp plots/DIGITS/umap/2D/qij_score.png ../tex/figures/DIGITS_umap_qij_score.png
 cp plots/DIGITS/umap/2D/auc_rnx.png ../tex/figures/DIGITS_umap_auc_rnx.png
 
@@ -20,11 +26,29 @@ cp plots/COIL20/umap/2D/qij_score.png ../tex/figures/COIL20_umap_qij_score.png
 cp plots/COIL20/umap/2D/auc_rnx.png ../tex/figures/COIL20_umap_auc_rnx.png
 
 
-# (3) figures contour predicted score from BO
+# # (3) figures contour predicted score from BO
 cp plots/DIGITS/umap/qij/predicted_score.png ../tex/figures/DIGITS_umap_predicted_score.png
 cp plots/COIL20/umap/qij/predicted_score.png ../tex/figures/COIL20_umap_predicted_score.png
 
 
-# (4) figures comparing BIC, AUC_log_RUX and qij_score
-cp plots/DIGITS/tsne/plot_compare.png ../tex/figures/DIGITS_compare_scores.png
-cp plots/COIL20/tsne/plot_compare.png ../tex/figures/COIL20_compare_scores.png
+# # (4) figures comparing BIC, AUC_log_RUX and qij_score
+for DATASET_NAME in "${LIST_DATASETS[@]}"; do
+    for METHOD in "${LIST_METHODS[@]}"; do
+        echo "COPY SCORE COMPARE: " $DATASET_NAME $METHOD
+        cp plots/${DATASET_NAME}/${METHOD}/plot_compare.png \
+           ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_compare_scores.png
+    done
+done
+
+
+################################################################################################
+# Command for reproducing figures/data
+
+# # Run score with UMAP(n_neighbors, min_dist)
+# python run_score.py --seed 1024 -d QPCR -m umap --run_score_umap -nl 10 -nr 10 --plot --run
+
+# # Plot Bic score
+# python run_score.py --seed 1024 -d DIGITS -m tsne -sc bic --plot --use_log_scale
+
+# # (4) plot compare scores: 3 scores for tsne and 2 scores for umap
+# python run_score.py --seed 1024 -d DIGITS -m tsne --plot_compare --use_log_scale
