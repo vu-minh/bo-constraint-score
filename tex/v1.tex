@@ -315,33 +315,87 @@ Present the dataset, the used pairwise constraint, the workflow as in the sectio
 To present and analyze the results, we can present following points (but we still miss the evaluation).
 
 
-(0) Compare constraint score, metric score and BIC score, in the case of BayOpt for tSNE with one parameter:
+(0) Compare constraint score, metric score and BIC score, in the case of BayOpt for tSNE with one parameter.
 
 \begin{figure*}
 \centering
-\begin{subfigure}[b]{0.23\textwidth}
+
+\begin{subfigure}[b]{0.32\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{DIGITS_compare_scores}
+    \includegraphics[width=\textwidth]{DIGITS_tsne_compare_scores}
     \caption{DIGITS}
 \end{subfigure}
 ~
-\begin{subfigure}[b]{0.23\textwidth}
-    \includegraphics[width=\textwidth]{COIL20_compare_scores}
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{COIL20_tsne_compare_scores}
     \caption{COIL20}
 \end{subfigure}
 ~
-\begin{subfigure}[b]{0.23\textwidth}
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{NEURON_1K_tsne_compare_scores}
+    \caption{NEURON\_1K}
+\end{subfigure}
+
+\vfill
+
+\begin{subfigure}[b]{0.32\textwidth}
     \centering
-    %\includegraphics[width=\textwidth]{DIGITS_compare_scores}
+    \includegraphics[width=\textwidth]{FASHION1000_tsne_compare_scores}
     \caption{FASHION1000}
 \end{subfigure}
 ~
-\begin{subfigure}[b]{0.23\textwidth}
-    %\includegraphics[width=\textwidth]{COIL20_compare_scores}
-    \caption{}
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{FASHION_MOBILENET_tsne_compare_scores}
+    \caption{FASHION\_MOBILENET}
 \end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \caption{20NEWS5 (TODO)}
+\end{subfigure}
+
+\caption{Comparing constraint score, $AUC_{log}RNX$ score and BIC score for the embeddings of tSNE.}
 \end{figure*}
 
+
+
+\begin{figure*}
+\centering
+
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{DIGITS_umap_compare_scores}
+    \caption{DIGITS}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{COIL20_umap_compare_scores}
+    \caption{COIL20}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{NEURON_1K_umap_compare_scores}
+    \caption{NEURON\_1K}
+\end{subfigure}
+
+\vfill
+
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{FASHION1000_umap_compare_scores}
+    \caption{FASHION1000}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{FASHION_MOBILENET_umap_compare_scores}
+    \caption{FASHION\_MOBILENET}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \caption{20NEWS5 (TODO)}
+\end{subfigure}
+
+\caption{Comparing constraint score and $AUC_{log}RNX$ score for the embeddings of UMAP with fixed \texttt{min\_dist=0.1}.}
+\end{figure*}
 
 
 (1) Optimal hyperparameters found by BayOpt w.r.t the constraint-based score:
