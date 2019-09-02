@@ -314,6 +314,36 @@ Present the dataset, the used pairwise constraint, the workflow as in the sectio
 
 To present and analyze the results, we can present following points (but we still miss the evaluation).
 
+
+(0) Compare constraint score, metric score and BIC score, in the case of BayOpt for tSNE with one parameter:
+
+\begin{figure*}
+\centering
+\begin{subfigure}[b]{0.23\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{DIGITS_compare_scores}
+    \caption{DIGITS}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.23\textwidth}
+    \includegraphics[width=\textwidth]{COIL20_compare_scores}
+    \caption{COIL20}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.23\textwidth}
+    \centering
+    %\includegraphics[width=\textwidth]{DIGITS_compare_scores}
+    \caption{FASHION1000}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.23\textwidth}
+    %\includegraphics[width=\textwidth]{COIL20_compare_scores}
+    \caption{}
+\end{subfigure}
+\end{figure*}
+
+
+
 (1) Optimal hyperparameters found by BayOpt w.r.t the constraint-based score:
 
 + BayOpt method for finding \verb|perplexity| param for t-SNE. (Case of 1 param to tune with t-SNE, Fig.~\ref{fig:tsne1}) (Done)
