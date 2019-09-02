@@ -167,7 +167,8 @@ def plot_bo_one_param_detail(
         f"{acq_method_name} after {len(optimizer.space)} steps"
         f" with best predicted param = {int(np.exp(current_best_param))}"
     )
-    plt.savefig(f"{plot_dir}/bo_detail.png", bbox_inches="tight")
+    plt.tight_layout()
+    plt.savefig(f"{plot_dir}/bo_detail.png")
     plt.close()
 
 
@@ -301,7 +302,8 @@ def plot_bo_one_param_summary(
 
     # set title and save figure
     plt.legend(loc="upper center", ncol=4, prop={"size": 14})
-    plt.savefig(f"{plot_dir}/bo_summary.png", bbox_inches="tight")
+    plt.tight_layout()
+    plt.savefig(f"{plot_dir}/bo_summary.png")
     plt.close()
 
 
@@ -366,6 +368,7 @@ def plot_density_2D(
 
     plt.tight_layout()
     plt.savefig(f"{plot_dir}/2D/{target_key_name}.png")
+    plt.close()
 
 
 def plot_prediction_density_2D(
@@ -501,8 +504,9 @@ def plot_prediction_density_2D(
 
     # ax2.legend((plt_score_by_min_dist, plt_score_by_n_neighbors),
     #           ("Score by min_dis", "Score by n_neighbors"), loc="lower center")
-
-    plt.savefig(f"{plot_dir}/predicted_score.png", bbox_inches="tight")
+    plt.tight_layout()
+    plt.savefig(f"{plot_dir}/predicted_score.png")
+    plt.close()
 
 
 if __name__ == "__main__":
