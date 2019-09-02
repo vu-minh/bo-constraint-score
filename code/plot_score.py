@@ -303,20 +303,6 @@ def plot_bic_scores(dataset_name, method_name, param_name="", score_dir="", plot
         )
         ax.set_title(score_key_name)
 
-        # _plot_line_with_variance(ax, list_params, score_sigma=None, score_mean=score_data)
-        # ax.set_title(score_key_name)
-        # ax.text(
-        #     x=0.985,
-        #     y=0.875,
-        #     s=f"{dataset_name}, {method_name}",
-        #     transform=ax.transAxes,
-        #     ha="right",
-        #     bbox=dict(edgecolor="b", facecolor="w"),
-        # )
-        # ax.set_xlabel(f"{param_name} in log-scale")
-        # # ax.set_ylabel(f"{metric_display_name} score")
-        # ax.grid(which="major", axis="y", linestyle="--", alpha=0.5)
-
         plt.tight_layout()
         plt.savefig(f"{plot_dir}/{score_key_name}.png")
         plt.close()
@@ -333,8 +319,7 @@ def plot_compare_qij_rnx_bic(
 ):
     # prepare subplots
     n_rows = len(list_score_names)
-    _, axes = plt.subplots(n_rows, 1, figsize=(7.2, 4 * n_rows))
-    plt.subplots_adjust(hspace=0.4)
+    fig, axes = plt.subplots(n_rows, 1, figsize=(7, 3.5 * n_rows))
 
     for i, (ax, title) in enumerate(zip(axes.ravel(), list_score_names)):
         ax.set_title(title, loc="left")
@@ -389,4 +374,7 @@ def plot_compare_qij_rnx_bic(
         if i == len(list_score_names) - 1:
             ax.set_xlabel("perplexity in log-scale")
 
-    plt.savefig(f"{plot_dir}/plot_compare.png")
+    # fig.tight_layout()
+    fig.subplots_adjust(hspace=0.4, top=0.925, bottom=0.125, left=0.125, right=0.95)
+    fig.savefig(f"{plot_dir}/plot_compare.png")
+    plt.close(fig)

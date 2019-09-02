@@ -432,12 +432,3 @@ if __name__ == "__main__":
         sys.exit(0)
 
     # TODO : change --user_log_scale to --disable_log_scale
-
-# Example command to run score with UMAP(n_neighbors, min_dist)
-# python run_score.py --seed 1024 -d QPCR -m umap --run_score_umap -nl 10 -nr 10 --plot --run
-
-# To plot bic score
-# python run_score.py --seed 1024 -d DIGITS -m tsne -sc bic --plot --use_log_scale
-
-# To plot comparing the scores (for tsne: qij score, rnx score and BIC score)
-# python run_score.py --seed 1024 -d DIGITS -m tsne --plot_compare --use_log_scale
