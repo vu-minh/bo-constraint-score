@@ -286,7 +286,9 @@ def plot_bo_one_param_summary(
     ax.set_xlabel(f"{param_name} in log-scale")
 
     # plot text for best param
-    ax.text(x=best_param, y=1.1 * ax.get_ylim()[0], ha="center", s=f"{int(np.exp(best_param))}")
+    ax.text(
+        x=best_param, y=1.1 * ax.get_ylim()[0], ha="center", s=f"{int(np.exp(best_param))}"
+    )
 
     # hint text for the top hightest scores horizontal line
     pivot = threshold * max(pred_mu)

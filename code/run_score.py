@@ -127,7 +127,7 @@ def run_all_score_umap(
                 ]
             )
             / n_repeat
-        )  # average score
+        )
         all_scores.append(
             {"n_neighbors": n_neighbors, "min_dist": min_dist, "qij_score": score}
         )
@@ -137,7 +137,9 @@ def run_all_score_umap(
     pd.DataFrame(all_metrics).to_csv(f"{score_dir}/umap_metrics.csv")
 
 
-def run_all_quality_metric(X, list_perps, default_min_dist=0.1, embedding_dir="", score_dir=""):
+def run_all_quality_metric(
+    X, list_perps, default_min_dist=0.1, embedding_dir="", score_dir=""
+):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
 
     # store the list of metric results for each metric name
@@ -208,7 +210,9 @@ def merge_all_score_files(
             all_scores[n_labels_each_class].append(list(scores_i_j.values()))
 
     for n_labels_each_class, scores_i_j in all_scores.items():
-        print("[Debug]#score values:", n_labels_each_class, len(scores_i_j), len(scores_i_j[0]))
+        print(
+            "[Debug]#score values:", n_labels_each_class, len(scores_i_j), len(scores_i_j[0])
+        )
 
     with open(f"{score_dir}/dof{degrees_of_freedom}_all.txt", "w") as out_file:
         json.dump({"list_params": list_params, "all_scores": all_scores}, out_file)
@@ -303,7 +307,8 @@ if __name__ == "__main__":
             os.makedirs(dir_path)
 
     default_min_dist = 0.1
-    # ['0.0010', '0.0022', '0.0046', '0.0100', '0.0215', '0.0464', '0.1000', '0.2154', '0.4642', '1.0000']
+    # ['0.0010', '0.0022', '0.0046', '0.0100', '0.0215', '0.0464', '0.1000',
+    # '0.2154', '0.4642', '1.0000']
 
     default_param_name = {
         "tsne": "perplexity",

@@ -162,7 +162,12 @@ def _calculate_score(
 
 
 def plot_bo(
-    optimizer, list_perp_in_log_scale, true_score, threshold=0.95, bayopt_params={}, plot_dir=""
+    optimizer,
+    list_perp_in_log_scale,
+    true_score,
+    threshold=0.95,
+    bayopt_params={},
+    plot_dir="",
 ):
     # test in case 1D, only one param `perplexity`
     # note that the observations are in logscale
@@ -194,7 +199,6 @@ def plot_bo(
 if __name__ == "__main__":
     import argparse
     import mlflow
-    import os
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dataset_name", default="")
@@ -235,7 +239,7 @@ if __name__ == "__main__":
         "--kappa",
         default=5.0,
         type=float,
-        help=("For UCB, small(1.0)->exploitation, " + "large(10.0)->exploration, default 5.0"),
+        help=("For UCB, small(1.0)->exploitation, large(10.0)->exploration, default 5.0"),
     )
     ap.add_argument(
         "-x",
@@ -243,8 +247,7 @@ if __name__ == "__main__":
         default=0.025,
         type=float,
         help=(
-            "For EI/POI, small(1e-4)->exploitation, "
-            + "large(1e-1)->exploration, default 0.025"
+            "For EI/POI, small(1e-4)->exploitation, large(1e-1)->exploration, default 0.025"
         ),
     )
     ap.add_argument("--run", action="store_true")
