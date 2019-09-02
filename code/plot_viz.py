@@ -16,7 +16,7 @@ def plot_2_labels(Z, labels, other_labels, out_name):
 
 
 def plot_test_vis(
-    X, dataset_name, debug=False, plot_dir="", embedding_dir="", labels=None, other_labels=None
+    X, dataset_name, plot_dir="", embedding_dir="", labels=None, other_labels=None, debug=False
 ):
     other_labels, des = dataset.load_additional_labels(dataset_name, label_name="class_matcat")
     print(des)
@@ -49,8 +49,34 @@ def plot_test_vis(
 
 if __name__ == "__main__":
     import argparse
+    import sys
 
-    argparse.add_argument("-d", "--dataset_name")
-    argparse.add_argument("-m")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-d", "--dataset_name", default="")
+    ap.add_argument("-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']")
+    ap.add_argument("-s", "--seed", default=42, type=int)
+    ap.add_argument("--use_other_label", default=None)
+    ap.add_argument("--plot_test_vis", action="store_true")
+    args = ap.parse_args()
 
-    args = parser.parse_args()
+    dataset.set_data_home("./data")
+    dataset_name = args.dataset_name
+    method_name = args.method_name
+
+    X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method="auto")
+
+    other_label_name = args.use_other_label
+    if other_label_name is not None:
+        other_labels, des = dataset.load_additional_labels(dataset_name, other_label_name)
+        if labels is None:
+            raise ValueError("Fail to load additional labels: " + des)
+        print("Using additional labels: ", other_label_name)
+    else:
+        other_labels = None
+
+    embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
+    plot_dir = f"./plots/{dataset_name}/{method_name}"
+
+    if args.plot_test_vis:
+        plot_test_vis(X, dataset_name, plot_dir, embedding_dir, labels, other_labels)
+        sys.exit(0)
