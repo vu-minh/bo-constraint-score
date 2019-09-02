@@ -434,5 +434,5 @@ if __name__ == "__main__":
 # To plot bic score
 # python run_score.py --seed 1024 -d DIGITS -m tsne -sc bic --plot --use_log_scale
 
-# To plot comparing the scores (3 scores for tsne)
+# To plot comparing the scores (for tsne: qij score, rnx score and BIC score)
 # python run_score.py --seed 1024 -d DIGITS -m tsne --plot_compare --use_log_scale

@@ -336,7 +336,7 @@ def plot_compare_qij_rnx_bic(
     _, axes = plt.subplots(n_rows, 1, figsize=(7.2, 4 * n_rows))
     plt.subplots_adjust(hspace=0.4)
 
-    for ax, title in zip(axes.ravel(), list_score_names):
+    for i, (ax, title) in enumerate(zip(axes.ravel(), list_score_names)):
         ax.set_title(title, loc="left")
 
         # prepare score data
@@ -384,5 +384,9 @@ def plot_compare_qij_rnx_bic(
             score_sigma=None,
             text_y_pos=-10,
         )
+
+        # show title for last subplot
+        if i == len(list_score_names) - 1:
+            ax.set_xlabel("perplexity in log-scale")
 
     plt.savefig(f"{plot_dir}/plot_compare.png")
