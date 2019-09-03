@@ -4,14 +4,17 @@ import os
 import math
 import joblib
 from itertools import product
-from collections import defaultdict
+from collections import namedtuple
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from common.dataset import dataset
 from run_viz import run_umap, run_tsne
 from sklearn.preprocessing import StandardScaler
 from MulticoreTSNE import MulticoreTSNE
+
+from utils import get_scores
 
 
 def plot_2_labels(Z, labels, other_labels, out_name):
@@ -59,6 +62,20 @@ def _simple_scatter(ax, Z, labels=None, title="", axis_off=True):
     ax.set_title(title)
     if axis_off:
         ax.axis("off")
+
+
+def _simple_scatter_with_colorbar(
+    ax, Z, labels, title="", cmap_name="viridis", highlight_range=()
+):
+    cmap = cm.get_cmap(cmap_name, 10)
+    scatter = ax.scatter(
+        Z[:, 0], Z[:, 1], c=labels, alpha=0.8, cmap=cmap, s=80, edgecolor="black"
+    )
+    ax.text(
+        x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18
+    )
+    ax.axis("off")
+    plt.colorbar(scatter, ax=ax, orientation="horizontal")
 
 
 def show_viz_grid(
@@ -109,14 +126,8 @@ def get_all_embeddings(embedding_dir, ignore_new_files=False):
     return all_embeddings
 
 
-def create_metamap(method_name, meta_perplexity, embedding_dir, ignore_new_files):
-    all_embeddings = get_all_embeddings(embedding_dir, ignore_new_files)
-    print("All embeddings: ", len(all_embeddings))
-
-    # convert the dict of embeddings hashed by param into numpy array
-    X = np.array(list(map(np.ravel, all_embeddings.values())))
-    print(X.shape)
-    Z = MulticoreTSNE(
+def meta_tsne(X, meta_perplexity=30):
+    return MulticoreTSNE(
         perplexity=meta_perplexity,
         n_iter=1500,
         n_jobs=-1,
@@ -124,6 +135,16 @@ def create_metamap(method_name, meta_perplexity, embedding_dir, ignore_new_files
         n_iter_without_progress=1500,
         min_grad_norm=1e-32,
     ).fit_transform(X)
+
+
+def create_metamap(method_name, meta_perplexity, embedding_dir, ignore_new_files):
+    all_embeddings = get_all_embeddings(embedding_dir, ignore_new_files)
+    print("All embeddings: ", len(all_embeddings))
+
+    # convert the dict of embeddings hashed by param into numpy array
+    X = np.array(list(map(np.ravel, all_embeddings.values())))
+    print(X.shape)
+    Z = meta_tsne(X, meta_perplexity)
 
     # extract params values from key names and use them as labels
     if method_name == "umap":
@@ -238,7 +259,63 @@ def get_params_to_show(dataset_name, method_name):
     }[dataset_name][method_name]
 
 
+def plot_metamap_with_scores_tsne(
+    dataset_name,
+    plot_dir,
+    embedding_dir,
+    score_dir,
+    meta_perplexity=30,
+    n_labels_each_class=10,
+):
+    ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
+    score_config = [
+        ScoreConfig("bic", "BIC score", "Purples_r"),
+        ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
+        ScoreConfig("qij", "Constraint score", "Greens"),
+        ScoreConfig("perplexity", "Perplexity", "Greys"),
+    ]
+
+    # if title == "BIC":  # need to find the min
+    #     threshold = 1.0 + (1.0 - threshold)
+    #     pivot = threshold * min(score_data)
+    #     (best_indices,) = np.where(score_data < pivot)
+    #     param_best = list_params[np.argmin(score_data)]
+    # else:  # need to find the max
+    #     pivot = threshold * score_data.max()
+    #     (best_indices,) = np.where(score_data > pivot)
+    #     param_best = list_params[np.argmax(score_data)]
+    # param_min = list_params[best_indices.min()]
+    # param_max = list_params[best_indices.max()]
+
+    perp_values = []
+    all_scores = []
+    for config in score_config:
+        if config.score_name != "perplexity":
+            perp_values, scores = get_scores(config.score_name, score_dir)
+        else:
+            scores = perp_values
+        all_scores.append(scores)
+
+    all_embeddings = joblib.load(f"{embedding_dir}/all.z")
+    X = [Z for key, Z in all_embeddings.items() if int(key) in perp_values]
+    X = np.array(list(map(np.ravel, X)))
+    print(X.shape)
+    X = StandardScaler().fit_transform(X)
+    Z = meta_tsne(X, meta_perplexity)
+
+    fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+    for config, scores, ax in zip(score_config, all_scores, axes.ravel()):
+        _, score_title, score_cmap = config
+        _simple_scatter_with_colorbar(
+            ax, Z, labels=scores, title=score_title, cmap_name=score_cmap
+        )
+
+    fig.tight_layout()
+    fig.savefig(f"{plot_dir}/metamap_scores_{meta_perplexity}.png")
+
+
 if __name__ == "__main__":
+    # plt.rcParams.update({"font.size": 20})
     import argparse
     import sys
 
@@ -269,6 +346,7 @@ if __name__ == "__main__":
 
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
     plot_dir = f"./plots/{dataset_name}/{method_name}"
+    score_dir = f"./scores/{dataset_name}/{method_name}"
 
     if args.plot_test_vis:
         plot_test_vis(X, dataset_name, plot_dir, embedding_dir, labels, other_labels)
@@ -280,5 +358,6 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if args.plot_metamap:
-        plot_metamap(dataset_name, method_name, plot_dir, embedding_dir)
+        # plot_metamap(dataset_name, method_name, plot_dir, embedding_dir)
+        plot_metamap_with_scores_tsne(dataset_name, plot_dir, embedding_dir, score_dir)
         sys.exit(0)
