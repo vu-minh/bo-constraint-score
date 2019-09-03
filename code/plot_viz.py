@@ -1,13 +1,17 @@
 # plot metamap (meta tsne) for all vizs of a dataset
 
+import os
 import math
 import joblib
-
-# import numpy as np
 from itertools import product
+from collections import defaultdict
+
+import numpy as np
 import matplotlib.pyplot as plt
 from common.dataset import dataset
 from run_viz import run_umap, run_tsne
+from sklearn.preprocessing import StandardScaler
+from MulticoreTSNE import MulticoreTSNE
 
 
 def plot_2_labels(Z, labels, other_labels, out_name):
@@ -79,6 +83,84 @@ def show_viz_grid(
     fig.tight_layout()
     fig.savefig(f"{plot_dir}/show.png")
     plt.close()
+
+
+def get_all_embeddings(embedding_dir, ignore_new_files=False):
+    found = False
+    if ignore_new_files:
+        # if os.path.exists(f"{embedding_dir}/all_updated.z"):
+        #     all_embeddings = joblib.load(f"{embedding_dir}/all_updated.z")
+        #     found = True
+        if os.path.exists(f"{embedding_dir}/all.z"):
+            all_embeddings = joblib.load(f"{embedding_dir}/all.z")
+            found = True
+
+    if not found:
+        print(f"Walk {embedding_dir}")
+        all_embeddings = {}
+        for dirname, _, filenames in os.walk(embedding_dir):
+            for filename in filenames:
+                if filename.startswith(("all", "meta")):
+                    continue
+                elif filename.endswith(".z"):
+                    Z = joblib.load(os.path.join(dirname, filename))
+                    all_embeddings[filename[:-2]] = Z
+        joblib.dump(all_embeddings, f"{embedding_dir}/all_updated.z")
+    return all_embeddings
+
+
+def create_metamap(method_name, meta_perplexity, embedding_dir, ignore_new_files):
+    all_embeddings = get_all_embeddings(embedding_dir, ignore_new_files)
+    print("All embeddings: ", len(all_embeddings))
+
+    # convert the dict of embeddings hashed by param into numpy array
+    X = np.array(list(map(np.ravel, all_embeddings.values())))
+    print(X.shape)
+    Z = MulticoreTSNE(
+        perplexity=meta_perplexity,
+        n_iter=1500,
+        n_jobs=-1,
+        random_state=42,
+        n_iter_without_progress=1500,
+        min_grad_norm=1e-32,
+    ).fit_transform(X)
+
+    # extract params values from key names and use them as labels
+    if method_name == "umap":
+        labels1, labels2 = zip(*[k.split("_") for k in all_embeddings.keys()])
+    else:
+        labels1, labels2 = list(all_embeddings.keys()), None
+    labels1 = np.array(list(map(float, labels1)))
+    if labels2 is not None:
+        labels2 = np.array(list(map(lambda s: float(s) * 100, labels2)))
+    res = {"Z": Z, "labels1": labels1, "labels2": labels2}
+    joblib.dump(res, f"{embedding_dir}/metamap{meta_perplexity}.z")
+    return res
+
+
+def plot_metamap(
+    dataset_name,
+    method_name,
+    plot_dir="",
+    embeddinging_dir="",
+    meta_perplexity=50,
+    ignore_new_files=False,
+):
+    # run tsne to create metamap
+    meta_name = f"{embedding_dir}/metamap{meta_perplexity}.z"
+    if ignore_new_files and os.path.exists(meta_name):
+        res = joblib.load(meta_name)
+    else:
+        res = create_metamap(
+            method_name, meta_perplexity, embedding_dir, ignore_new_files=True
+        )
+    Z, labels1, labels2 = res.values()
+
+    # plot metamap
+    fig, ax = plt.subplots(1, 1, figsize=(12, 12))
+    scatter = ax.scatter(Z[:, 0], Z[:, 1], c=labels1, s=labels2, cmap="PuBu", alpha=0.8)
+    fig.colorbar(scatter)
+    fig.savefig(f"{plot_dir}/metamap_{meta_perplexity}.png")
 
 
 def get_params_to_show(dataset_name, method_name):
@@ -167,6 +249,7 @@ if __name__ == "__main__":
     ap.add_argument("--use_other_label", default=None)
     ap.add_argument("--plot_test_vis", action="store_true")
     ap.add_argument("--show_viz_grid", action="store_true")
+    ap.add_argument("--plot_metamap", action="store_true")
     args = ap.parse_args()
 
     dataset.set_data_home("./data")
@@ -194,4 +277,8 @@ if __name__ == "__main__":
     if args.show_viz_grid:
         list_params = get_params_to_show(dataset_name, method_name)
         show_viz_grid(dataset_name, method_name, labels, plot_dir, embedding_dir, list_params)
+        sys.exit(0)
+
+    if args.plot_metamap:
+        plot_metamap(dataset_name, method_name, plot_dir, embedding_dir)
         sys.exit(0)
