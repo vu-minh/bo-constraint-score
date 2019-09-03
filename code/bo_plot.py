@@ -512,7 +512,7 @@ def plot_prediction_density_2D(
 
 
 if __name__ == "__main__":
-    dataset_name = "QPCR"
+    dataset_name = "FASHION1000"
     method_name = "umap"
     score_name = "qij"
     log_dir = f"./logs/{dataset_name}/{method_name}/{score_name}"

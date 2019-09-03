@@ -52,3 +52,8 @@ done
 
 # # (4) plot compare scores: 3 scores for tsne and 2 scores for umap
 # python run_score.py --seed 1024 -d DIGITS -m tsne --plot_compare --use_log_scale
+
+# # BO
+# # 20NEWS5
+# python bo_constraint.py --seed 42 -d 20NEWS5 -m umap -u ei -x 0.1 --plot --run -nr 40
+# python bo_constraint.py --seed 42 -d 20NEWS5 -m tsne -u ei -x 0.1 --plot --run -nr 15
