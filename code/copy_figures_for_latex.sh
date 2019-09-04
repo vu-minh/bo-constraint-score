@@ -31,14 +31,25 @@ cp plots/DIGITS/umap/qij/predicted_score.png ../tex/figures/DIGITS_umap_predicte
 cp plots/COIL20/umap/qij/predicted_score.png ../tex/figures/COIL20_umap_predicted_score.png
 
 
-# # (4) figures comparing BIC, AUC_log_RUX and qij_score
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
     for METHOD in "${LIST_METHODS[@]}"; do
+
+        # # (4) figures comparing BIC, AUC_log_RUX and qij_score
+
         echo "COPY SCORE COMPARE: " $DATASET_NAME $METHOD
         cp plots/${DATASET_NAME}/${METHOD}/plot_compare.png \
            ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_compare_scores.png
+
+
+        # # (5) figures metamap
+        echo "COPY METAMAP: " $DATASET_NAME $METHOD
+        cp plots/${DATASET_NAME}/${METHOD}/metamap_scores_50.png \
+           ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_metamap.png
     done
 done
+
+
+# # (5) 
 
 
 ################################################################################################
@@ -57,3 +68,6 @@ done
 # # 20NEWS5
 # python bo_constraint.py --seed 42 -d 20NEWS5 -m umap -u ei -x 0.1 --plot --run -nr 40
 # python bo_constraint.py --seed 42 -d 20NEWS5 -m tsne -u ei -x 0.1 --plot --run -nr 15
+
+# # (5) Gen metamap
+# python plot_viz.py  --seed 42 -d COIL20 -m tsne --plot_metamap

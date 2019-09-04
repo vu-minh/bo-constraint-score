@@ -120,6 +120,12 @@ function plot_compare_scores {
         --use_log_scale
 }
 
+
+function gen_metamap {
+    python plot_viz.py  --seed 42 -d $1 -m $2 --plot_metamap
+}
+
+
 ############################################################################
 RUN_ALL=false
 
@@ -127,8 +133,8 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("DIGITS" "COIL20" "FASHION1000" "FASHION_MOBILENET" "NEURON_1K") # "20NEWS5"
-    declare -a LIST_METHODS=("tsne" "umap")
+    declare -a LIST_DATASETS=("DIGITS" "COIL20" "FASHION1000" "FASHION_MOBILENET" "NEURON_1K" "20NEWS5")
+    declare -a LIST_METHODS=("tsne")
 fi
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
@@ -145,7 +151,8 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
 	    #    run_score_umap_2D $DATASET_NAME
      #    fi
 
-        plot_compare_scores $DATASET_NAME $METHOD
+        # plot_compare_scores $DATASET_NAME $METHOD
+        gen_metamap $DATASET_NAME $METHOD
     done
 done
 
