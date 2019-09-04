@@ -7,15 +7,17 @@ from itertools import product
 from collections import namedtuple
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from matplotlib import ticker
 from common.dataset import dataset
 from run_viz import run_umap, run_tsne
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from MulticoreTSNE import MulticoreTSNE
 from umap import UMAP
 
-from utils import get_scores
+from utils import get_scores_tsne
 
 
 # note to make big font size for plots in the paper
@@ -103,6 +105,71 @@ def _simple_scatter_with_colorbar(
         cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(1, n_ticks + 1)])
 
 
+def _scatter_with_colorbar_and_legend_size(
+    ax,
+    Z,
+    labels,
+    sizes=None,
+    title="",
+    cmap_name="viridis",
+    Z_highlight=None,
+    Z_best=None,
+    show_legend=True,
+):
+    ax.axis("off")
+    marker_size = 40
+
+    if Z_highlight is not None:
+        ax.scatter(
+            Z_highlight[:, 0],
+            Z_highlight[:, 1],
+            facecolors="none",
+            edgecolor="orange",
+            s=marker_size + 10,
+            zorder=99,
+        )
+    if Z_best is not None:
+        ax.scatter(Z_best[0], Z_best[1], c="red", marker="X", s=marker_size + 10, zorder=100)
+
+    # should custom colorbar for metaplot colored by perplexity values
+    should_custom_color_bar = Z_highlight is None and Z_best is None
+    cmap = cm.get_cmap(cmap_name, 20 if should_custom_color_bar else 10)
+    scatter = ax.scatter(
+        Z[:, 0], Z[:, 1], c=labels, s=sizes, alpha=0.6, cmap=cmap, edgecolor="black"
+    )
+    ax.text(
+        x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18
+    )
+
+    cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
+    if should_custom_color_bar:
+        nbins = math.floor(max(labels))
+        tick_locator = ticker.MaxNLocator(nbins=nbins)
+        cb.locator = tick_locator
+        cb.update_ticks()
+        cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(nbins + 1)])
+
+    # create "free" legend
+    min_dist_vals = [1e-3, 0.1, 0.5, 1.0]
+    min_dist_shows = MinMaxScaler((10, 90)).fit_transform(
+        np.array(min_dist_vals).reshape(-1, 1)
+    )
+
+    for min_dist_val, min_dist_show in zip(min_dist_vals, min_dist_shows.ravel()):
+        ax.scatter([], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val))
+    ax.legend(
+        scatterpoints=1,
+        frameon=False,
+        labelspacing=0.5,
+        title="min_dist",
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.15),
+        ncol=4,
+        fontsize=16,
+        title_fontsize=16,
+    )
+
+
 def show_viz_grid(
     dataset_name, method_name, labels=None, plot_dir="", embedding_dir="", list_params=[]
 ):
@@ -127,6 +194,21 @@ def show_viz_grid(
     plt.close()
 
 
+def meta_tsne(X, meta_perplexity=30):
+    return MulticoreTSNE(
+        perplexity=meta_perplexity,
+        n_iter=1500,
+        n_jobs=-1,
+        random_state=42,
+        n_iter_without_progress=1500,
+        min_grad_norm=1e-32,
+    ).fit_transform(X)
+
+
+def meta_umap(X, meta_n_neighbors=10):
+    return UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=1024).fit_transform(X)
+
+
 def get_all_embeddings(embedding_dir, ignore_new_files=False):
     found = False
     if ignore_new_files:
@@ -149,21 +231,6 @@ def get_all_embeddings(embedding_dir, ignore_new_files=False):
                     all_embeddings[filename[:-2]] = Z
         joblib.dump(all_embeddings, f"{embedding_dir}/all_updated.z")
     return all_embeddings
-
-
-def meta_tsne(X, meta_perplexity=30):
-    return MulticoreTSNE(
-        perplexity=meta_perplexity,
-        n_iter=1500,
-        n_jobs=-1,
-        random_state=42,
-        n_iter_without_progress=1500,
-        min_grad_norm=1e-32,
-    ).fit_transform(X)
-
-
-def meta_umap(X, meta_n_neighbors=10):
-    return UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=1024).fit_transform(X)
 
 
 def create_metamap(method_name, meta_perplexity, embedding_dir, ignore_new_files):
@@ -211,6 +278,150 @@ def plot_metamap(
     scatter = ax.scatter(Z[:, 0], Z[:, 1], c=labels1, s=labels2, cmap="PuBu", alpha=0.8)
     fig.colorbar(scatter)
     fig.savefig(f"{plot_dir}/metamap_{meta_perplexity}.png")
+
+
+def plot_metamap_with_scores_tsne(
+    dataset_name,
+    plot_dir,
+    embedding_dir,
+    score_dir,
+    meta_n_neighbors=50,
+    n_labels_each_class=10,
+    threshold=0.96,
+):
+    ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
+    score_config = [
+        ScoreConfig("perplexity", "Perplexity in log-scale", "Greys_r"),
+        ScoreConfig("bic", "BIC score", "Purples_r"),
+        ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
+        ScoreConfig("qij", "Constraint score", "Greens"),
+    ]
+
+    perp_values = []
+    all_scores = []
+    for config in score_config:
+        if config.score_name != "perplexity":
+            perp_values, scores = get_scores_tsne(config.score_name, score_dir)
+        else:
+            scores = np.log(perp_values)
+        all_scores.append(np.array(scores))
+
+    all_embeddings = joblib.load(f"{embedding_dir}/all.z")
+    X = [Z for key, Z in all_embeddings.items() if int(key) in perp_values]
+    X = np.array(list(map(np.ravel, X)))
+    print("Metamap input data: ", X.shape)
+    X = StandardScaler().fit_transform(X)
+    Z = meta_umap(X, meta_n_neighbors)
+
+    fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+    for config, scores, ax in zip(score_config, all_scores, axes.ravel()):
+        score_name, score_title, score_cmap = config
+
+        if score_name != "perplexity":
+            if score_name == "bic":
+                pivot = (1.0 + (1.0 - threshold)) * min(scores)
+                (best_indices,) = np.where(scores < pivot)
+                best_idx = np.argmin(scores)
+            else:
+                pivot = threshold * scores.max()
+                (best_indices,) = np.where(scores > pivot)
+                best_idx = np.argmax(scores)
+            Z_highlight = Z[best_indices]
+            Z_best = Z[best_idx]
+        else:
+            Z_highlight, Z_best = None, None
+
+        _simple_scatter_with_colorbar(
+            ax,
+            Z,
+            labels=scores,
+            title=score_title,
+            cmap_name=score_cmap,
+            Z_highlight=Z_highlight,
+            Z_best=Z_best,
+        )
+
+    fig.tight_layout()
+    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
+
+
+def plot_metamap_with_scores_umap(
+    dataset_name,
+    plot_dir,
+    embedding_dir,
+    score_dir,
+    meta_n_neighbors=200,
+    n_labels_each_class=10,
+    threshold=0.96,
+):
+    ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
+    score_config = [
+        ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
+        ScoreConfig("qij", "Constraint score", "Greens"),
+        ScoreConfig("n_neighbors", "n_neighbors in log-scale", "Greys_r"),
+    ]
+
+    df_qij = pd.read_csv(f"{score_dir}/qij/umap_scores.csv")
+    qij_scores = df_qij["qij_score"].to_numpy()
+    n_params = df_qij.shape[0]
+    list_n_neighbors = df_qij["n_neighbors"].to_numpy()
+    list_min_dist = df_qij["min_dist"].to_numpy()
+
+    df_metrics = pd.read_csv(f"{score_dir}/qij/umap_metrics.csv")
+    assert n_params == df_metrics.shape[0]
+    rnx_scores = df_metrics["auc_rnx"]
+
+    all_embeddings = joblib.load(f"{embedding_dir}/all.z")
+    assert n_params == len(all_embeddings)
+
+    X = np.array(list(map(np.ravel, all_embeddings.values())))
+    print("Metamap input data: ", X.shape)
+    X = StandardScaler().fit_transform(X)
+    Z = meta_umap(X, meta_n_neighbors)
+
+    fig, [ax0, ax1, ax2] = plt.subplots(1, 3, figsize=(20, 8))
+
+    # plot metamap, colored by n_neighbors and sized by min_dist
+    _scatter_with_colorbar_and_legend_size(
+        ax0,
+        Z,
+        labels=np.log(list_n_neighbors),
+        sizes=MinMaxScaler((10, 90)).fit_transform(list_min_dist.reshape(-1, 1)),
+        title="n_neighbors in log-scale",
+        cmap_name="Greys_r",
+        Z_highlight=None,
+        Z_best=None,
+    )
+
+    # for config, scores, ax in zip(score_config, all_scores, axes.ravel()):
+    #     score_name, score_title, score_cmap = config
+
+    #     if score_name != "n_neighbors":
+    #         if score_name == "bic":
+    #             pivot = (1.0 + (1.0 - threshold)) * min(scores)
+    #             (best_indices,) = np.where(scores < pivot)
+    #             best_idx = np.argmin(scores)
+    #         else:
+    #             pivot = threshold * scores.max()
+    #             (best_indices,) = np.where(scores > pivot)
+    #             best_idx = np.argmax(scores)
+    #         Z_highlight = Z[best_indices]
+    #         Z_best = Z[best_idx]
+    #     else:
+    #         Z_highlight, Z_best = None, None
+
+    #     _simple_scatter_with_colorbar(
+    #         ax,
+    #         Z,
+    #         labels=scores,
+    #         title=score_title,
+    #         cmap_name=score_cmap,
+    #         Z_highlight=Z_highlight,
+    #         Z_best=Z_best,
+    #     )
+
+    fig.tight_layout()
+    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
 
 
 def get_params_to_show(dataset_name, method_name):
@@ -288,71 +499,6 @@ def get_params_to_show(dataset_name, method_name):
     }[dataset_name][method_name]
 
 
-def plot_metamap_with_scores_tsne(
-    dataset_name,
-    plot_dir,
-    embedding_dir,
-    score_dir,
-    meta_perplexity=50,
-    n_labels_each_class=10,
-    threshold=0.96,
-):
-    ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
-    score_config = [
-        ScoreConfig("bic", "BIC score", "Purples_r"),
-        ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
-        ScoreConfig("qij", "Constraint score", "Greens"),
-        ScoreConfig("perplexity", "Perplexity in log-scale", "Greys_r"),
-    ]
-
-    perp_values = []
-    all_scores = []
-    for config in score_config:
-        if config.score_name != "perplexity":
-            perp_values, scores = get_scores(config.score_name, score_dir)
-        else:
-            scores = np.log(perp_values)
-        all_scores.append(np.array(scores))
-
-    all_embeddings = joblib.load(f"{embedding_dir}/all.z")
-    X = [Z for key, Z in all_embeddings.items() if int(key) in perp_values]
-    X = np.array(list(map(np.ravel, X)))
-    print("Metamap input data: ", X.shape)
-    X = StandardScaler().fit_transform(X)
-    Z = meta_umap(X, meta_perplexity)
-
-    fig, axes = plt.subplots(1, 4, figsize=(16, 4))
-    for config, scores, ax in zip(score_config, all_scores, axes.ravel()):
-        score_name, score_title, score_cmap = config
-
-        if score_name != "perplexity":
-            if score_name == "bic":
-                pivot = (1.0 + (1.0 - threshold)) * min(scores)
-                (best_indices,) = np.where(scores < pivot)
-                best_idx = np.argmin(scores)
-            else:
-                pivot = threshold * scores.max()
-                (best_indices,) = np.where(scores > pivot)
-                best_idx = np.argmax(scores)
-            Z_highlight = Z[best_indices]
-            Z_best = Z[best_idx]
-        else:
-            Z_highlight, Z_best = None, None
-
-        _simple_scatter_with_colorbar(
-            ax,
-            Z,
-            labels=scores,
-            title=score_title,
-            cmap_name=score_cmap,
-            Z_highlight=Z_highlight,
-            Z_best=Z_best,
-        )
-
-    fig.tight_layout()
-    fig.savefig(f"{plot_dir}/metamap_scores_{meta_perplexity}.png")
-
-
 if __name__ == "__main__":
     import argparse
     import sys
@@ -397,5 +543,11 @@ if __name__ == "__main__":
 
     if args.plot_metamap:
         # plot_metamap(dataset_name, method_name, plot_dir, embedding_dir)
-        plot_metamap_with_scores_tsne(dataset_name, plot_dir, embedding_dir, score_dir)
+        plot_metamap_func = {
+            "tsne": plot_metamap_with_scores_tsne,
+            "umap": plot_metamap_with_scores_umap,
+        }.get(
+            method_name, plot_metamap
+        )  # simple metamap plot version
+        plot_metamap_func(dataset_name, plot_dir, embedding_dir, score_dir)
         sys.exit(0)
