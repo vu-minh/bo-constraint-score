@@ -13,6 +13,7 @@ from common.dataset import dataset
 from run_viz import run_umap, run_tsne
 from sklearn.preprocessing import StandardScaler
 from MulticoreTSNE import MulticoreTSNE
+from umap import UMAP
 
 from utils import get_scores
 
@@ -65,17 +66,37 @@ def _simple_scatter(ax, Z, labels=None, title="", axis_off=True):
 
 
 def _simple_scatter_with_colorbar(
-    ax, Z, labels, title="", cmap_name="viridis", highlight_range=()
+    ax, Z, labels, title="", cmap_name="viridis", Z_highlight=None, Z_best=None
 ):
-    cmap = cm.get_cmap(cmap_name, 10)
+    ax.axis("off")
+    marker_size = 80
+
+    if Z_highlight is not None:
+        ax.scatter(
+            Z_highlight[:, 0],
+            Z_highlight[:, 1],
+            facecolors="none",
+            edgecolor="orange",
+            s=marker_size + 10,
+            zorder=99,
+        )
+    if Z_best is not None:
+        ax.scatter(Z_best[0], Z_best[1], c="red", marker="X", s=marker_size + 10, zorder=100)
+
+    # should custom colorbar for metaplot colored by perplexity values
+    should_custom_color_bar = Z_highlight is None and Z_best is None
+    cmap = cm.get_cmap(cmap_name, 20 if should_custom_color_bar else 10)
     scatter = ax.scatter(
-        Z[:, 0], Z[:, 1], c=labels, alpha=0.8, cmap=cmap, s=80, edgecolor="black"
+        Z[:, 0], Z[:, 1], c=labels, alpha=0.8, cmap=cmap, s=marker_size, edgecolor="black"
     )
     ax.text(
         x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18
     )
-    ax.axis("off")
-    plt.colorbar(scatter, ax=ax, orientation="horizontal")
+
+    cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
+    if should_custom_color_bar:
+        n_ticks = len(cb.ax.get_xticklabels())
+        cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(1, n_ticks + 1)])
 
 
 def show_viz_grid(
@@ -137,6 +158,10 @@ def meta_tsne(X, meta_perplexity=30):
     ).fit_transform(X)
 
 
+def meta_umap(X, meta_n_neighbors=10):
+    return UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=1024).fit_transform(X)
+
+
 def create_metamap(method_name, meta_perplexity, embedding_dir, ignore_new_files):
     all_embeddings = get_all_embeddings(embedding_dir, ignore_new_files)
     print("All embeddings: ", len(all_embeddings))
@@ -164,18 +189,18 @@ def plot_metamap(
     method_name,
     plot_dir="",
     embeddinging_dir="",
-    meta_perplexity=50,
+    meta_perplexity=10,
     ignore_new_files=False,
 ):
     # run tsne to create metamap
     meta_name = f"{embedding_dir}/metamap{meta_perplexity}.z"
     if ignore_new_files and os.path.exists(meta_name):
-        res = joblib.load(meta_name)
+        metamap = joblib.load(meta_name)
     else:
-        res = create_metamap(
+        metamap = create_metamap(
             method_name, meta_perplexity, embedding_dir, ignore_new_files=True
         )
-    Z, labels1, labels2 = res.values()
+    Z, labels1, labels2 = metamap.values()
 
     # plot metamap
     fig, ax = plt.subplots(1, 1, figsize=(12, 12))
@@ -264,28 +289,17 @@ def plot_metamap_with_scores_tsne(
     plot_dir,
     embedding_dir,
     score_dir,
-    meta_perplexity=30,
+    meta_perplexity=50,
     n_labels_each_class=10,
+    threshold=0.96,
 ):
     ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
     score_config = [
         ScoreConfig("bic", "BIC score", "Purples_r"),
         ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
         ScoreConfig("qij", "Constraint score", "Greens"),
-        ScoreConfig("perplexity", "Perplexity", "Greys"),
+        ScoreConfig("perplexity", "Perplexity in log-scale", "Greys_r"),
     ]
-
-    # if title == "BIC":  # need to find the min
-    #     threshold = 1.0 + (1.0 - threshold)
-    #     pivot = threshold * min(score_data)
-    #     (best_indices,) = np.where(score_data < pivot)
-    #     param_best = list_params[np.argmin(score_data)]
-    # else:  # need to find the max
-    #     pivot = threshold * score_data.max()
-    #     (best_indices,) = np.where(score_data > pivot)
-    #     param_best = list_params[np.argmax(score_data)]
-    # param_min = list_params[best_indices.min()]
-    # param_max = list_params[best_indices.max()]
 
     perp_values = []
     all_scores = []
@@ -293,21 +307,42 @@ def plot_metamap_with_scores_tsne(
         if config.score_name != "perplexity":
             perp_values, scores = get_scores(config.score_name, score_dir)
         else:
-            scores = perp_values
-        all_scores.append(scores)
+            scores = np.log(perp_values)
+        all_scores.append(np.array(scores))
 
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
     X = [Z for key, Z in all_embeddings.items() if int(key) in perp_values]
     X = np.array(list(map(np.ravel, X)))
-    print(X.shape)
+    print("Metamap input data: ", X.shape)
     X = StandardScaler().fit_transform(X)
-    Z = meta_tsne(X, meta_perplexity)
+    Z = meta_umap(X, meta_perplexity)
 
     fig, axes = plt.subplots(1, 4, figsize=(16, 4))
     for config, scores, ax in zip(score_config, all_scores, axes.ravel()):
-        _, score_title, score_cmap = config
+        score_name, score_title, score_cmap = config
+
+        if score_name != "perplexity":
+            if score_name == "bic":
+                pivot = (1.0 + (1.0 - threshold)) * min(scores)
+                (best_indices,) = np.where(scores < pivot)
+                best_idx = np.argmin(scores)
+            else:
+                pivot = threshold * scores.max()
+                (best_indices,) = np.where(scores > pivot)
+                best_idx = np.argmax(scores)
+            Z_highlight = Z[best_indices]
+            Z_best = Z[best_idx]
+        else:
+            Z_highlight, Z_best = None, None
+
         _simple_scatter_with_colorbar(
-            ax, Z, labels=scores, title=score_title, cmap_name=score_cmap
+            ax,
+            Z,
+            labels=scores,
+            title=score_title,
+            cmap_name=score_cmap,
+            Z_highlight=Z_highlight,
+            Z_best=Z_best,
         )
 
     fig.tight_layout()
