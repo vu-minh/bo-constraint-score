@@ -11,6 +11,10 @@ from bayes_opt import UtilityFunction
 from utils import generate_value_range
 
 
+# note to make big font size for plots in the paper
+plt.rcParams.update({"font.size": 22})
+
+
 def _plot_acq_func(ax, util_func, list_params, utility_values, next_best_guess_param):
     ax.plot(list_params, utility_values, color="green", label=f"{util_func.upper()} function")
     ax.axvline(
@@ -118,9 +122,6 @@ def plot_bo_one_param_detail(
     """ Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real param in logscale)
     """
-    # note to make big font size for plots in the paper
-    plt.rcParams.update({"font.size": 22})
-
     plt.figure(figsize=(14, 8))
     gs = gridspec.GridSpec(2, 1, height_ratios=[3, 1])
     ax0 = plt.subplot(gs[0])  # plot gp prediction values
@@ -240,8 +241,6 @@ def plot_bo_one_param_summary(
     """ Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real GP params are in logscale)
     """
-    # note to make big font size for plots in the paper
-    plt.rcParams.update({"font.size": 22})
     _, ax = plt.subplots(1, 1, figsize=(11, 5))
 
     ax.set_xlim(left=list_params.min(), right=list_params.max())

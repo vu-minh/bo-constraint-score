@@ -18,6 +18,10 @@ from plot_score import plot_compare_qij_rnx_bic
 from common.dataset import dataset
 
 
+# note to make big font size for plots
+plt.rcParams.update({"font.size": 22})
+
+
 # to profile with line_profiler, add @profile decoration to the target function
 # and run kernprof -l script.py -with --params
 
@@ -357,9 +361,6 @@ if __name__ == "__main__":
             )
 
     if args.plot:
-        # note to make big font size for plots
-        plt.rcParams.update({"font.size": 24})
-
         if score_name == "qij":
             plot_scores(
                 dataset_name,
@@ -414,8 +415,6 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if args.plot_compare:
-        # note to make big font size for plots
-        plt.rcParams.update({"font.size": 24})
         list_score_names = ["Constraint score", "$AUC_{log}RNX$"]
         if method_name == "tsne":
             list_score_names += ["BIC"]

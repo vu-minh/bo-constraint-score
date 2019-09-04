@@ -18,6 +18,10 @@ from umap import UMAP
 from utils import get_scores
 
 
+# note to make big font size for plots in the paper
+plt.rcParams.update({"font.size": 22})
+
+
 def plot_2_labels(Z, labels, other_labels, out_name):
     _, [ax0, ax1] = plt.subplots(1, 2, figsize=(12, 6))
     ax0.scatter(Z[:, 0], Z[:, 1], c=labels, cmap="Spectral", alpha=0.5)
@@ -350,7 +354,6 @@ def plot_metamap_with_scores_tsne(
 
 
 if __name__ == "__main__":
-    # plt.rcParams.update({"font.size": 20})
     import argparse
     import sys
 
