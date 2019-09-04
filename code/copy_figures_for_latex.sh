@@ -43,7 +43,7 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
 
         # # (5) figures metamap
         echo "COPY METAMAP: " $DATASET_NAME $METHOD
-        cp plots/${DATASET_NAME}/${METHOD}/metamap_scores_50.png \
+        cp plots/${DATASET_NAME}/${METHOD}/metamap_scores_200.png \
            ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_metamap.png
     done
 done

@@ -134,7 +134,7 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
     declare -a LIST_DATASETS=("DIGITS" "COIL20" "FASHION1000" "FASHION_MOBILENET" "NEURON_1K" "20NEWS5")
-    declare -a LIST_METHODS=("tsne")
+    declare -a LIST_METHODS=("tsne" "umap")
 fi
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
