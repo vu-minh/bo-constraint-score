@@ -348,6 +348,14 @@ def plot_metamap_with_scores_tsne(
             Z_best=Z_best,
         )
 
+    # ax0 show metamap colored by perplexity values.
+    # now show a list of selected perplexities.
+    list_selected_perps = list(
+        map(lambda p: p[0], get_params_to_show(dataset_name, method_name="tsne"))
+    )
+    list_selected_pos = Z[np.isin(perp_values, list_selected_perps)]
+    annotate_selected_values(ax0, list_selected_perps, list_selected_pos)
+
     fig.tight_layout()
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
 
@@ -417,6 +425,30 @@ def plot_metamap_with_scores_umap(
 
     fig.tight_layout()
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
+
+
+def annotate_selected_values(ax, list_values, list_positions):
+    print(list_values)
+    print(list_positions)
+    # TODO 2 list with different size
+
+    # annotate the positions of selected values on the scatter plot
+    ax.scatter(list_positions[:, 0], list_positions[:, 1], marker="x", color="red")
+    # for text, (px, py) in zip(list_values, list_positions):
+    #     ax.annotate(text, (px, py))
+
+    # keep corresponding the values and the positions, but sort the positions by x
+    pairs = sorted(zip(list_values, list_positions), key=lambda p: p[1][0])
+    for i, (val, pos) in enumerate(pairs):
+        ax.annotate(
+            str(val),
+            xy=pos,
+            xycoords="data",
+            xytext=(i * 0.175, -0.075),
+            textcoords="axes fraction",
+            arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=5"),
+            fontsize=18,
+        )
 
 
 def get_params_to_show(dataset_name, method_name):
