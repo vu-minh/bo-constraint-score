@@ -21,7 +21,7 @@ from utils import get_scores_tsne
 
 
 # note to make big font size for plots in the paper
-plt.rcParams.update({"font.size": 22})
+plt.rcParams.update({"font.size": 20})
 
 
 def plot_2_labels(Z, labels, other_labels, out_name):
@@ -84,14 +84,14 @@ def _simple_scatter_with_colorbar(
             facecolors="none",
             edgecolor="orange",
             s=marker_size + 10,
+            linewidths=1.5,
             zorder=99,
         )
     if Z_best is not None:
         ax.scatter(Z_best[0], Z_best[1], c="red", marker="X", s=marker_size + 10, zorder=100)
 
     # should custom colorbar for metaplot colored by perplexity values
-    should_custom_color_bar = Z_highlight is None and Z_best is None
-    cmap = cm.get_cmap(cmap_name, 20 if should_custom_color_bar else 10)
+    cmap = cm.get_cmap(cmap_name, 20)
     scatter = ax.scatter(
         Z[:, 0], Z[:, 1], c=labels, alpha=0.8, cmap=cmap, s=marker_size, edgecolor="black"
     )
@@ -100,9 +100,13 @@ def _simple_scatter_with_colorbar(
     )
 
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
-    if should_custom_color_bar:
-        n_ticks = len(cb.ax.get_xticklabels())
-        cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(1, n_ticks + 1)])
+    if Z_highlight is None and Z_best is None:
+        # nbins = math.floor(max(labels))
+        # tick_locator = ticker.MaxNLocator(nbins=nbins)
+        # cb.locator = tick_locator
+        # cb.update_ticks()
+        nbins = len(cb.ax.get_xticklabels())
+        cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(1, nbins + 1)])
 
 
 def _scatter_with_colorbar_and_legend_size(
@@ -112,62 +116,64 @@ def _scatter_with_colorbar_and_legend_size(
     sizes=None,
     title="",
     cmap_name="viridis",
-    Z_highlight=None,
-    Z_best=None,
+    best_indices=None,
+    best_idx=None,
     show_legend=True,
 ):
     ax.axis("off")
-    marker_size = 40
 
-    if Z_highlight is not None:
+    if best_indices is not None:
+        Z_highlight = Z[best_indices]
         ax.scatter(
             Z_highlight[:, 0],
             Z_highlight[:, 1],
+            s=sizes[best_indices],
             facecolors="none",
             edgecolor="orange",
-            s=marker_size + 10,
             zorder=99,
         )
-    if Z_best is not None:
-        ax.scatter(Z_best[0], Z_best[1], c="red", marker="X", s=marker_size + 10, zorder=100)
+    if best_idx is not None:
+        Z_best = Z[best_idx]
+        ax.scatter(
+            Z_best[0], Z_best[1], c="red", marker="X", s=sizes[best_idx] + 10, zorder=100
+        )
 
-    # should custom colorbar for metaplot colored by perplexity values
-    should_custom_color_bar = Z_highlight is None and Z_best is None
-    cmap = cm.get_cmap(cmap_name, 20 if should_custom_color_bar else 10)
+    cmap = cm.get_cmap(cmap_name, 20)
     scatter = ax.scatter(
         Z[:, 0], Z[:, 1], c=labels, s=sizes, alpha=0.6, cmap=cmap, edgecolor="black"
     )
     ax.text(
         x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18
     )
-
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
-    if should_custom_color_bar:
+
+    if show_legend:
+        # create "free" legend
+        min_dist_vals = [1e-3, 0.1, 0.5, 1.0]
+        min_dist_shows = MinMaxScaler((30, 100)).fit_transform(
+            np.array(min_dist_vals).reshape(-1, 1)
+        )
+
+        for min_dist_val, min_dist_show in zip(min_dist_vals, min_dist_shows.ravel()):
+            ax.scatter([], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val))
+        ax.legend(
+            scatterpoints=1,
+            frameon=False,
+            labelspacing=0.25,
+            title="min_dist",
+            loc="lower center",
+            bbox_to_anchor=(0.5, -0.15),
+            ncol=len(min_dist_vals),
+            fontsize=18,
+            title_fontsize=18,
+        )
+
+        # should custom colorbar to show n_neighbors in log scale
         nbins = math.floor(max(labels))
         tick_locator = ticker.MaxNLocator(nbins=nbins)
         cb.locator = tick_locator
         cb.update_ticks()
         cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(nbins + 1)])
-
-    # create "free" legend
-    min_dist_vals = [1e-3, 0.1, 0.5, 1.0]
-    min_dist_shows = MinMaxScaler((10, 90)).fit_transform(
-        np.array(min_dist_vals).reshape(-1, 1)
-    )
-
-    for min_dist_val, min_dist_show in zip(min_dist_vals, min_dist_shows.ravel()):
-        ax.scatter([], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val))
-    ax.legend(
-        scatterpoints=1,
-        frameon=False,
-        labelspacing=0.5,
-        title="min_dist",
-        loc="lower center",
-        bbox_to_anchor=(0.5, -0.15),
-        ncol=4,
-        fontsize=16,
-        title_fontsize=16,
-    )
 
 
 def show_viz_grid(
@@ -291,11 +297,11 @@ def plot_metamap_with_scores_tsne(
 ):
     ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
     score_config = [
-        ScoreConfig("perplexity", "Perplexity in log-scale", "Greys_r"),
+        ScoreConfig("qij", "Constraint score", "Greens"),
         ScoreConfig("bic", "BIC score", "Purples_r"),
         ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
-        ScoreConfig("qij", "Constraint score", "Greens"),
-    ]
+        ScoreConfig("perplexity", "Perplexity in log-scale", "bone"),
+    ]  # perplexity should be in the last of this list, since we have to get list_params first
 
     perp_values = []
     all_scores = []
@@ -313,11 +319,14 @@ def plot_metamap_with_scores_tsne(
     X = StandardScaler().fit_transform(X)
     Z = meta_umap(X, meta_n_neighbors)
 
-    fig, axes = plt.subplots(1, 4, figsize=(16, 4))
-    for config, scores, ax in zip(score_config, all_scores, axes.ravel()):
+    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(20, 5))
+    # note: roll axes to make subfigure for perplexity being moved from last to first
+    for config, scores, ax in zip(score_config, all_scores, [ax1, ax2, ax3, ax0]):
         score_name, score_title, score_cmap = config
 
-        if score_name != "perplexity":
+        if score_name == "perplexity":
+            Z_highlight, Z_best = None, None
+        else:
             if score_name == "bic":
                 pivot = (1.0 + (1.0 - threshold)) * min(scores)
                 (best_indices,) = np.where(scores < pivot)
@@ -328,8 +337,6 @@ def plot_metamap_with_scores_tsne(
                 best_idx = np.argmax(scores)
             Z_highlight = Z[best_indices]
             Z_best = Z[best_idx]
-        else:
-            Z_highlight, Z_best = None, None
 
         _simple_scatter_with_colorbar(
             ax,
@@ -354,13 +361,6 @@ def plot_metamap_with_scores_umap(
     n_labels_each_class=10,
     threshold=0.96,
 ):
-    ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
-    score_config = [
-        ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
-        ScoreConfig("qij", "Constraint score", "Greens"),
-        ScoreConfig("n_neighbors", "n_neighbors in log-scale", "Greys_r"),
-    ]
-
     df_qij = pd.read_csv(f"{score_dir}/qij/umap_scores.csv")
     qij_scores = df_qij["qij_score"].to_numpy()
     n_params = df_qij.shape[0]
@@ -369,7 +369,7 @@ def plot_metamap_with_scores_umap(
 
     df_metrics = pd.read_csv(f"{score_dir}/qij/umap_metrics.csv")
     assert n_params == df_metrics.shape[0]
-    rnx_scores = df_metrics["auc_rnx"]
+    rnx_scores = df_metrics["auc_rnx"].to_numpy()
 
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
     assert n_params == len(all_embeddings)
@@ -379,46 +379,41 @@ def plot_metamap_with_scores_umap(
     X = StandardScaler().fit_transform(X)
     Z = meta_umap(X, meta_n_neighbors)
 
-    fig, [ax0, ax1, ax2] = plt.subplots(1, 3, figsize=(20, 8))
-
-    # plot metamap, colored by n_neighbors and sized by min_dist
-    _scatter_with_colorbar_and_legend_size(
-        ax0,
-        Z,
-        labels=np.log(list_n_neighbors),
-        sizes=MinMaxScaler((10, 90)).fit_transform(list_min_dist.reshape(-1, 1)),
-        title="n_neighbors in log-scale",
-        cmap_name="Greys_r",
-        Z_highlight=None,
-        Z_best=None,
+    ScoreConfig = namedtuple(
+        "ScoreConfig", ["score_name", "score_title", "score_cmap", "score_values"]
     )
+    score_config = [
+        ScoreConfig(
+            "n_neighbors", "n_neighbors in log-scale", "bone", np.log(list_n_neighbors)
+        ),
+        ScoreConfig("qij", "Constraint score in log-scale", "Greens", qij_scores),
+        ScoreConfig("rnx", "$AUC_{log}RNX$ in log-scale", "Blues", rnx_scores),
+    ]
 
-    # for config, scores, ax in zip(score_config, all_scores, axes.ravel()):
-    #     score_name, score_title, score_cmap = config
+    fig, axes = plt.subplots(1, 3, figsize=(21, 10))
+    for config, ax in zip(score_config, axes.ravel()):
+        score_name, score_title, score_cmap, score_values = config
 
-    #     if score_name != "n_neighbors":
-    #         if score_name == "bic":
-    #             pivot = (1.0 + (1.0 - threshold)) * min(scores)
-    #             (best_indices,) = np.where(scores < pivot)
-    #             best_idx = np.argmin(scores)
-    #         else:
-    #             pivot = threshold * scores.max()
-    #             (best_indices,) = np.where(scores > pivot)
-    #             best_idx = np.argmax(scores)
-    #         Z_highlight = Z[best_indices]
-    #         Z_best = Z[best_idx]
-    #     else:
-    #         Z_highlight, Z_best = None, None
+        if score_name == "n_neighbors":
+            best_indices, best_idx = None, None
+            show_legend = True
+        else:
+            pivot = threshold * score_values.max()
+            (best_indices,) = np.where(score_values > pivot)
+            best_idx = np.argmax(score_values)
+            show_legend = False
 
-    #     _simple_scatter_with_colorbar(
-    #         ax,
-    #         Z,
-    #         labels=scores,
-    #         title=score_title,
-    #         cmap_name=score_cmap,
-    #         Z_highlight=Z_highlight,
-    #         Z_best=Z_best,
-    #     )
+        _scatter_with_colorbar_and_legend_size(
+            ax,
+            Z,
+            labels=score_values,
+            sizes=MinMaxScaler((30, 100)).fit_transform(list_min_dist.reshape(-1, 1)),
+            title=score_title,
+            cmap_name=score_cmap,
+            best_indices=best_indices,
+            best_idx=best_idx,
+            show_legend=show_legend,
+        )
 
     fig.tight_layout()
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
