@@ -446,7 +446,12 @@ def annotate_selected_values(ax, list_values, list_positions):
             xycoords="data",
             xytext=(i * 0.175, -0.075),
             textcoords="axes fraction",
-            arrowprops=dict(arrowstyle="->", connectionstyle="angle,angleA=0,angleB=90,rad=5"),
+            arrowprops=dict(
+                arrowstyle="->",
+                linestyle="--",
+                color="blue",
+                connectionstyle="angle,angleA=0,angleB=90,rad=5",
+            ),
             fontsize=18,
         )
 
