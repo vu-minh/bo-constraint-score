@@ -90,32 +90,29 @@ def _generate_log_range(min_val=2, max_val=1000, num=150, dtype=int, base=math.e
     return np.unique(range_values[np.where(range_values >= min_val)])
 
 
-def _get_bic_score(score_dir):
-    with open(f"{score_dir}/bic/BIC.txt", "r") as in_file_bic:
-        bic_data = json.load(in_file_bic)
-        list_params = list(map(int, bic_data["list_params"]))
-        bic_score = np.array(bic_data["bic"])
-    return list_params, bic_score
+def get_scores_tsne(score_name, score_dir):
+    def _get_bic_score(score_dir):
+        with open(f"{score_dir}/bic/BIC.txt", "r") as in_file_bic:
+            bic_data = json.load(in_file_bic)
+            list_params = list(map(int, bic_data["list_params"]))
+            bic_score = np.array(bic_data["bic"])
+        return list_params, bic_score
 
+    def _get_rnx_score(score_dir):
+        with open(f"{score_dir}/metrics/metrics.txt", "r") as in_file_metric:
+            metrics_data = json.load(in_file_metric)
+            list_params = list(map(int, metrics_data["list_params"]))
+            rnx_score = np.array(metrics_data["auc_rnx"])
+        return list_params, rnx_score
 
-def _get_rnx_score(score_dir):
-    with open(f"{score_dir}/metrics/metrics.txt", "r") as in_file_metric:
-        metrics_data = json.load(in_file_metric)
-        list_params = list(map(int, metrics_data["list_params"]))
-        rnx_score = np.array(metrics_data["auc_rnx"])
-    return list_params, rnx_score
+    def _get_qij_score(score_dir, n_labels_each_class=10):
+        with open(f"{score_dir}/qij/dof1.0_all.txt", "r") as in_file_qij:
+            qij_score_data = json.load(in_file_qij)
+            list_params = list(map(int, qij_score_data["list_params"]))
+            all_scores = qij_score_data["all_scores"]
+            qij_score = np.mean(all_scores[str(n_labels_each_class)], axis=0)
+        return list_params, qij_score
 
-
-def _get_qij_score(score_dir, n_labels_each_class=10):
-    with open(f"{score_dir}/qij/dof1.0_all.txt", "r") as in_file_qij:
-        qij_score_data = json.load(in_file_qij)
-        list_params = list(map(int, qij_score_data["list_params"]))
-        all_scores = qij_score_data["all_scores"]
-        qij_score = np.mean(all_scores[str(n_labels_each_class)], axis=0)
-    return list_params, qij_score
-
-
-def get_scores(score_name, score_dir):
     return {
         "qij": partial(_get_qij_score, score_dir=score_dir, n_labels_each_class=10),
         "rnx": partial(_get_rnx_score, score_dir=score_dir),
