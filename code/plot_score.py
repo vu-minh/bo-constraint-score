@@ -347,8 +347,7 @@ def plot_compare_qij_rnx_bic(
 
         # find best param range
         if title == "BIC":  # need to find the min
-            threshold = 1.0 + (1.0 - threshold)
-            pivot = threshold * min(score_data)
+            pivot = (1.0 + (1.0 - threshold)) * min(score_data)
             (best_indices,) = np.where(score_data < pivot)
             param_best = list_params[np.argmin(score_data)]
         else:  # need to find the max
