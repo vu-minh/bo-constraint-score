@@ -151,7 +151,7 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
 	    #    run_score_umap_2D $DATASET_NAME
      #    fi
 
-        # plot_compare_scores $DATASET_NAME $METHOD
+        plot_compare_scores $DATASET_NAME $METHOD
         gen_metamap $DATASET_NAME $METHOD
     done
 done

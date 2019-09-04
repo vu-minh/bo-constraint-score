@@ -3,7 +3,7 @@
 # Generate all figures,
 # then copy them from code folder to tex/figures folder
 
-LIST_DATASETS=("DIGITS" "COIL20" "FASHION1000" "FASHION_MOBILENET" "NEURON_1K") # "20NEWS5"
+LIST_DATASETS=("DIGITS" "COIL20" "FASHION1000" "FASHION_MOBILENET" "NEURON_1K" "20NEWS5")
 LIST_METHODS=("tsne" "umap")
 TARGET_DIR="../tex/figures"
 
