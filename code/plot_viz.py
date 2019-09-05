@@ -1,6 +1,7 @@
 # plot metamap (meta tsne) for all vizs of a dataset
 
 import os
+import re
 import math
 import joblib
 from itertools import product
@@ -9,6 +10,8 @@ from collections import namedtuple
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+# from matplotlib import rc
 from matplotlib import cm
 from matplotlib import ticker
 from common.dataset import dataset
@@ -18,10 +21,6 @@ from MulticoreTSNE import MulticoreTSNE
 from umap import UMAP
 
 from utils import get_scores_tsne
-
-
-# note to make big font size for plots in the paper
-plt.rcParams.update({"font.size": 20})
 
 
 def plot_2_labels(Z, labels, other_labels, out_name):
@@ -64,9 +63,10 @@ def plot_test_vis(
         plot_2_labels(Z, labels, None, out_name)
 
 
-def _simple_scatter(ax, Z, labels=None, title="", axis_off=True):
+def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=True):
     ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap="Spectral", s=6)
-    ax.set_title(title)
+    ax.set_title(title, loc="center")
+    ax.text(x=-0.05, y=-0.05, s=comment, transform=ax.transAxes, ha="left", va="bottom")
     if axis_off:
         ax.axis("off")
 
@@ -180,7 +180,7 @@ def show_viz_grid(
     dataset_name, method_name, labels=None, plot_dir="", embedding_dir="", list_params=[]
 ):
     n_viz = len(list_params)
-    n_rows, n_cols = math.ceil(n_viz / 3), 3
+    n_rows, n_cols = math.ceil(n_viz / 4), 4
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 4))
 
     for i, (params, ax) in enumerate(zip(list_params, axes.ravel())):
@@ -190,12 +190,13 @@ def show_viz_grid(
         else:
             param_key = str(params[0])
             param_explanation = f"perplexity={params[0]}"
-        comment = f"{params[-1]}, {param_explanation}"
-        print(i, comment)
+        comment = f"{params[-1]}"
+        print(i, comment, param_explanation)
         Z = joblib.load(f"{embedding_dir}/{param_key}.z")
-        _simple_scatter(ax, Z, labels, title=comment)
+        _simple_scatter(ax, Z, labels, title=param_explanation, comment=comment)
 
     fig.tight_layout()
+    fig.subplots_adjust(left=0.05, hspace=0.1)
     fig.savefig(f"{plot_dir}/show.png")
     plt.close()
 
@@ -376,14 +377,17 @@ def plot_metamap_with_scores_umap(
     df_qij = pd.read_csv(f"{score_dir}/qij/umap_scores.csv")
     qij_scores = df_qij["qij_score"].to_numpy()
     n_params = df_qij.shape[0]
+    print("Number of qij scores: ", n_params)
     list_n_neighbors = df_qij["n_neighbors"].to_numpy()
     list_min_dist = df_qij["min_dist"].to_numpy()
 
     df_metrics = pd.read_csv(f"{score_dir}/qij/umap_metrics.csv")
+    print("Number of metric scores: ", df_metrics.shape)
     assert n_params == df_metrics.shape[0]
     rnx_scores = df_metrics["auc_rnx"].to_numpy()
 
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
+    print("Number of embeddings: ", len(all_embeddings))
     assert n_params == len(all_embeddings)
 
     X = np.array(list(map(np.ravel, all_embeddings.values())))
@@ -495,15 +499,45 @@ def annotate_selected_params_umap(ax, list_annotations):
 
 
 def get_params_to_show(dataset_name, method_name):
-    return {
+    symbol_map = {"++": "⇧⇧", "+": " ⇧", "=": " ▯", "-": " ⇩", "--": "⇩⇩", "": "  "}
+
+    method_text_map = {
+        "qij": "$f_{score}$",
+        "rnx": "$AUC_{log}RNX$",
+        "bic": "BIC",
+        "prediction": "☆ Best prediction",
+        "all": "All scores",
+        "": "",
+    }
+
+    def transform_text(text):
+        res = []
+        for s in text.split():
+            s = s.strip()
+            m = re.compile("([+-=]*)([a-z]*)")
+            g = m.match(s)
+            if g:
+                symbol, method_text = g.groups()
+                res.append(f"{symbol_map[symbol]:>3} {method_text_map[method_text]}")
+            else:
+                print("[Deubg] Invalid selected param: ", s, text)
+        return "\n".join(res)
+
+    def transform_list_items(list_items):
+        transformed_list = []
+        for *p, text in list_items:
+            print(*p, text)
+            transformed_list.append((*p, transform_text(text)))
+        return transformed_list
+
+    config_params = {
         "20NEWS5": {
             "umap": [
-                (15, 0.2154, "++RNX"),
+                (15, 0.2154, "++rnx"),
                 (134, 0.001, "++qij"),
-                (147, 0.01, "predict"),
-                (126, 0.1, "default"),
-                (86, 0.0464, "+qij, =RNX"),
-                (7, 0.1, "++RNX, --qij"),
+                (147, 0.01, "prediction"),
+                (86, 0.0464, "+qij, =rnx"),
+                (7, 0.1, "++rnx, --qij"),
             ],
             "tsne": {
                 (114, "++qij, +bic, -rnx"),
@@ -516,7 +550,7 @@ def get_params_to_show(dataset_name, method_name):
         },
         "DIGITS": {
             "tsne": [
-                (50, "++qij, ++bic, predict"),
+                (50, "++qij, ++bic, prediction"),
                 (14, "++rnx, -qij, -bic"),
                 (22, "+qij, +rnx, -bic"),
                 (76, "+qij, -rnx, +bic"),
@@ -525,19 +559,19 @@ def get_params_to_show(dataset_name, method_name):
             ],
             "umap": {
                 (5, 0.001, "++rnx, -qij"),
-                (11, 0.01, "++qij, +rnx, predict"),
+                (11, 0.01, "++qij, +rnx, prediction"),
                 (401, 0.0464, "--qij, +rnx"),
             },
         },
         "COIL20": {
-            "tsne": [(36, "++qij, +rnx +bic, predict"), (5, "---"), (142, "+rnx, --")],
+            "tsne": [(36, "++qij, +rnx +bic, prediction"), (5, "--all"), (142, "+rnx, --")],
             "umap": [
                 (4, 0.4642, "++rnx, --qij"),
                 (9, 0.0022, "++qij, =rnx"),
-                (13, 0.001, "predict, +qij, =rnx"),
+                (13, 0.001, "prediction, +qij, =rnx"),
                 (150, 0.01, "--qij, =rnx"),
                 (20, 0.0464, "=qij, =rnx"),
-                (3, 0.0179, "---"),
+                (3, 0.0179, "--all"),
             ],
         },
         "NEURON_1K": {
@@ -546,7 +580,7 @@ def get_params_to_show(dataset_name, method_name):
                 # (13, "++rnx , --qij, -bic"),
                 # (40, "+rnx, +qij, +bic"),
                 (106, "+qij, +bic, -rnx"),
-                (150, "---"),
+                (150, "--all"),
             ],
             "umap": [
                 (16, 0.001, "prediction, ++qij, +rnx"),
@@ -566,7 +600,19 @@ def get_params_to_show(dataset_name, method_name):
                 (310, 0.1, "="),
             ],
         },
-    }[dataset_name][method_name]
+        "FASHION1000": {
+            "tsne": [(36, "++qij, prediction"), (10, "++rnx"), (80, "+bic"), (220, "--all")],
+            "umap": [
+                (4, 0.01, "++qij, prediction"),
+                (4, 0.2154, "++rnx, +qij"),
+                (50, 0.1, ""),
+                (150, 0.4642, "-qij, +rnx"),
+            ],
+        },
+    }
+
+    params = config_params[dataset_name][method_name]
+    return transform_list_items(params)
 
 
 if __name__ == "__main__":
@@ -587,6 +633,9 @@ if __name__ == "__main__":
     dataset_name = args.dataset_name
     method_name = args.method_name
 
+    # print(get_params_to_show(dataset_name, method_name))
+    # sys.exit(0)
+
     X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method="auto")
 
     other_label_name = args.use_other_label
@@ -601,6 +650,9 @@ if __name__ == "__main__":
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
     plot_dir = f"./plots/{dataset_name}/{method_name}"
     score_dir = f"./scores/{dataset_name}/{method_name}"
+
+    # note to make big font size for plots in the paper
+    plt.rcParams.update({"font.size": 12})
 
     if args.plot_test_vis:
         plot_test_vis(X, dataset_name, plot_dir, embedding_dir, labels, other_labels)

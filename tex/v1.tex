@@ -393,7 +393,7 @@ To present and analyze the results, we can present following points (but we stil
 ~
 \begin{subfigure}[b]{0.32\textwidth}
     \includegraphics[width=\textwidth]{20NEWS5_umap_compare_scores}
-    \caption{20NEWS5 (TODO)}
+    \caption{20NEWS5}
 \end{subfigure}
 
 \caption{Comparing constraint score and $AUC_{log}RNX$ score for the embeddings of UMAP with fixed \texttt{min\_dist=0.1}.}
@@ -668,3 +668,175 @@ They can also manualy select the next hyperparameters to evaluate in a customize
 (b) Integrate directly the pairwise constraints into the optimization process of BayOpt.
 BayOpt is now used as a generic toolbox to find the extreme of a blackbox costly objective function.
 Our idea is to use the pairwise constraint to modify the kernel in the covariance function of Gaussian Process model, which is the core element of BayOpt.
+
+
+% temp figures
+
+\newpage
+
+
+\begin{figure*}
+\centering
+
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{DIGITS_tsne_compare_scores}
+    \caption{DIGITS}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{COIL20_tsne_compare_scores}
+    \caption{COIL20}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{NEURON_1K_tsne_compare_scores}
+    \caption{NEURON\_1K}
+\end{subfigure}
+
+\vfill
+
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{FASHION1000_tsne_compare_scores}
+    \caption{FASHION1000}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{FASHION_MOBILENET_tsne_compare_scores}
+    \caption{FASHION\_MOBILENET}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{20NEWS5_tsne_compare_scores}
+    \caption{20NEWS5 (TODO)}
+\end{subfigure}
+
+\caption{Comparing constraint score, $AUC_{log}RNX$ score and BIC score for the embeddings of tSNE.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{DIGITS_umap_compare_scores}
+    \caption{DIGITS}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{COIL20_umap_compare_scores}
+    \caption{COIL20}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{NEURON_1K_umap_compare_scores}
+    \caption{NEURON\_1K}
+\end{subfigure}
+
+\vfill
+
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{FASHION1000_umap_compare_scores}
+    \caption{FASHION1000}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{FASHION_MOBILENET_umap_compare_scores}
+    \caption{FASHION\_MOBILENET}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{20NEWS5_umap_compare_scores}
+    \caption{20NEWS5}
+\end{subfigure}
+
+\caption{Comparing constraint score and $AUC_{log}RNX$ score for the embeddings of UMAP with fixed \texttt{min\_dist=0.1}.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{DIGITS_tsne_metamap}.png}
+\caption{Metamap for tSNE embeddings of DIGITS dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{COIL20_tsne_metamap}.png}
+\caption{Metamap for tSNE embeddings of COIL20 dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{FASHION1000_tsne_metamap}.png}
+\caption{Metamap for tSNE embeddings of FASHION1000 dataset.}\label{fig:meta:f1k}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{FASHION_MOBILENET_tsne_metamap}.png}
+\caption{Metamap for tSNE embeddings of FASHION\_MOBILENET dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{20NEWS5_tsne_metamap}.png}
+\caption{Metamap for tSNE embeddings of 20NEWS5 dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{NEURON_1K_tsne_metamap}.png}
+\caption{Metamap for tSNE embeddings of NEURON\_1K dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{DIGITS_umap_metamap}.png}
+\caption{Metamap for umap embeddings of DIGITS dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{COIL20_umap_metamap}.png}
+\caption{Metamap for umap embeddings of COIL20 dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{FASHION1000_umap_metamap}.png}
+\caption{Metamap for umap embeddings of FASHION1000 dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{FASHION_MOBILENET_umap_metamap}.png}
+\caption{Metamap for umap embeddings of FASHION\_MOBILENET dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{20NEWS5_umap_metamap}.png}
+\caption{Metamap for umap embeddings of 20NEWS5 dataset.}
+\end{figure*}
+
+
+\begin{figure*}
+\centering
+\includegraphics[width=\textwidth]{{NEURON_1K_umap_metamap}.png}
+\caption{Metamap for umap embeddings of NEURON\_1K dataset.}
+\end{figure*}
+

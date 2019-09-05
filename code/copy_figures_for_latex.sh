@@ -40,14 +40,18 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
         cp plots/${DATASET_NAME}/${METHOD}/plot_compare.png \
            ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_compare_scores.png
 
-
-        # # (5) figures metamap
-        echo "COPY METAMAP: " $DATASET_NAME $METHOD
-        cp plots/${DATASET_NAME}/${METHOD}/metamap_scores_200.png \
-           ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_metamap.png
     done
-done
 
+    # # (5) figures metamap
+    echo "COPY METAMAP: " $DATASET_NAME "tsne"
+    cp plots/${DATASET_NAME}/tsne/metamap_scores_50.png \
+       ${TARGET_DIR}/${DATASET_NAME}_tsne_metamap.png
+
+    echo "COPY METAMAP: " $DATASET_NAME "umap"
+    cp plots/${DATASET_NAME}/umap/metamap_scores_200.png \
+       ${TARGET_DIR}/${DATASET_NAME}_umap_metamap.png
+
+done
 
 # # (5) 
 
