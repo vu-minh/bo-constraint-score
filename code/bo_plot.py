@@ -11,10 +11,6 @@ from bayes_opt import UtilityFunction
 from utils import generate_value_range
 
 
-# note to make big font size for plots in the paper
-plt.rcParams.update({"font.size": 22})
-
-
 def _plot_acq_func(ax, util_func, list_params, utility_values, next_best_guess_param):
     ax.plot(list_params, utility_values, color="green", label=f"{util_func.upper()} function")
     ax.axvline(
@@ -315,6 +311,8 @@ def plot_density_2D(
     log_dir: str = "",
     score_dir: str = "",
     plot_dir: str = "",
+    contour_levels=10,
+    contour_cmap="YlGn",
 ):
     # plot contour/contourf guide:
     # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
@@ -345,8 +343,8 @@ def plot_density_2D(
     ax.set_title(f"[{dataset_name}] {title} for UMAP embeddings")
 
     # contour for score
-    ax.contour(X, Y, Z, levels=10, linewidths=0.5, colors="k")
-    cntr1 = ax.contourf(X, Y, Z, levels=10, cmap="YlGn")
+    ax.contour(X, Y, Z, levels=contour_levels, linewidths=0.5, colors="k")
+    cntr1 = ax.contourf(X, Y, Z, levels=contour_levels, cmap=contour_cmap)
     fig.colorbar(cntr1, ax=ax)
 
     # grid of sampled points
@@ -381,6 +379,8 @@ def plot_prediction_density_2D(
     log_dir: str = "",
     score_dir: str = "",
     plot_dir: str = "",
+    contour_levels=10,
+    contour_cmap="YlGn",
 ):
     # plot contour/contourf guide:
     # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
@@ -424,15 +424,19 @@ def plot_prediction_density_2D(
     ax.plot(X, Y, ".w", ms=0.5)
 
     # contour for the prediction (in linear space)
-    ax.contour(X, Y, Z, levels=10, linewidths=0.5, colors="k")
-    cntr1 = ax.contourf(X, Y, Z, levels=10, cmap="YlGn")
+    ax.contour(X, Y, Z, levels=contour_levels, linewidths=0.5, colors="k")
+    cntr1 = ax.contourf(X, Y, Z, levels=contour_levels, cmap=contour_cmap)
 
     # scatter plot the selected points in optimizer
     # encode their score values as color
     # the observations selected by optimizer._gp are in log space
     # they must be transformed to linear space by np.exp
     ax.scatter(
-        np.exp(X_obs[:, 1]), np.exp(X_obs[:, 0]), c=y_obs, cmap="YlGn", edgecolors="white"
+        np.exp(X_obs[:, 1]),
+        np.exp(X_obs[:, 0]),
+        c=y_obs,
+        cmap=contour_cmap,
+        edgecolors="white",
     )
 
     # evaluate the correctness of the viz by evaluating the corresponding color
@@ -511,6 +515,9 @@ def plot_prediction_density_2D(
 
 
 if __name__ == "__main__":
+    # note to make big font size for plots in the paper
+    plt.rcParams.update({"font.size": 10})
+
     dataset_name = "FASHION1000"
     method_name = "umap"
     score_name = "qij"
