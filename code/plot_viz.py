@@ -201,90 +201,102 @@ def show_viz_grid(
     plt.close()
 
 
-def meta_tsne(X, meta_perplexity=30):
-    return MulticoreTSNE(
-        perplexity=meta_perplexity,
-        n_iter=1500,
-        n_jobs=-1,
-        random_state=42,
-        n_iter_without_progress=1500,
-        min_grad_norm=1e-32,
-    ).fit_transform(X)
-
-
-def meta_umap(X, meta_n_neighbors=10):
-    return UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=1024).fit_transform(X)
-
-
-def get_all_embeddings(embedding_dir, ignore_new_files=False):
-    found = False
-    if ignore_new_files:
-        # if os.path.exists(f"{embedding_dir}/all_updated.z"):
-        #     all_embeddings = joblib.load(f"{embedding_dir}/all_updated.z")
-        #     found = True
-        if os.path.exists(f"{embedding_dir}/all.z"):
-            all_embeddings = joblib.load(f"{embedding_dir}/all.z")
-            found = True
-
-    if not found:
-        print(f"Walk {embedding_dir}")
-        all_embeddings = {}
-        for dirname, _, filenames in os.walk(embedding_dir):
-            for filename in filenames:
-                if filename.startswith(("all", "meta")):
-                    continue
-                elif filename.endswith(".z"):
-                    Z = joblib.load(os.path.join(dirname, filename))
-                    all_embeddings[filename[:-2]] = Z
-        joblib.dump(all_embeddings, f"{embedding_dir}/all_updated.z")
-    return all_embeddings
-
-
-def create_metamap(method_name, meta_perplexity, embedding_dir, ignore_new_files):
-    all_embeddings = get_all_embeddings(embedding_dir, ignore_new_files)
-    print("All embeddings: ", len(all_embeddings))
-
-    # convert the dict of embeddings hashed by param into numpy array
-    X = np.array(list(map(np.ravel, all_embeddings.values())))
-    print(X.shape)
-    Z = meta_tsne(X, meta_perplexity)
-
-    # extract params values from key names and use them as labels
-    if method_name == "umap":
-        labels1, labels2 = zip(*[k.split("_") for k in all_embeddings.keys()])
+def meta_tsne(X, meta_perplexity=30, cache=False, embedding_dir=""):
+    if cache:
+        Z = joblib.load(f"{embedding_dir}/metamap{meta_perplexity}.z")
     else:
-        labels1, labels2 = list(all_embeddings.keys()), None
-    labels1 = np.array(list(map(float, labels1)))
-    if labels2 is not None:
-        labels2 = np.array(list(map(lambda s: float(s) * 100, labels2)))
-    res = {"Z": Z, "labels1": labels1, "labels2": labels2}
-    joblib.dump(res, f"{embedding_dir}/metamap{meta_perplexity}.z")
-    return res
+        Z = MulticoreTSNE(
+            perplexity=meta_perplexity,
+            n_iter=1500,
+            n_jobs=-1,
+            random_state=42,
+            n_iter_without_progress=1500,
+            min_grad_norm=1e-32,
+        ).fit_transform(X)
+        joblib.dump(Z, f"{embedding_dir}/metamap{meta_perplexity}.z")
+    return Z
 
 
-def plot_metamap(
-    dataset_name,
-    method_name,
-    plot_dir="",
-    embeddinging_dir="",
-    meta_perplexity=10,
-    ignore_new_files=False,
-):
-    # run tsne to create metamap
-    meta_name = f"{embedding_dir}/metamap{meta_perplexity}.z"
-    if ignore_new_files and os.path.exists(meta_name):
-        metamap = joblib.load(meta_name)
+def meta_umap(X, meta_n_neighbors=15, cache=False, embedding_dir=""):
+    if cache:
+        Z = joblib.load(f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     else:
-        metamap = create_metamap(
-            method_name, meta_perplexity, embedding_dir, ignore_new_files=True
-        )
-    Z, labels1, labels2 = metamap.values()
+        Z = UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=24).fit_transform(X)
+        joblib.dump(Z, f"{embedding_dir}/metamap{meta_n_neighbors}.z")
+    return Z
 
-    # plot metamap
-    fig, ax = plt.subplots(1, 1, figsize=(12, 12))
-    scatter = ax.scatter(Z[:, 0], Z[:, 1], c=labels1, s=labels2, cmap="PuBu", alpha=0.8)
-    fig.colorbar(scatter)
-    fig.savefig(f"{plot_dir}/metamap_{meta_perplexity}.png")
+
+# def get_all_embeddings(embedding_dir, ignore_new_files=False):
+#     found = False
+#     if ignore_new_files:
+#         # if os.path.exists(f"{embedding_dir}/all_updated.z"):
+#         #     all_embeddings = joblib.load(f"{embedding_dir}/all_updated.z")
+#         #     found = True
+#         if os.path.exists(f"{embedding_dir}/all.z"):
+#             all_embeddings = joblib.load(f"{embedding_dir}/all.z")
+#             found = True
+
+#     if not found:
+#         print(f"Walk {embedding_dir}")
+#         all_embeddings = {}
+#         for dirname, _, filenames in os.walk(embedding_dir):
+#             for filename in filenames:
+#                 if filename.startswith(("all", "meta")):
+#                     continue
+#                 elif filename.endswith(".z"):
+#                     Z = joblib.load(os.path.join(dirname, filename))
+#                     all_embeddings[filename[:-2]] = Z
+#         joblib.dump(all_embeddings, f"{embedding_dir}/all_updated.z")
+#     return all_embeddings
+
+
+# def create_metamap(
+#     method_name, meta_perplexity, embedding_dir, ignore_new_files, use_cache=False
+# ):
+#     all_embeddings = get_all_embeddings(embedding_dir, ignore_new_files)
+#     print("All embeddings: ", len(all_embeddings))
+
+#     # convert the dict of embeddings hashed by param into numpy array
+#     X = np.array(list(map(np.ravel, all_embeddings.values())))
+#     print(X.shape)
+#     Z = meta_tsne(X, meta_perplexity, cache=use_cache, embedding_dir=embedding_dir)
+
+#     # extract params values from key names and use them as labels
+#     if method_name == "umap":
+#         labels1, labels2 = zip(*[k.split("_") for k in all_embeddings.keys()])
+#     else:
+#         labels1, labels2 = list(all_embeddings.keys()), None
+#     labels1 = np.array(list(map(float, labels1)))
+#     if labels2 is not None:
+#         labels2 = np.array(list(map(lambda s: float(s) * 100, labels2)))
+#     res = {"Z": Z, "labels1": labels1, "labels2": labels2}
+#     joblib.dump(res, f"{embedding_dir}/metamap{meta_perplexity}.z")
+#     return res
+
+
+# def plot_metamap(
+#     dataset_name,
+#     method_name,
+#     plot_dir="",
+#     embeddinging_dir="",
+#     meta_perplexity=10,
+#     ignore_new_files=False,
+# ):
+#     # run tsne to create metamap
+#     meta_name = f"{embedding_dir}/metamap{meta_perplexity}.z"
+#     if ignore_new_files and os.path.exists(meta_name):
+#         metamap = joblib.load(meta_name)
+#     else:
+#         metamap = create_metamap(
+#             method_name, meta_perplexity, embedding_dir, ignore_new_files=True
+#         )
+#     Z, labels1, labels2 = metamap.values()
+
+#     # plot metamap
+#     fig, ax = plt.subplots(1, 1, figsize=(12, 12))
+#     scatter = ax.scatter(Z[:, 0], Z[:, 1], c=labels1, s=labels2, cmap="PuBu", alpha=0.8)
+#     fig.colorbar(scatter)
+#     fig.savefig(f"{plot_dir}/metamap_{meta_perplexity}.png")
 
 
 def plot_metamap_with_scores_tsne(
@@ -292,9 +304,10 @@ def plot_metamap_with_scores_tsne(
     plot_dir,
     embedding_dir,
     score_dir,
-    meta_n_neighbors=50,
+    meta_n_neighbors=20,
     n_labels_each_class=10,
     threshold=0.96,
+    use_cache=False,
 ):
     ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
     score_config = [
@@ -319,9 +332,9 @@ def plot_metamap_with_scores_tsne(
     X = np.array(list(map(np.ravel, X)))
     print("Metamap input data: ", X.shape)
     X = StandardScaler().fit_transform(X)
-    Z = meta_umap(X, meta_n_neighbors)
+    Z = meta_umap(X, meta_n_neighbors, cache=use_cache, embedding_dir=embedding_dir)
 
-    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(20, 5))
+    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(20, 7))
     # note: roll axes to make subfigure for perplexity being moved from last to first
     for config, scores, ax in zip(score_config, all_scores, [ax1, ax2, ax3, ax0]):
         score_name, score_title, score_cmap = config
@@ -361,6 +374,7 @@ def plot_metamap_with_scores_tsne(
             list_annotations.append((perplexity, *pos[0]))
     annotate_selected_params_tsne(ax0, list_annotations)
 
+    plt.subplots_adjust(left=0.05)
     fig.tight_layout()
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
 
@@ -373,6 +387,7 @@ def plot_metamap_with_scores_umap(
     meta_n_neighbors=200,
     n_labels_each_class=10,
     threshold=0.96,
+    use_cache=False,
 ):
     df_qij = pd.read_csv(f"{score_dir}/qij/umap_scores.csv")
     qij_scores = df_qij["qij_score"].to_numpy()
@@ -393,7 +408,7 @@ def plot_metamap_with_scores_umap(
     X = np.array(list(map(np.ravel, all_embeddings.values())))
     print("Metamap input data: ", X.shape)
     X = StandardScaler().fit_transform(X)
-    Z = meta_umap(X, meta_n_neighbors)
+    Z = meta_umap(X, meta_n_neighbors, cache=use_cache, embedding_dir=embedding_dir)
 
     ScoreConfig = namedtuple(
         "ScoreConfig", ["score_name", "score_title", "score_cmap", "score_values"]
@@ -627,6 +642,7 @@ if __name__ == "__main__":
     ap.add_argument("--plot_test_vis", action="store_true")
     ap.add_argument("--show_viz_grid", action="store_true")
     ap.add_argument("--plot_metamap", action="store_true")
+    ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
 
     dataset.set_data_home("./data")
@@ -668,8 +684,8 @@ if __name__ == "__main__":
         plot_metamap_func = {
             "tsne": plot_metamap_with_scores_tsne,
             "umap": plot_metamap_with_scores_umap,
-        }.get(
-            method_name, plot_metamap
-        )  # simple metamap plot version
-        plot_metamap_func(dataset_name, plot_dir, embedding_dir, score_dir)
+        }[method_name]
+        plot_metamap_func(
+            dataset_name, plot_dir, embedding_dir, score_dir, use_cache=args.debug
+        )
         sys.exit(0)
