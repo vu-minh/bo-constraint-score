@@ -358,7 +358,7 @@ def plot_metamap_with_scores_tsne(
         if perplexity in perp_values:
             pos = Z[np.where(perp_values == perplexity)]
             list_annotations.append((perplexity, *pos[0]))
-    annotate_selected_values(ax0, list_annotations)
+    annotate_selected_params_tsne(ax0, list_annotations)
 
     fig.tight_layout()
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
@@ -427,11 +427,26 @@ def plot_metamap_with_scores_umap(
             show_legend=show_legend,
         )
 
+    # ax0 show metamap colored by perplexity values.
+    # now show a list of selected perplexities.
+    list_selected_params = get_params_to_show(dataset_name, method_name="umap")
+    list_annotations = []
+    all_keys = list(all_embeddings.keys())
+    for param in list_selected_params:
+        n_neighbors, min_dist = param[0], param[1]
+        key = f"{n_neighbors}_{min_dist:.4f}"
+        if key in all_keys:
+            pos = Z[all_keys.index(key)]
+            list_annotations.append((n_neighbors, min_dist, *pos))
+        else:
+            print("Debug: params to show but not found: ", key)
+    annotate_selected_params_umap(axes[0], list_annotations)
+
     fig.tight_layout()
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
 
 
-def annotate_selected_values(ax, list_annotations):
+def annotate_selected_params_tsne(ax, list_annotations):
     print(list_annotations)
     # sort by x coordinate
     for i, (perp_val, pos_x, pos_y) in enumerate(sorted(list_annotations, key=lambda p: p[1])):
@@ -450,6 +465,32 @@ def annotate_selected_values(ax, list_annotations):
                 connectionstyle="angle,angleA=0,angleB=90,rad=10",
             ),
             fontsize=18,
+        )
+
+
+def annotate_selected_params_umap(ax, list_annotations):
+    print(list_annotations)
+    # sort by y coordinate
+    offset = 0.2  # 1.0 / len(list_annotations)
+    for i, (n_neighbors, min_dist, pos_x, pos_y) in enumerate(
+        sorted(list_annotations, key=lambda p: p[2])
+    ):
+        ax.scatter(pos_x, pos_y, marker="x", color="orange")
+        txt = f"{n_neighbors:>6},\n{min_dist:>5}"
+        # ax.annotate(txt, (pos_x, pos_y), fontsize=12)
+        ax.annotate(
+            txt,
+            xy=(pos_x, pos_y),
+            xycoords="data",
+            xytext=(0.9, 0.85 - i * offset),
+            textcoords="axes fraction",
+            arrowprops=dict(
+                arrowstyle="->",
+                linestyle="--",
+                color="#0047BB",
+                connectionstyle="angle,angleA=0,angleB=90,rad=10",
+            ),
+            fontsize=14,
         )
 
 
