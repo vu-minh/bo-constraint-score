@@ -221,7 +221,7 @@ def meta_umap(X, meta_n_neighbors=15, cache=False, embedding_dir=""):
     if cache:
         Z = joblib.load(f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     else:
-        Z = UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=24).fit_transform(X)
+        Z = UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=42).fit_transform(X)
         joblib.dump(Z, f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     return Z
 
