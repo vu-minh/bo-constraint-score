@@ -101,12 +101,12 @@ def _simple_scatter_with_colorbar(
 
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
     if Z_highlight is None and Z_best is None:
-        # nbins = math.floor(max(labels))
-        # tick_locator = ticker.MaxNLocator(nbins=nbins)
-        # cb.locator = tick_locator
-        # cb.update_ticks()
-        nbins = len(cb.ax.get_xticklabels())
-        cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(1, nbins + 1)])
+        nbins = math.floor(max(labels))
+        print("nbins: ", nbins)
+        tick_locator = ticker.MaxNLocator(nbins=nbins)
+        cb.locator = tick_locator
+        cb.update_ticks()
+        cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(nbins + 1)])
 
 
 def _scatter_with_colorbar_and_legend_size(
