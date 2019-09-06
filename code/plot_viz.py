@@ -62,24 +62,30 @@ def plot_test_vis(
         plot_2_labels(Z, labels, None, out_name)
 
 
-def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=True):
+def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=False):
     ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap="Spectral", s=6)
     ax.set_title(title, loc="center")
     ax.text(
-        x=1.05,
-        y=-0.05,
-        s=comment,
-        transform=ax.transAxes,
-        ha="right",
-        va="bottom",
-        fontsize=14,
+        x=1.0, y=0.0, s=comment, transform=ax.transAxes, ha="right", va="bottom", fontsize=14
     )
     if axis_off:
         ax.axis("off")
+    else:
+        ax.axes.get_yaxis().set_visible(False)
+        ax.axes.get_xaxis().set_visible(False)
+        for axis in ["top", "bottom", "left", "right"]:
+            ax.spines[axis].set_linewidth(0.25)
 
 
 def _simple_scatter_with_colorbar(
-    ax, Z, labels, title="", cmap_name="viridis", best_indices=None, best_idx=None
+    ax,
+    Z,
+    labels,
+    title="",
+    cmap_name="viridis",
+    best_indices=None,
+    best_idx=None,
+    debug_label=False,
 ):
     ax.axis("off")
     plot_for_score_values = best_indices is not None
@@ -130,7 +136,7 @@ def _simple_scatter_with_colorbar(
         cb.update_ticks()
         cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(nbins + 1)])
 
-    if not plot_for_score_values:
+    if debug_label and not plot_for_score_values:
         # debug show param in the metmap
         for s, (x, y) in zip(labels, Z):
             ax.text(x=x, y=y, s=str(int(math.exp(s))), fontsize=10)
@@ -146,6 +152,7 @@ def _scatter_with_colorbar_and_legend_size(
     best_indices=None,
     best_idx=None,
     show_legend=True,
+    debug_label=False,
 ):
     ax.axis("off")
     plot_for_score_values = best_indices is not None
@@ -213,13 +220,21 @@ def _scatter_with_colorbar_and_legend_size(
         cb.update_ticks()
         cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(nbins + 1)])
 
+    if debug_label and not plot_for_score_values:
+        # debug show param in the metmap
+        for i, (p1, p2, (x, y)) in enumerate(zip(labels, sizes, Z)):
+            if i % 85 == 0:
+                ax.text(x=x, y=y, s=str(i), fontsize=15, color="blue")
+        # test_idx = [170]
+        # print(labels[test_idx], sizes[test_idx])
+
 
 def show_viz_grid(
     dataset_name, method_name, labels=None, plot_dir="", embedding_dir="", list_params=[]
 ):
     n_viz = len(list_params)
     n_rows, n_cols = math.ceil(n_viz / 4), 4
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 4.5))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 4.75))
 
     for i, (params, ax) in enumerate(zip(list_params, axes.ravel())):
         if method_name == "umap":
@@ -234,7 +249,7 @@ def show_viz_grid(
         _simple_scatter(ax, Z, labels, title=param_explanation, comment=comment)
 
     fig.tight_layout()
-    fig.subplots_adjust(wspace=0.1, left=0.0)
+    fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99)
     fig.savefig(f"{plot_dir}/show.png")
     plt.close()
 
@@ -324,6 +339,7 @@ def plot_metamap_with_scores_tsne(
             cmap_name=score_cmap,
             best_indices=best_indices,
             best_idx=best_idx,
+            debug_label=use_cache,
         )
 
     # ax0 show metamap colored by perplexity values.
@@ -407,6 +423,7 @@ def plot_metamap_with_scores_umap(
             best_indices=best_indices,
             best_idx=best_idx,
             show_legend=show_legend,
+            debug_label=use_cache,
         )
 
     # ax0 show metamap colored by perplexity values.
@@ -425,7 +442,7 @@ def plot_metamap_with_scores_umap(
     annotate_selected_params_umap(axes[0], list_annotations)
 
     fig.tight_layout()
-    plt.subplots_adjust(left=0.025, bottom=-0.075, top=1.0, wspace=0.075)
+    plt.subplots_adjust(bottom=-0.075, top=1.0, left=0.01, right=0.99, wspace=0.05)
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
 
 
@@ -542,8 +559,9 @@ def get_params_to_show(dataset_name, method_name):
                 (260, "--all"),
             ],
             "umap": {
-                (5, 0.001, "++rnx, -qij"),
-                (11, 0.01, "++qij, +rnx, ~prediction"),
+                (5, 0.001, "+qij, ++rnx"),
+                (11, 0.0022, "++qij, +rnx, ~prediction"),
+                (19, 0.0046, "++qij, +rnx"),
                 (401, 0.0464, "--qij, +rnx"),
             },
         },
