@@ -95,7 +95,6 @@ def _simple_scatter_with_colorbar(
             Z[best_indices][:, 1],
             c=labels[best_indices],
             cmap=cmap,
-            # facecolors="none",
             edgecolor="orange",
             marker="s",
             s=marker_size + 30,
@@ -131,6 +130,11 @@ def _simple_scatter_with_colorbar(
         cb.locator = tick_locator
         cb.update_ticks()
         cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(nbins + 1)])
+
+    if not plot_for_score_values:
+        # debug show param
+        for s, (x, y) in zip(labels, Z):
+            ax.text(x=x, y=y, s=str(int(math.exp(s))), fontsize=10)
 
 
 def _scatter_with_colorbar_and_legend_size(
@@ -546,7 +550,12 @@ def get_params_to_show(dataset_name, method_name):
             },
         },
         "COIL20": {
-            "tsne": [(36, "++qij, +rnx +bic, ~prediction"), (5, "--all"), (142, "+rnx, --")],
+            "tsne": [
+                (40, "++qij, ++bic, ++rnx, ~prediction"),
+                (28, "++qij, ++bic, ++rnx"),
+                (124, "--qij, --bic, +rnx,"),
+                (247, "--all"),
+            ],
             "umap": [
                 (4, 0.4642, "++rnx, --qij"),
                 (9, 0.0022, "++qij, =rnx"),
