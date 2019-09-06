@@ -72,35 +72,51 @@ def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=True):
 
 
 def _simple_scatter_with_colorbar(
-    ax, Z, labels, title="", cmap_name="viridis", Z_highlight=None, Z_best=None
+    ax, Z, labels, title="", cmap_name="viridis", best_indices=None, best_idx=None
 ):
+    plot_for_score_values = best_indices is not None
     ax.axis("off")
     marker_size = 80
+    c_min, c_max = labels.min(), labels.max()
+    norm = plt.Normalize(c_min, c_max)
+    cmap = cm.get_cmap(cmap_name, 20)
 
-    if Z_highlight is not None:
+    if best_indices is not None:
         ax.scatter(
-            Z_highlight[:, 0],
-            Z_highlight[:, 1],
-            facecolors="none",
+            Z[best_indices][:, 0],
+            Z[best_indices][:, 1],
+            c=labels[best_indices],
+            cmap=cmap,
+            # facecolors="none",
             edgecolor="orange",
-            s=marker_size + 10,
-            linewidths=1.5,
+            marker="s",
+            s=marker_size + 30,
+            linewidths=2,
             zorder=99,
+            alpha=0.8,
+            norm=norm,
         )
-    if Z_best is not None:
-        ax.scatter(Z_best[0], Z_best[1], c="red", marker="X", s=marker_size + 10, zorder=100)
+
+    if best_idx is not None:
+        ax.scatter(*Z[best_idx], c="red", marker="X", s=2 * marker_size, zorder=100)
 
     # should custom colorbar for metaplot colored by perplexity values
-    cmap = cm.get_cmap(cmap_name, 20)
     scatter = ax.scatter(
-        Z[:, 0], Z[:, 1], c=labels, alpha=0.8, cmap=cmap, s=marker_size, edgecolor="black"
+        Z[:, 0],
+        Z[:, 1],
+        c=labels,
+        alpha=0.5 if plot_for_score_values else 0.8,
+        cmap=cmap,
+        s=marker_size,
+        edgecolor="black",
+        norm=norm,
     )
     ax.text(
         x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18
     )
 
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
-    if Z_highlight is None and Z_best is None:
+    if best_indices is None:
         nbins = math.floor(max(labels))
         print("nbins: ", nbins)
         tick_locator = ticker.MaxNLocator(nbins=nbins)
@@ -221,7 +237,7 @@ def meta_umap(X, meta_n_neighbors=15, cache=False, embedding_dir=""):
     if cache:
         Z = joblib.load(f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     else:
-        Z = UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=42).fit_transform(X)
+        Z = UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=30).fit_transform(X)
         joblib.dump(Z, f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     return Z
 
@@ -231,7 +247,7 @@ def plot_metamap_with_scores_tsne(
     plot_dir,
     embedding_dir,
     score_dir,
-    meta_n_neighbors=20,
+    meta_n_neighbors=50,
     n_labels_each_class=10,
     threshold=0.96,
     use_cache=False,
@@ -261,13 +277,13 @@ def plot_metamap_with_scores_tsne(
     X = StandardScaler().fit_transform(X)
     Z = meta_umap(X, meta_n_neighbors, cache=use_cache, embedding_dir=embedding_dir)
 
-    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(20, 7))
+    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(20, 6))
     # note: roll axes to make subfigure for perplexity being moved from last to first
     for config, scores, ax in zip(score_config, all_scores, [ax1, ax2, ax3, ax0]):
         score_name, score_title, score_cmap = config
 
         if score_name == "perplexity":
-            Z_highlight, Z_best = None, None
+            best_indices, best_idx = None, None
         else:
             if score_name == "bic":
                 pivot = (1.0 + (1.0 - threshold)) * min(scores)
@@ -277,8 +293,6 @@ def plot_metamap_with_scores_tsne(
                 pivot = threshold * scores.max()
                 (best_indices,) = np.where(scores > pivot)
                 best_idx = np.argmax(scores)
-            Z_highlight = Z[best_indices]
-            Z_best = Z[best_idx]
 
         _simple_scatter_with_colorbar(
             ax,
@@ -286,8 +300,8 @@ def plot_metamap_with_scores_tsne(
             labels=scores,
             title=score_title,
             cmap_name=score_cmap,
-            Z_highlight=Z_highlight,
-            Z_best=Z_best,
+            best_indices=best_indices,
+            best_idx=best_idx,
         )
 
     # ax0 show metamap colored by perplexity values.
@@ -301,8 +315,8 @@ def plot_metamap_with_scores_tsne(
             list_annotations.append((perplexity, *pos[0]))
     annotate_selected_params_tsne(ax0, list_annotations)
 
-    plt.subplots_adjust(left=0.05)
     fig.tight_layout()
+    plt.subplots_adjust(wspace=0.075)
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
 
 
@@ -396,7 +410,7 @@ def annotate_selected_params_tsne(ax, list_annotations):
     print(list_annotations)
     # sort by x coordinate
     for i, (perp_val, pos_x, pos_y) in enumerate(sorted(list_annotations, key=lambda p: p[1])):
-        ax.scatter(pos_x, pos_y, marker="x", color="orange")
+        ax.scatter(pos_x, pos_y, marker="X", color="orange", s=80)
         # ax.annotate(str(perp_val), (pos_x, pos_y), fontsize=10)
         ax.annotate(
             str(perp_val),
@@ -421,7 +435,7 @@ def annotate_selected_params_umap(ax, list_annotations):
     for i, (n_neighbors, min_dist, pos_x, pos_y) in enumerate(
         sorted(list_annotations, key=lambda p: p[2])
     ):
-        ax.scatter(pos_x, pos_y, marker="x", color="orange")
+        ax.scatter(pos_x, pos_y, marker="X", color="orange")
         txt = f"{n_neighbors:>6},\n{min_dist:>5}"
         # ax.annotate(txt, (pos_x, pos_y), fontsize=12)
         ax.annotate(
