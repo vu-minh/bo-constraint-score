@@ -125,6 +125,10 @@ function gen_metamap {
     python plot_viz.py  --seed 42 -d $1 -m $2 --plot_metamap
 }
 
+function gen_grid_viz_demo {
+    python plot_viz.py --seed 42 -d $1 -m $2 --show_viz_grid
+}
+
 
 ############################################################################
 RUN_ALL=false
@@ -152,7 +156,8 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
      #    fi
 
         # plot_compare_scores $DATASET_NAME $METHOD
-        gen_metamap $DATASET_NAME $METHOD
+        # gen_metamap $DATASET_NAME $METHOD
+        gen_grid_viz_demo $DATASET_NAME $METHOD
     done
 done
 

@@ -132,7 +132,7 @@ def _simple_scatter_with_colorbar(
         cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(nbins + 1)])
 
     if not plot_for_score_values:
-        # debug show param
+        # debug show param in the metmap
         for s, (x, y) in zip(labels, Z):
             ax.text(x=x, y=y, s=str(int(math.exp(s))), fontsize=10)
 
@@ -432,6 +432,7 @@ def plot_metamap_with_scores_umap(
 
 def annotate_selected_params_tsne(ax, list_annotations):
     print(list_annotations)
+    offset = 1.0 / len(list_annotations)
     # sort by x coordinate
     for i, (perp_val, pos_x, pos_y) in enumerate(sorted(list_annotations, key=lambda p: p[1])):
         ax.scatter(pos_x, pos_y, marker="X", color="orange", s=80)
@@ -440,7 +441,7 @@ def annotate_selected_params_tsne(ax, list_annotations):
             str(perp_val),
             xy=(pos_x, pos_y),
             xycoords="data",
-            xytext=(i * 0.175, -0.075),
+            xytext=(i * offset, -0.075),
             textcoords="axes fraction",
             arrowprops=dict(
                 arrowstyle="->",
@@ -485,8 +486,8 @@ def get_params_to_show(dataset_name, method_name):
         "=": "   ▯",
         "-": "   ⇩",
         "--": " ⇩⇩",
-        "": "    ",
         "~": "   ☆",
+        "": "     ",
     }
 
     method_text_map = {
@@ -592,7 +593,12 @@ def get_params_to_show(dataset_name, method_name):
             ],
         },
         "FASHION1000": {
-            "tsne": [(36, "++qij, ~prediction"), (10, "++rnx"), (80, "+bic"), (220, "--all")],
+            "tsne": [
+                (36, "++qij, +bic, ++rnx, ~prediction"),
+                (14, "+qij, --bic, ++rnx, "),
+                (69, "+qij, ++bic, =rnx"),
+                (220, "--all"),
+            ],
             "umap": [
                 (4, 0.01, "++qij, ~prediction"),
                 (4, 0.2154, "++rnx, +qij"),

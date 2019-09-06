@@ -40,6 +40,10 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
         cp plots/${DATASET_NAME}/${METHOD}/plot_compare.png \
            ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_compare_scores.png
 
+        # # (6) figures grid of selected vizs
+        cp plots/${DATASET_NAME}/${METHOD}/show.png \
+           ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_show.png
+
     done
 
     # # (5) figures metamap
@@ -75,3 +79,6 @@ done
 
 # # (5) Gen metamap
 # python plot_viz.py  --seed 42 -d COIL20 -m tsne --plot_metamap
+
+# # (6) Show grid of selected vizs
+# python plot_viz.py --seed 42 -d COIL20 -m tsne --show_viz_grid
