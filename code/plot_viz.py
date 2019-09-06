@@ -74,8 +74,8 @@ def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=True):
 def _simple_scatter_with_colorbar(
     ax, Z, labels, title="", cmap_name="viridis", best_indices=None, best_idx=None
 ):
-    plot_for_score_values = best_indices is not None
     ax.axis("off")
+    plot_for_score_values = best_indices is not None
     marker_size = 80
     c_min, c_max = labels.min(), labels.max()
     norm = plt.Normalize(c_min, c_max)
@@ -137,6 +137,10 @@ def _scatter_with_colorbar_and_legend_size(
     show_legend=True,
 ):
     ax.axis("off")
+    plot_for_score_values = best_indices is not None
+    c_min, c_max = labels.min(), labels.max()
+    norm = plt.Normalize(c_min, c_max)
+    cmap = cm.get_cmap(cmap_name, 20)
 
     if best_indices is not None:
         Z_highlight = Z[best_indices]
@@ -144,29 +148,36 @@ def _scatter_with_colorbar_and_legend_size(
             Z_highlight[:, 0],
             Z_highlight[:, 1],
             s=sizes[best_indices],
-            facecolors="none",
+            c=labels[best_indices],
+            cmap=cmap,
             edgecolor="orange",
+            marker="s",
             zorder=99,
+            norm=norm,
+            alpha=0.9,
         )
     if best_idx is not None:
-        Z_best = Z[best_idx]
-        ax.scatter(
-            Z_best[0], Z_best[1], c="red", marker="X", s=sizes[best_idx] + 10, zorder=100
-        )
+        ax.scatter(*Z[best_idx], c="red", marker="X", s=2 * sizes[best_idx], zorder=100)
 
-    cmap = cm.get_cmap(cmap_name, 20)
     scatter = ax.scatter(
-        Z[:, 0], Z[:, 1], c=labels, s=sizes, alpha=0.6, cmap=cmap, edgecolor="black"
+        Z[:, 0],
+        Z[:, 1],
+        c=labels,
+        s=sizes,
+        alpha=0.35 if plot_for_score_values else 0.8,
+        cmap=cmap,
+        norm=norm,
+        edgecolor="black",
     )
     ax.text(
         x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18
     )
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
 
-    if show_legend:
-        # create "free" legend
+    if not plot_for_score_values:  # plot metamap by n_neighbors and min_dist values
+        # create "free" legend showing size of points by min_dist values
         min_dist_vals = [1e-3, 0.1, 0.5, 1.0]
-        min_dist_shows = MinMaxScaler((30, 100)).fit_transform(
+        min_dist_shows = MinMaxScaler((30, 90)).fit_transform(
             np.array(min_dist_vals).reshape(-1, 1)
         )
 
@@ -316,7 +327,7 @@ def plot_metamap_with_scores_tsne(
     annotate_selected_params_tsne(ax0, list_annotations)
 
     fig.tight_layout()
-    plt.subplots_adjust(wspace=0.075)
+    plt.subplots_adjust(wspace=0.075, bottom=-0.05, top=1.0, left=0.01)
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
 
 
@@ -362,7 +373,7 @@ def plot_metamap_with_scores_umap(
         ScoreConfig("rnx", "$AUC_{log}RNX$ in log-scale", "Blues", rnx_scores),
     ]
 
-    fig, axes = plt.subplots(1, 3, figsize=(21, 10))
+    fig, axes = plt.subplots(1, 3, figsize=(21, 9))
     for config, ax in zip(score_config, axes.ravel()):
         score_name, score_title, score_cmap, score_values = config
 
@@ -379,7 +390,7 @@ def plot_metamap_with_scores_umap(
             ax,
             Z,
             labels=score_values,
-            sizes=MinMaxScaler((30, 100)).fit_transform(list_min_dist.reshape(-1, 1)),
+            sizes=MinMaxScaler((30, 90)).fit_transform(list_min_dist.reshape(-1, 1)),
             title=score_title,
             cmap_name=score_cmap,
             best_indices=best_indices,
@@ -403,6 +414,7 @@ def plot_metamap_with_scores_umap(
     annotate_selected_params_umap(axes[0], list_annotations)
 
     fig.tight_layout()
+    plt.subplots_adjust(left=0.025, bottom=-0.075, top=1.0, wspace=0.075)
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
 
 
