@@ -1,6 +1,5 @@
 # plot metamap (meta tsne) for all vizs of a dataset
 
-import os
 import re
 import math
 import joblib
@@ -521,6 +520,12 @@ def get_params_to_show(dataset_name, method_name):
 
     config_params = {
         "20NEWS5": {
+            "tsne": {
+                (130, "++qij, ++bic, --rnx, ~prediction"),
+                (89, "++qij, ++bic, +rnx"),
+                (25, "--qij, --bic, ++rnx"),
+                (512, "--all"),
+            },
             "umap": [
                 (15, 0.2154, "++rnx"),
                 (134, 0.001, "++qij"),
@@ -528,21 +533,13 @@ def get_params_to_show(dataset_name, method_name):
                 (86, 0.0464, "+qij, =rnx"),
                 (7, 0.1, "++rnx, --qij"),
             ],
-            "tsne": {
-                (114, "++qij, +bic, -rnx"),
-                (89, "+qij, +bic, =rnx"),
-                (250, "+qij, =bic, -rnx"),
-                (25, "++rnx, -qij, =bic"),
-                (11, "+rnx, --qij, =bic"),
-                (156, "+qij --rnx, ++bic"),
-            },
         },
         "DIGITS": {
             "tsne": [
                 (50, "++qij, ++bic, +rnx, ~prediction"),
                 (14, "+qij, -bic, ++rnx"),
                 (90, "+qij, ++bic, --rnx,"),
-                (270, "--qij, --bic, --rnx"),
+                (260, "--all"),
             ],
             "umap": {
                 (5, 0.001, "++rnx, -qij"),
@@ -568,10 +565,9 @@ def get_params_to_show(dataset_name, method_name):
         },
         "NEURON_1K": {
             "tsne": [
-                (72, "++qij, -rnx, ++bic, ~prediction"),
-                # (13, "++rnx , --qij, -bic"),
-                # (40, "+rnx, +qij, +bic"),
-                (106, "+qij, +bic, -rnx"),
+                (72, "++qij, ++bic, --rnx, ~prediction"),
+                (13, " --qij, -bic, ++rnx"),
+                (40, "=qij, +rnx,  ++bic"),
                 (150, "--all"),
             ],
             "umap": [
@@ -583,8 +579,9 @@ def get_params_to_show(dataset_name, method_name):
         "FASHION_MOBILENET": {
             "tsne": [
                 (82, "++qij, ++bic, +rnx, ~prediction"),
-                (12, "--qij, +rnx, --bic"),
-                (164, "+qij, +bic, --rnx"),
+                (12, "-qij, --bic, ++rnx"),
+                (35, "++qij, --bic, ++rnx"),
+                (151, "++qij, ++bic, --rnx"),
             ],
             "umap": [
                 (19, 0.0022, "~prediction, +"),
@@ -619,7 +616,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dataset_name", default="")
     ap.add_argument("-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']")
-    ap.add_argument("-s", "--seed", default=42, type=int)
+    # ap.add_argument("-s", "--seed", default=42, type=int)
     ap.add_argument("--use_other_label", default=None)
     ap.add_argument("--plot_test_vis", action="store_true")
     ap.add_argument("--show_viz_grid", action="store_true")
