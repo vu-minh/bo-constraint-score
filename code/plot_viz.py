@@ -66,7 +66,15 @@ def plot_test_vis(
 def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=True):
     ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap="Spectral", s=6)
     ax.set_title(title, loc="center")
-    ax.text(x=-0.05, y=-0.05, s=comment, transform=ax.transAxes, ha="left", va="bottom")
+    ax.text(
+        x=1.05,
+        y=-0.05,
+        s=comment,
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=14,
+    )
     if axis_off:
         ax.axis("off")
 
@@ -208,7 +216,7 @@ def show_viz_grid(
 ):
     n_viz = len(list_params)
     n_rows, n_cols = math.ceil(n_viz / 4), 4
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 4))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 4.5))
 
     for i, (params, ax) in enumerate(zip(list_params, axes.ravel())):
         if method_name == "umap":
@@ -218,12 +226,12 @@ def show_viz_grid(
             param_key = str(params[0])
             param_explanation = f"perplexity={params[0]}"
         comment = f"{params[-1]}"
-        print(i, comment, param_explanation)
+        print(i, "\n", comment, "\n", param_explanation)
         Z = joblib.load(f"{embedding_dir}/{param_key}.z")
         _simple_scatter(ax, Z, labels, title=param_explanation, comment=comment)
 
     fig.tight_layout()
-    fig.subplots_adjust(left=0.05, hspace=0.1)
+    fig.subplots_adjust(wspace=0.1, left=0.0)
     fig.savefig(f"{plot_dir}/show.png")
     plt.close()
 
@@ -467,13 +475,21 @@ def annotate_selected_params_umap(ax, list_annotations):
 
 
 def get_params_to_show(dataset_name, method_name):
-    symbol_map = {"++": "⇧⇧", "+": " ⇧", "=": " ▯", "-": " ⇩", "--": "⇩⇩", "": "  "}
+    symbol_map = {
+        "++": " ⇧⇧",
+        "+": "   ⇧",
+        "=": "   ▯",
+        "-": "   ⇩",
+        "--": " ⇩⇩",
+        "": "    ",
+        "~": "   ☆",
+    }
 
     method_text_map = {
         "qij": "$f_{score}$",
         "rnx": "$AUC_{log}RNX$",
         "bic": "BIC",
-        "prediction": "☆ Best prediction",
+        "prediction": "Good prediction",
         "all": "All scores",
         "": "",
     }
@@ -482,11 +498,11 @@ def get_params_to_show(dataset_name, method_name):
         res = []
         for s in text.split():
             s = s.strip()
-            m = re.compile("([+-=]*)([a-z]*)")
+            m = re.compile("([+-=~]*)([a-z]*)")
             g = m.match(s)
             if g:
                 symbol, method_text = g.groups()
-                res.append(f"{symbol_map[symbol]:>3} {method_text_map[method_text]}")
+                res.append(f"{method_text_map[method_text]} {symbol_map[symbol]:<2}")
             else:
                 print("[Deubg] Invalid selected param: ", s, text)
         return "\n".join(res)
@@ -503,7 +519,7 @@ def get_params_to_show(dataset_name, method_name):
             "umap": [
                 (15, 0.2154, "++rnx"),
                 (134, 0.001, "++qij"),
-                (147, 0.01, "prediction"),
+                (147, 0.01, "~prediction"),
                 (86, 0.0464, "+qij, =rnx"),
                 (7, 0.1, "++rnx, --qij"),
             ],
@@ -518,25 +534,23 @@ def get_params_to_show(dataset_name, method_name):
         },
         "DIGITS": {
             "tsne": [
-                (50, "++qij, ++bic, prediction"),
-                (14, "++rnx, -qij, -bic"),
-                (22, "+qij, +rnx, -bic"),
-                (76, "+qij, -rnx, +bic"),
-                (5, "--qij, --rnx, --bic"),
-                (270, "--qij, --rnx, --bic"),
+                (50, "++qij, ++bic, +rnx, ~prediction"),
+                (14, "+qij, -bic, ++rnx"),
+                (90, "+qij, ++bic, --rnx,"),
+                (270, "--qij, --bic, --rnx"),
             ],
             "umap": {
                 (5, 0.001, "++rnx, -qij"),
-                (11, 0.01, "++qij, +rnx, prediction"),
+                (11, 0.01, "++qij, +rnx, ~prediction"),
                 (401, 0.0464, "--qij, +rnx"),
             },
         },
         "COIL20": {
-            "tsne": [(36, "++qij, +rnx +bic, prediction"), (5, "--all"), (142, "+rnx, --")],
+            "tsne": [(36, "++qij, +rnx +bic, ~prediction"), (5, "--all"), (142, "+rnx, --")],
             "umap": [
                 (4, 0.4642, "++rnx, --qij"),
                 (9, 0.0022, "++qij, =rnx"),
-                (13, 0.001, "prediction, +qij, =rnx"),
+                (13, 0.001, "~prediction, +qij, =rnx"),
                 (150, 0.01, "--qij, =rnx"),
                 (20, 0.0464, "=qij, =rnx"),
                 (3, 0.0179, "--all"),
@@ -544,34 +558,34 @@ def get_params_to_show(dataset_name, method_name):
         },
         "NEURON_1K": {
             "tsne": [
-                (72, "++qij, -rnx, ++bic, prediction"),
+                (72, "++qij, -rnx, ++bic, ~prediction"),
                 # (13, "++rnx , --qij, -bic"),
                 # (40, "+rnx, +qij, +bic"),
                 (106, "+qij, +bic, -rnx"),
                 (150, "--all"),
             ],
             "umap": [
-                (16, 0.001, "prediction, ++qij, +rnx"),
+                (16, 0.001, "~prediction, ++qij, +rnx"),
                 (5, 0.1, "++rnx, +qij"),
                 (150, 0.0464, "-qij, -rnx"),
             ],
         },
         "FASHION_MOBILENET": {
             "tsne": [
-                (82, "++qij, ++bic, +rnx, prediction"),
+                (82, "++qij, ++bic, +rnx, ~prediction"),
                 (12, "--qij, +rnx, --bic"),
                 (164, "+qij, +bic, --rnx"),
             ],
             "umap": [
-                (19, 0.0022, "prediction, +"),
+                (19, 0.0022, "~prediction, +"),
                 (9, 0.0046, "++rnx, +qij"),
                 (310, 0.1, "="),
             ],
         },
         "FASHION1000": {
-            "tsne": [(36, "++qij, prediction"), (10, "++rnx"), (80, "+bic"), (220, "--all")],
+            "tsne": [(36, "++qij, ~prediction"), (10, "++rnx"), (80, "+bic"), (220, "--all")],
             "umap": [
-                (4, 0.01, "++qij, prediction"),
+                (4, 0.01, "++qij, ~prediction"),
                 (4, 0.2154, "++rnx, +qij"),
                 (50, 0.1, ""),
                 (150, 0.4642, "-qij, +rnx"),
