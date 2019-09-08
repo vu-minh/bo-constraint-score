@@ -182,7 +182,7 @@ def _scatter_with_colorbar_and_legend_size(
         Z[:, 1],
         c=labels,
         s=sizes,
-        alpha=0.35 if plot_for_score_values else 0.8,
+        alpha=0.35 if plot_for_score_values else 0.18,
         cmap=cmap,
         norm=norm,
         edgecolor="black",
@@ -223,7 +223,7 @@ def _scatter_with_colorbar_and_legend_size(
     if debug_label and not plot_for_score_values:
         # debug show param in the metmap
         for i, (p1, p2, (x, y)) in enumerate(zip(labels, sizes, Z)):
-            if i % 85 == 0:
+            if i % 72 == 0:
                 ax.text(x=x, y=y, s=str(i), fontsize=15, color="blue")
         # test_idx = [170]
         # print(labels[test_idx], sizes[test_idx])
@@ -363,7 +363,7 @@ def plot_metamap_with_scores_umap(
     plot_dir,
     embedding_dir,
     score_dir,
-    meta_n_neighbors=200,
+    meta_n_neighbors=100,
     n_labels_each_class=10,
     threshold=0.96,
     use_cache=False,
@@ -472,7 +472,7 @@ def annotate_selected_params_tsne(ax, list_annotations):
 def annotate_selected_params_umap(ax, list_annotations):
     print(list_annotations)
     # sort by y coordinate
-    offset = 0.2  # 1.0 / len(list_annotations)
+    offset = 1.0 / len(list_annotations)
     for i, (n_neighbors, min_dist, pos_x, pos_y) in enumerate(
         sorted(list_annotations, key=lambda p: p[2])
     ):
@@ -483,7 +483,7 @@ def annotate_selected_params_umap(ax, list_annotations):
             txt,
             xy=(pos_x, pos_y),
             xycoords="data",
-            xytext=(0.9, 0.85 - i * offset),
+            xytext=(i * offset, 0),
             textcoords="axes fraction",
             arrowprops=dict(
                 arrowstyle="->",
@@ -573,12 +573,11 @@ def get_params_to_show(dataset_name, method_name):
                 (247, "--all"),
             ],
             "umap": [
-                (4, 0.4642, "++rnx, --qij"),
-                (9, 0.0022, "++qij, =rnx"),
-                (13, 0.001, "~prediction, +qij, =rnx"),
-                (150, 0.01, "--qij, =rnx"),
-                (20, 0.0464, "=qij, =rnx"),
-                (3, 0.0179, "--all"),
+                (8, 0.01, "~prediction, ++qij, =rnx"),
+                # (5, 0.01, "+qij, +rnx"),
+                (4, 0.4642, "--qij, ++rnx"),
+                (56, 0.1, "--qij, +rnx"),
+                (300, 0.4642, "--all"),
             ],
         },
         "NEURON_1K": {
