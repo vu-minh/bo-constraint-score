@@ -574,6 +574,7 @@ def get_params_to_show(dataset_name, method_name):
             ],
             "umap": [
                 (8, 0.01, "~prediction, ++qij, =rnx"),
+                # bo_constraint.py  --seed 2019 -d COIL20 -m umap -u ei -x 0.1 -nr 40 --run
                 # (5, 0.01, "+qij, +rnx"),
                 (4, 0.4642, "--qij, ++rnx"),
                 (56, 0.1, "--qij, +rnx"),
@@ -614,9 +615,11 @@ def get_params_to_show(dataset_name, method_name):
                 (220, "--all"),
             ],
             "umap": [
-                (4, 0.01, "++qij, ~prediction"),
-                (4, 0.2154, "++rnx, +qij"),
-                (50, 0.1, ""),
+                # (4, 0.01, "++qij, +rnx"),
+                (4, 0.2154, "++qij, ++rnx"),
+                (6, 0.01, "~prediction"),
+                # bo_constraint.py  --seed 2018 -d FASHION1000 -m umap -u ei -x 0.1 -nr 50
+                (50, 0.1, "+qij, +rnx"),
                 (150, 0.4642, "-qij, +rnx"),
             ],
         },
