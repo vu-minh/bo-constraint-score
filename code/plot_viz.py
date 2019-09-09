@@ -139,7 +139,8 @@ def _simple_scatter_with_colorbar(
     if debug_label and not plot_for_score_values:
         # debug show param in the metmap
         for s, (x, y) in zip(labels, Z):
-            ax.text(x=x, y=y, s=str(int(math.exp(s))), fontsize=10)
+            # ax.text(x=x, y=y, s=str(int(math.exp(s))), fontsize=10)
+            pass
 
 
 def _scatter_with_colorbar_and_legend_size(
@@ -182,7 +183,7 @@ def _scatter_with_colorbar_and_legend_size(
         Z[:, 1],
         c=labels,
         s=sizes,
-        alpha=0.35 if plot_for_score_values else 0.18,
+        alpha=0.35 if plot_for_score_values else 0.8,
         cmap=cmap,
         norm=norm,
         edgecolor="black",
@@ -224,7 +225,8 @@ def _scatter_with_colorbar_and_legend_size(
         # debug show param in the metmap
         for i, (p1, p2, (x, y)) in enumerate(zip(labels, sizes, Z)):
             if i % 72 == 0:
-                ax.text(x=x, y=y, s=str(i), fontsize=15, color="blue")
+                # ax.text(x=x, y=y, s=str(i), fontsize=15, color="blue")
+                pass
         # test_idx = [170]
         # print(labels[test_idx], sizes[test_idx])
 

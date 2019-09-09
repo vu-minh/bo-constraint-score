@@ -52,7 +52,7 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
        ${TARGET_DIR}/${DATASET_NAME}_tsne_metamap.png
 
     echo "COPY METAMAP: " $DATASET_NAME "umap"
-    cp plots/${DATASET_NAME}/umap/metamap_scores_200.png \
+    cp plots/${DATASET_NAME}/umap/metamap_scores_100.png \
        ${TARGET_DIR}/${DATASET_NAME}_umap_metamap.png
 
 done
