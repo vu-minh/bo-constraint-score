@@ -446,6 +446,7 @@ def plot_metamap_with_scores_umap(
     fig.tight_layout()
     plt.subplots_adjust(bottom=-0.075, top=1.0, left=0.01, right=0.99, wspace=0.05)
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
+    plt.close()
 
 
 def annotate_selected_params_tsne(ax, list_annotations):
@@ -631,9 +632,26 @@ def get_params_to_show(dataset_name, method_name):
     return transform_list_items(params)
 
 
+def plot_samples(dataset_name, data, plot_dir="", n_samples=4, transpose=False):
+    img_size = int(math.sqrt(data.shape[1]))
+    fig, axes = plt.subplots(1, n_samples, figsize=(n_samples, 1.0))
+    for i, ax in enumerate(axes.ravel()):
+        X = data[i].reshape(img_size, img_size)
+        if transpose:
+            X = X.transpose()
+        ax.imshow(X, cmap="gray")
+        ax.axis("off")
+
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0.05, bottom=0.1, top=0.9, left=0.05, right=0.95)
+    fig.savefig(f"{plot_dir}/{dataset_name}_samples.pdf")
+    plt.close()
+
+
 if __name__ == "__main__":
     import argparse
-    import sys
+
+    # import sys
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dataset_name", default="")
@@ -643,6 +661,7 @@ if __name__ == "__main__":
     ap.add_argument("--plot_test_vis", action="store_true")
     ap.add_argument("--show_viz_grid", action="store_true")
     ap.add_argument("--plot_metamap", action="store_true")
+    ap.add_argument("--plot_samples", action="store_true")
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
 
@@ -673,12 +692,10 @@ if __name__ == "__main__":
 
     if args.plot_test_vis:
         plot_test_vis(X, dataset_name, plot_dir, embedding_dir, labels, other_labels)
-        sys.exit(0)
 
     if args.show_viz_grid:
         list_params = get_params_to_show(dataset_name, method_name)
         show_viz_grid(dataset_name, method_name, labels, plot_dir, embedding_dir, list_params)
-        sys.exit(0)
 
     if args.plot_metamap:
         # plot_metamap(dataset_name, method_name, plot_dir, embedding_dir)
@@ -689,4 +706,16 @@ if __name__ == "__main__":
         plot_metamap_func(
             dataset_name, plot_dir, embedding_dir, score_dir, use_cache=args.debug
         )
-        sys.exit(0)
+
+    if args.plot_samples:
+        n_samples = 4
+        transpose = True if dataset_name == "COIL20" else False
+        data = X_origin[np.random.choice(X_origin.shape[0], size=n_samples)]
+        print("Sampled data: ", data.shape)
+        plot_samples(
+            dataset_name,
+            data,
+            plot_dir=f"./plots/{dataset_name}",
+            n_samples=n_samples,
+            transpose=transpose,
+        )
