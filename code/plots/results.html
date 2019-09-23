@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="./html_libs/bootstrap-4.3.1-dist/css/bootstrap.min.css">
+
+    <style>
+    body {
+      position: relative;
+    }
+
+    .scrollspy-body {
+      position: relative;
+      height: 900px;
+      margin-top: .5rem;
+      overflow: auto;
+    }
+
+    img {
+      /*position: absolute;*/
+      max-height:750px;
+      /*max-width:100%;*/
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .img-wide {
+      max-width:90%;
+      display: block;
+    }
+
+    .img-50 {
+      max-width: 48%;
+      display: block;
+      float: left;
+    }
+
+    </style>
+
+    <title>Minh's Notes</title>
+  </head>
+  <body>
+    <div class="row" style="background-color:rgb(240, 240, 208);">
+
+      <div class="col-6">
+        <h3>New results for constraint preserving scores</h3>
+      </div>
+
+      <div class="col-1">
+        <div class="dropdown"">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="select-dataset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Select dataset
+          </button>
+          <div id="dropdown-select-dataset" class="dropdown-menu" aria-labelledby="select-dataset">
+            <button class="dropdown-item" type="button">DIGITS</button>
+            <button class="dropdown-item" type="button">COIL20</button>
+            <button class="dropdown-item" type="button">FASHION1000</button>
+            <button class="dropdown-item" type="button">FASHION_MOBILENET</button>
+            <button class="dropdown-item" type="button">20NEWS5</button>
+            <button class="dropdown-item" type="button">NEURON_1K</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="select-method" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Select method
+          </button>
+          <div id="dropdown-select-method" class="dropdown-menu" aria-labelledby="selecte-method">
+            <button class="dropdown-item" type="button">tsne</button>
+            <button class="dropdown-item" type="button">umap</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-2">
+        <p>Updated 23/09/2019</p>
+      </div>
+
+    </div>
+
+    <div id="main-results">
+      <div class="row">
+        <div class="col-2">
+
+          <nav id="navbar" class="navbar navbar-light bg-light flex-column">
+            <!-- <a class="navbar-brand" href="#">Constraint preserving score</a> -->
+            <nav class="nav nav-pills flex-column">
+              <a class="nav-link active" href="#score-stability">Score Stability</a>
+
+              <div id="nav-one-param">
+                <a class="nav-link" href="#BayOpt-with-one-param">BayOpt with one param (tSNE)</a>
+                <nav class="nav nav-pills flex-column">
+                  <a class="nav-link ml-3 my-1" href="#BayOpt-with-one-param-compare">Comparing 3 scores</a>
+                  <a class="nav-link ml-3 my-1" href="#BayOpt-with-one-params-prediction">BayOpt prediction (1D)</a>
+                  <a class="nav-link ml-3 my-1" href="#BayOpt-with-one-params-metamap">Metamap</a>
+                </nav>
+              </div>
+
+              <div id="nav-two-param">
+                <a class="nav-link" href="#BayOpt-with-two-param">BayOpt with two params (UMAP)</a>
+                <nav class="nav nav-pills flex-column">
+                  <a class="nav-link ml-3 my-1" href="#BayOpt-with-two-param-compare">Comparing 2 scores</a>
+                  <a class="nav-link ml-3 my-1" href="#BayOpt-with-two-params-prediction">BayOpt prediction (2D)</a>
+                  <a class="nav-link ml-3 my-1" href="#BayOpt-with-two-params-metamap">Metamap</a>
+                </nav>
+              </div>
+
+	      <div id="nav-case-demo">
+		<a class="nav-link" href="#body-case-demo">Score Flexibility</a>
+	      </div>
+
+            </nav>
+          </nav>
+        </div>
+        <div class="col-10">
+          <div data-spy="scroll" data-target="#navbar" data-offset="0" class="scrollspy-body">
+
+            <div>
+              <h2 id="score-stability">Score Stability</h2>
+              <img id="img-score-stability" src="" onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+            </div>
+
+            <div id="body-one-param">
+              <h2 id="BayOpt-with-one-param">BayOpt with one parameter (with tSNE)</h2>
+	      (DIGITS, FASHION_MOBILENET, 20NEWS5, NEURON_1K)
+
+              <div>
+                <h3 id="BayOpt-with-one-param-compare">Comparing the scores (constraint score, AUC_log_RNX score, BIC score)
+		</h3>
+                <img id="img-bayopt1-compare" src=""
+		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+              </div>
+
+              <div>
+                <h3 id="BayOpt-with-one-params-prediction">Prediction of BayOpt for one param with tsne</h3>
+                <img id="img-bayopt1-prediction" src=""
+		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+              </div>
+
+              <div>
+                <h3 id="BayOpt-with-one-params-metamap">Metamap and sample visualizations</h3>
+                <img id="img-bayopt1-metamap" class="img-wide" src=""
+		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+                <img id="img-bayopt1-show" class="img-wide" src=""
+		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+              </div>
+
+            </div>
+
+            <div id="body-two-param">
+              <h2 id="BayOpt-with-two-param">BayOpt with two parameters (with UMAP)</h2>
+	      (COIL20, FASHION_1000)
+
+              <div>
+                <h3 id="BayOpt-with-two-param-compare">Comparing the scores (constraint score and AUC_log_RNX score) for UMAP embeddings with 2 params</h3>
+                <img id="img-bayopt2-rnx2d" class="img-50" src=""
+		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+                <img id="img-bayopt2-qij2d" class="img-50"
+		     src="" onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+              </div>
+
+              <div>
+                <h3 id="BayOpt-with-two-params-prediction">Prediction of BayOpt for two params with UMAP</h3>
+                <img id="img-bayopt2-prediction" src=""
+		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+              </div>
+
+              <div>
+                <h3 id="BayOpt-with-two-params-metamap">Metamap and sample visualizations</h3>
+                <img id="img-bayopt2-metamap" class="img-wide" src=""
+		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+                <img id="img-bayopt2-show" class="img-wide" src=""
+		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+              </div>
+            </div>
+
+	    <div>
+	      <h3 id="body-case-demo">Score Flexibility</h3>
+	      <h4>Demo the flexibility of the constraint score for 3 datasets with <b>tsne embeddings</b></h4>
+	      <ul>
+		<li>FASHION_MOBILENET (for image dataset)</li>
+		<li>20NEWS5 (for text dataset)</li>
+		<li>NEURON_1K (for genetic dataset)</li>
+	      </ul>
+	      <img id="img-score-flexibility" class="img-wide" src=""
+		   onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+	    </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="./html_libs/jquery/jquery-3.4.1.min.js"></script>
+    <script src="./html_libs/popper/popper.min.js"></script>
+    <script src="./html_libs/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+
+    <!-- script to load figures corresponding to the selected dataset -->
+    <script>
+      list_datasets = [
+        "DIGITS", "COIL20", "FASHION1000", "FASHION_MOBILENET", "20NEWS5", "NEURON_1K"
+      ];
+      list_methods = ["tsne", "umap"];
+
+
+      $(document).ready(function() {
+        // toggle nav menu according to metho name
+
+      });
+
+      function toggle_nav() {
+        var method_name = $('#select-method').text().trim();
+
+        if (method_name == "tsne") {
+          $("#nav-one-param").show();
+          $("#body-one-param").show();
+          $("#nav-two-param").hide();
+          $("#body-two-param").hide();
+        } else if (method_name == "umap") {
+          $("#nav-two-param").show();
+          $("#body-two-param").show();
+          $("#nav-one-param").hide();
+          $("#body-one-param").hide();
+        }
+      }
+
+      function update_figures() {
+        var dataset_name = $('#select-dataset').text().trim();
+        var method_name = $('#select-method').text().trim();
+
+        if (!list_datasets.includes(dataset_name) || !list_methods.includes(method_name)){
+          console.log("Dataset or method name is invalide: ", dataset_name, method_name);
+          return;
+        }
+
+        console.log("UPDATE FIGURES: ", dataset_name, method_name);
+        var img_dir = `${dataset_name}/${method_name}`;
+        console.log("IMAGE DIR: ", img_dir);
+
+        $("#img-score-stability").attr("src", `${img_dir}/scores.png`);
+
+        if (method_name == "tsne") {
+          $("#img-bayopt1-compare").attr("src", `${img_dir}/plot_compare.png`);
+          $("#img-bayopt1-prediction").attr("src", `${img_dir}/qij/bo_summary.png`);
+          $("#img-bayopt1-metamap").attr("src", `${img_dir}/metamap_scores_50.png`);
+          $("#img-bayopt1-show").attr("src", `${img_dir}/show.png`);
+        } else {
+          $("#img-bayopt2-compare").attr("src", `${img_dir}/plot_compare.png`);
+          $("#img-bayopt2-rnx2d").attr("src", `${img_dir}/2D/auc_rnx.png`);
+          $("#img-bayopt2-qij2d").attr("src", `${img_dir}/2D/qij_score.png`);
+          $("#img-bayopt2-prediction").attr("src", `${img_dir}/qij/predicted_score.png`);
+          $("#img-bayopt2-metamap").attr("src", `${img_dir}/metamap_scores_100.png`);
+          $("#img-bayopt2-show").attr("src", `${img_dir}/show.png`);
+        }
+
+        $("#img-score-flexibility").attr("src", `${img_dir}/score_flexibility.png`);
+      }
+
+
+      // update selected dataset
+      $("#dropdown-select-dataset .dropdown-item").click(function(){
+        var dataset_name = $(this).text();
+
+        $('#select-dataset').text(dataset_name);
+        console.log("Dataset name: ", dataset_name);
+
+        update_figures();
+      });
+
+      $("#dropdown-select-method .dropdown-item").click(function(){
+        var method_name = $(this).text();
+
+        $('#select-method').text(method_name);
+        console.log("Method name: ", method_name);
+
+        toggle_nav();
+        update_figures();
+      });
+
+    </script>
+
+  </body>
+</html>
