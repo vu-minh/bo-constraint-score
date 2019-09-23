@@ -690,7 +690,7 @@ def plot_samples(dataset_name, data, plot_dir="", n_samples=4, transpose=False):
 def plot_score_flexibility(
     dataset_name, X, labels1=None, labels2=None, title1="", title2="", plot_dir=""
 ):
-    pass
+    print(title1, title2)
 
 
 if __name__ == "__main__":
@@ -775,10 +775,23 @@ if __name__ == "__main__":
         )
 
     if args.plot_score_flexibility:
-        config_labels = {}
-        labels2 = None
-        title1 = ""
-        title2 = ""
+        config_labels = {
+            "NEURON_1K": {
+                "tsne": {
+                    "label_name": "umi_count",
+                    "title1": "Points colored by graph-based cluster indices",
+                    "title2": "Points colored by UMI count",
+                }
+            }
+        }
+        config = config_labels[dataset_name][method_name]
+        label_name = config["label_name"]
+        labels2, _ = dataset.load_additional_labels(dataset_name, label_name)
         plot_score_flexibility(
-            dataset_name, labels, labels2, title1, title2, plot_dir=plot_dir
+            dataset_name,
+            labels,
+            labels2,
+            title1=config["title1"],
+            title2=config["title2"],
+            plot_dir=plot_dir,
         )
