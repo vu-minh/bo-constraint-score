@@ -22,18 +22,28 @@ from umap import UMAP
 from utils import get_scores_tsne
 
 
-def plot_2_labels(Z, labels, other_labels, out_name):
+def plot_2_labels(Z, labels, other_labels, out_name, title1="", title2=""):
     _, [ax0, ax1] = plt.subplots(1, 2, figsize=(12, 6))
+    ax0.set_title(title1)
     ax0.scatter(Z[:, 0], Z[:, 1], c=labels, cmap="Spectral", alpha=0.5)
+    ax1.set_title(title2)
     ax1.scatter(Z[:, 0], Z[:, 1], c=other_labels, cmap="Spectral", alpha=0.5)
     plt.savefig(out_name)
     plt.close()
 
 
 def plot_test_vis(
-    X, dataset_name, plot_dir="", embedding_dir="", labels=None, other_labels=None, debug=False
+    X,
+    dataset_name,
+    plot_dir="",
+    embedding_dir="",
+    labels=None,
+    other_labels=None,
+    debug=False,
 ):
-    other_labels, des = dataset.load_additional_labels(dataset_name, label_name="class_matcat")
+    other_labels, des = dataset.load_additional_labels(
+        dataset_name, label_name="class_matcat"
+    )
     print(des)
 
     list_min_dist = [0.001, 0.01, 0.1, 0.5, 1.0]
@@ -66,7 +76,13 @@ def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=False):
     ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap="Spectral", s=6)
     ax.set_title(title, loc="center")
     ax.text(
-        x=1.0, y=0.0, s=comment, transform=ax.transAxes, ha="right", va="bottom", fontsize=14
+        x=1.0,
+        y=0.0,
+        s=comment,
+        transform=ax.transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=14,
     )
     if axis_off:
         ax.axis("off")
@@ -124,7 +140,13 @@ def _simple_scatter_with_colorbar(
         norm=norm,
     )
     ax.text(
-        x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18
+        x=0.5,
+        y=-0.2,
+        s=title,
+        transform=ax.transAxes,
+        va="bottom",
+        ha="center",
+        fontsize=18,
     )
 
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
@@ -189,7 +211,13 @@ def _scatter_with_colorbar_and_legend_size(
         edgecolor="black",
     )
     ax.text(
-        x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18
+        x=0.5,
+        y=-0.2,
+        s=title,
+        transform=ax.transAxes,
+        va="bottom",
+        ha="center",
+        fontsize=18,
     )
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
 
@@ -201,7 +229,9 @@ def _scatter_with_colorbar_and_legend_size(
         )
 
         for min_dist_val, min_dist_show in zip(min_dist_vals, min_dist_shows.ravel()):
-            ax.scatter([], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val))
+            ax.scatter(
+                [], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val)
+            )
         ax.legend(
             scatterpoints=1,
             frameon=False,
@@ -232,7 +262,12 @@ def _scatter_with_colorbar_and_legend_size(
 
 
 def show_viz_grid(
-    dataset_name, method_name, labels=None, plot_dir="", embedding_dir="", list_params=[]
+    dataset_name,
+    method_name,
+    labels=None,
+    plot_dir="",
+    embedding_dir="",
+    list_params=[],
 ):
     n_viz = len(list_params)
     n_rows, n_cols = math.ceil(n_viz / 4), 4
@@ -276,7 +311,9 @@ def meta_umap(X, meta_n_neighbors=15, cache=False, embedding_dir=""):
     if cache:
         Z = joblib.load(f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     else:
-        Z = UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=30).fit_transform(X)
+        Z = UMAP(
+            n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=30
+        ).fit_transform(X)
         joblib.dump(Z, f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     return Z
 
@@ -453,7 +490,9 @@ def annotate_selected_params_tsne(ax, list_annotations):
     print(list_annotations)
     offset = 1.0 / len(list_annotations)
     # sort by x coordinate
-    for i, (perp_val, pos_x, pos_y) in enumerate(sorted(list_annotations, key=lambda p: p[1])):
+    for i, (perp_val, pos_x, pos_y) in enumerate(
+        sorted(list_annotations, key=lambda p: p[1])
+    ):
         ax.scatter(pos_x, pos_y, marker="X", color="orange", s=80)
         # ax.annotate(str(perp_val), (pos_x, pos_y), fontsize=10)
         ax.annotate(
@@ -648,6 +687,12 @@ def plot_samples(dataset_name, data, plot_dir="", n_samples=4, transpose=False):
     plt.close()
 
 
+def plot_score_flexibility(
+    dataset_name, X, labels1=None, labels2=None, title1="", title2="", plot_dir=""
+):
+    pass
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -655,13 +700,16 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dataset_name", default="")
-    ap.add_argument("-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']")
+    ap.add_argument(
+        "-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']"
+    )
     # ap.add_argument("-s", "--seed", default=42, type=int)
     ap.add_argument("--use_other_label", default=None)
     ap.add_argument("--plot_test_vis", action="store_true")
     ap.add_argument("--show_viz_grid", action="store_true")
     ap.add_argument("--plot_metamap", action="store_true")
     ap.add_argument("--plot_samples", action="store_true")
+    ap.add_argument("--plot_score_flexibility", action="store_true")
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
 
@@ -672,11 +720,15 @@ if __name__ == "__main__":
     # print(get_params_to_show(dataset_name, method_name))
     # sys.exit(0)
 
-    X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method="auto")
+    X_origin, X, labels = dataset.load_dataset(
+        dataset_name, preprocessing_method="auto"
+    )
 
     other_label_name = args.use_other_label
     if other_label_name is not None:
-        other_labels, des = dataset.load_additional_labels(dataset_name, other_label_name)
+        other_labels, des = dataset.load_additional_labels(
+            dataset_name, other_label_name
+        )
         if labels is None:
             raise ValueError("Fail to load additional labels: " + des)
         print("Using additional labels: ", other_label_name)
@@ -695,7 +747,9 @@ if __name__ == "__main__":
 
     if args.show_viz_grid:
         list_params = get_params_to_show(dataset_name, method_name)
-        show_viz_grid(dataset_name, method_name, labels, plot_dir, embedding_dir, list_params)
+        show_viz_grid(
+            dataset_name, method_name, labels, plot_dir, embedding_dir, list_params
+        )
 
     if args.plot_metamap:
         # plot_metamap(dataset_name, method_name, plot_dir, embedding_dir)
@@ -718,4 +772,13 @@ if __name__ == "__main__":
             plot_dir=f"./plots/{dataset_name}",
             n_samples=n_samples,
             transpose=transpose,
+        )
+
+    if args.plot_score_flexibility:
+        config_labels = {}
+        labels2 = None
+        title1 = ""
+        title2 = ""
+        plot_score_flexibility(
+            dataset_name, labels, labels2, title1, title2, plot_dir=plot_dir
         )
