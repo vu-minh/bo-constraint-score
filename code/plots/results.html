@@ -45,7 +45,7 @@
     <title>Minh's Notes</title>
   </head>
   <body>
-    <div class="row" style="background-color:rgb(240, 240, 208);">
+    <div class="row" style="background-color:#E6EAF3">
 
       <div class="col-6">
         <h3>New results for constraint preserving scores</h3>
@@ -131,20 +131,22 @@
 	      (DIGITS, FASHION_MOBILENET, 20NEWS5, NEURON_1K)
 
               <div>
-                <h3 id="BayOpt-with-one-param-compare">Comparing the scores (constraint score, AUC_log_RNX score, BIC score)
-		</h3>
+                <h3 id="BayOpt-with-one-param-compare">Comparing the scores (constraint score, AUC_log_RNX score, BIC score)</h3>
+		<br />
                 <img id="img-bayopt1-compare" src=""
 		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
               </div>
 
               <div>
                 <h3 id="BayOpt-with-one-params-prediction">Prediction of BayOpt for one param with tsne</h3>
+		<br />
                 <img id="img-bayopt1-prediction" src=""
 		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
               </div>
 
               <div>
                 <h3 id="BayOpt-with-one-params-metamap">Metamap and sample visualizations</h3>
+		<br />
                 <img id="img-bayopt1-metamap" class="img-wide" src=""
 		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
                 <img id="img-bayopt1-show" class="img-wide" src=""
@@ -156,23 +158,25 @@
             <div id="body-two-param">
               <h2 id="BayOpt-with-two-param">BayOpt with two parameters (with UMAP)</h2>
 	      (COIL20, FASHION_1000)
-
-              <div>
+	      <br />
+              <div style="display:block;float:left">
                 <h3 id="BayOpt-with-two-param-compare">Comparing the scores (constraint score and AUC_log_RNX score) for UMAP embeddings with 2 params</h3>
                 <img id="img-bayopt2-rnx2d" class="img-50" src=""
 		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
-                <img id="img-bayopt2-qij2d" class="img-50"
-		     src="" onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
+                <img id="img-bayopt2-qij2d" class="img-50" src=""
+		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
               </div>
 
               <div>
                 <h3 id="BayOpt-with-two-params-prediction">Prediction of BayOpt for two params with UMAP</h3>
+		<br />
                 <img id="img-bayopt2-prediction" src=""
 		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
               </div>
 
               <div>
                 <h3 id="BayOpt-with-two-params-metamap">Metamap and sample visualizations</h3>
+		<br />
                 <img id="img-bayopt2-metamap" class="img-wide" src=""
 		     onerror="this.onerror=null; this.src='./html_libs/no_results_found.png'"/>
                 <img id="img-bayopt2-show" class="img-wide" src=""
@@ -182,6 +186,7 @@
 
 	    <div>
 	      <h3 id="body-case-demo">Score Flexibility</h3>
+	      <br />
 	      <h4>Demo the flexibility of the constraint score for 3 datasets with <b>tsne embeddings</b></h4>
 	      <ul>
 		<li>FASHION_MOBILENET (for image dataset)</li>
