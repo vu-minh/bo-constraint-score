@@ -1,4 +1,31 @@
-\section{Experiments}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
+
++ Explain the internal step in BayOpt.
+Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step5}.png}
+\caption{BayOpt after 5 steps.}\label{fig:bayopt5}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step10}.png}
+\caption{BayOpt after 10 steps.}\label{fig:bayopt10}
+\end{figure}
+
++ Explain how the utility function are constructed and optimized, and answer why optimize the utility function (surrogate function), we can optimize at the same time the target function (the constraint-based score function).
+
++ Explain the exploitation-exploration trade-off in BayOpt (and estimate the number of times we need to try before reaching to the global maximum).
+
+%+ Note about the nature of BayOpt that, it can work with any non-convex multi-modal objective function and it assures to find the global extremum.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Experimental Setups}
 
 
 \subsection{Datasets}
@@ -89,3 +116,85 @@ In contrast, the $f_{score}$ evaluates how the constraints are preserved.
 
 $f_{score}$ takes a set of constraints as input to find the best visualization which respects the constraints.
 Naturally, the constraints generated from the class labels reflect the class-relationship between the data points in the same class.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Experimental Results}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Discussion}
+
+\par
+Discuss the variance of the proposed score (w.r.t to different set of constraints, different number of constraitns).
+Say, the constraint-based score is a stochastic function.
+Say, how BayOpt can take into account the uncertainty (the variance of the score) to estimate the maximum of this stochastic function.
+
+
+\par
+The violated constraints in our methods correspond to the shortcomming of t-SNE in \cite{wattenberg2016use}.
+t-SNE can not preserve the within-cluster distances and between-clusters distances.
+[TODO: Add reproduced figures].
+The $q_{ij}$-based score can help to understand the defective of the visualization.
+
+\par
+Add discussion for UMAP.
+
+\par
+Easily generate pairwise constraints from labels.
+  Only need small amount of labeled points for each class to generate hundreds of constraints.
+  The proposed method only need 200 constraints to work well.
+  [TODO: Test with smaller number of constraints to see if it works. 200 constraints seem too much].
+
+\par
+Can replace the auto-generated constraints by the manual constraints of the real user.
+
+\par
+The user can interact directly in the loop of Bayesian Optimization method to select the next hyperparameter to discover.
+
+
+\par
+Both the constraint-based score and the BayOpt's internal steps are explainable even for the non-technical users. 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion and Future Work}
+
+\par (1) Repeat the problem of hyperparameter tuning for DR methods and our solution:
+
++ The proposed constraint-based score is indenpendent to how the embedding is produced and can be used with any DR methods.
+This score is built upon a limited number of constraints but can distinguish the visualizations prefering local structure and those prefereing global structure.
+
++ A finding that Bayesian Optimization approach fits well in our problem.
+
+
+\vspace{8pt}
+\par (2) Summary the advantages of the two above elements
+
++ The constraint-based score agree the the well-known quality metric.
+
++ This score can be visually represented to explain the violated pairs.
+
++ By combining this score with BayOpt approach, we can tune many hyperparameters at the same time for many widely used DR methods like t-SNE or UMAP.
+
++ BayOpt takes into account the uncertainty in the score values and also explainable. We can observe the internal optimization step to anwser the question: why to choose the next promissing hyperparameters to try?
+
+
+\vspace{8pt}
+\par (4) Future work:
+
+(a) User experiment:
+
++ Integrate the user's feedback in two stages of our workflow.
+The users can select the pairwise constraints or label some points (used to generate the constraints) to build the score.
+They can also manualy select the next hyperparameters to evaluate in a customized interactive BayOpt framework.
+
++ Take the preference of the users on the presented visualizations to evaluate the quality of the visualization. We search for if the best visualization selected by the user corresponds to the result of our method.
+
+
+(b) Integrate directly the pairwise constraints into the optimization process of BayOpt.
+BayOpt is now used as a generic toolbox to find the extreme of a blackbox costly objective function.
+Our idea is to use the pairwise constraint to modify the kernel in the covariance function of Gaussian Process model, which is the core element of BayOpt.
