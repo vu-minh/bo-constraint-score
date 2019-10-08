@@ -1,27 +1,27 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
 
-+ Explain the internal step in BayOpt.
-Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
+% + Explain the internal step in BayOpt.
+% Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
 
-\begin{figure}
-\centering
-\includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step5}.png}
-\caption{BayOpt after 5 steps.}\label{fig:bayopt5}
-\end{figure}
+% \begin{figure}
+% \centering
+% \includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step5}.png}
+% \caption{BayOpt after 5 steps.}\label{fig:bayopt5}
+% \end{figure}
 
 
-\begin{figure}
-\centering
-\includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step10}.png}
-\caption{BayOpt after 10 steps.}\label{fig:bayopt10}
-\end{figure}
+% \begin{figure}
+% \centering
+% \includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step10}.png}
+% \caption{BayOpt after 10 steps.}\label{fig:bayopt10}
+% \end{figure}
 
-+ Explain how the utility function are constructed and optimized, and answer why optimize the utility function (surrogate function), we can optimize at the same time the target function (the constraint-based score function).
+% + Explain how the utility function are constructed and optimized, and answer why optimize the utility function (surrogate function), we can optimize at the same time the target function (the constraint-based score function).
 
-+ Explain the exploitation-exploration trade-off in BayOpt (and estimate the number of times we need to try before reaching to the global maximum).
+% + Explain the exploitation-exploration trade-off in BayOpt (and estimate the number of times we need to try before reaching to the global maximum).
 
-%+ Note about the nature of BayOpt that, it can work with any non-convex multi-modal objective function and it assures to find the global extremum.
+% %+ Note about the nature of BayOpt that, it can work with any non-convex multi-modal objective function and it assures to find the global extremum.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,24 +32,24 @@ Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
 
 The six used datasets are summaries in Table.~\ref{tbl:dataset}.
 \emph{DIGITS} is a subset of the optical recognition of handwritten digits dataset~\cite{kaynak1995methods} of 8x8 grayscale images.
-\emph{COIL20} \cite{nene1996} is a dataset of 32x32 grayscale pictures of 20 rotated objects.
+\emph{COIL20} \cite{nene1996} is a dataset of 32x32 grayscale images of 20 rotated objects.
 \emph{FASHION\_1K} contains 1000 grayscale images of size 28x28, sampled from Fashion-MNIST\cite{xiao2017/online} clothing dataset.
-The grayscale images from there above datasets are normalized and used directly in the DR methods.
+The grayscale images from three above datasets are normalized and used directly in the DR methods.
 
-\emph{FASHION\_MOBILENET} contains features extracted from a subset of Fashion Product images dataset~\cite{fashionproduct}.
-The MobileNet\cite{} with pre-trained weights from ImageNet is used for feature extraction, a transfer learning technique that uses the representation of the learned network (trained on a large-scale image classification task) to extract meaningful features for new samples.
-The last fully connected layer of the network is replaced by a global average pooling layer\cite{} to obtain the flatten output vector of 1280 dimensions.
+\emph{FASHION\_MOBILENET} dataset contains samples of 7 most numerous classes from a subset of Fashion Product images dataset~\cite{fashionproduct}.
+The MobileNet\cite{howard2017mobilenets} with pre-trained weights from ImageNet is used for feature extraction, a transfer learning technique that uses the representation of the learned network (trained on a large-scale image classification task) to extract meaningful features for new samples.
+The last fully connected layer of the network is replaced by a global average pooling layer\cite[Sec.3.2]{lin2013network} to obtain the flattened output vector of 1280 dimensions.
 To speed up the DR methods, PCA is then applied to take only 75 features.
 
-\emph{5NEWS} contains the text of 5 groups selected from the 20 Newsgroups dataset which are converted to a matrix of token counts via TF-IDF method.
-The count vectors are then fed into Latent Dirichlet Allocation (LDA) model to extract 15 hidden topics, which are 15 features used for DR methods.
+\emph{5NEWS} dataset contains the text of 5 groups selected from the 20 Newsgroups dataset which are converted to a matrix of token counts via Term Frequency Inverse Document Frequency (TF-IDF) method.
+The count vectors are then fed into Latent Dirichlet Allocation (LDA)~\cite{blei2003latent} model to extract 15 hidden topics, which are 15 features used for DR methods.
 
-The open \emph{NEURON\_1K}~\cite{neuron1k} dataset contains 1301 Brain Cells from an E18 Mouse, processed and provided by 10X Genomics, a company who provides chromium single cell gene expression solution and publics several genetic datasets.\footnote{https://www.10xgenomics.com/resources/datasets/, The datasets are licensed under the Creative Commons Attribution license.}
+The open \emph{NEURON\_1K}~\cite{neuron1k} dataset contains 1301 brain cells from an E18 Mouse, processed and provided by 10X Genomics, a company who provides chromium single cell gene expression solution and releases several public genetic datasets.\footnote{https://www.10xgenomics.com/resources/datasets/, the datasets are licensed under the Creative Commons Attribution license.}
 The processed data have 10 PCA features and labeled in 6 classes found by a graph-based clustering method.
 
 
 \begin{table*}[width=\textwidth,cols=6,pos=h]
-\caption{Description of six selected datasets with samples for the image datasets.}\label{tbl:dataset}
+\caption{Description of six selected datasets.}\label{tbl:dataset}
 \begin{tabular}{m{3cm} m{4.8cm} m{8cm}}
 \toprule
 Dataset name & Samples & Description \\
@@ -83,7 +83,7 @@ Dataset name & Samples & Description \\
 
 \emph{NEURON\_1K}
     &
-    & 1301 brain cells from a combined cortex, hippocampus and subventricular zone of an E18 mouse. \\
+    & 1301 brain cells from a combined cortex, hippo-campus and sub-ventricular zone of an E18 mouse. \\
 
 \bottomrule
 \end{tabular}
@@ -93,17 +93,48 @@ Dataset name & Samples & Description \\
 \subsection{Constraint Generation}
 
 The input for our proposed constraint preserving scores is ensemble of constraints in form of similar links and dissimilar links.
+However, it is hard to control the effect of the number of constraints each type to the score function and the quality of them.
+For example, a similar link between two different data points is not expected.
+In order to correctly evaluate the score function, we do not use the pairwise constraints directly, but use a small subset of instances with labels to generate the constraints instead.
+
+Give a dataset of $C$ classes, for each class we take randomly $k$ labeled instances to generate the constraints.
+Suppose that the number of instances in each class is larger than $k$ ($k$ is usually very small).
+A similar link is formed by choosing a random pair from $k$ labeled instances of a class.
+The number of all possible similar links are given in equation~\ref{equ:n-sim-link}.
+\begin{equation}\label{equ:n-sim-link}
+n_{sim\_link} = C {k \choose 2} = \frac{1}{2} C k (k-1)
+\end{equation}
+A dissimilar link is formed by firstly choosing two different classes among $C$ classes (${C \choose 2}$ ways),
+then choosing a pair of two instances from these two chosen classes ($k^2$ pairs).
+The number of all possible dissimilar links are given in equation~\ref{equ:n-dis-link}.
+\begin{equation}\label{equ:n-dis-link}
+n_{dis\_link} = {C \choose 2} k^2 = \frac{1}{2} C (C-1) k^2
+\end{equation}
+
+Intuitively, the more labeled points we had, the more constraints are generated and the more stable the $f_{score}$ is.
+We will show in the next section the experimental setup for the proof of concept.
+Indeed, with 10 labeled points for each of 10 classes of the DIGITS dataset for example, they are around 5.6\% of total labels but can generate 450 similar links and 4500 dissimilar links.
 
 
 \subsection{Proof of Concept}
+We design the experiments to answer the research questions concerning to the stability (question 1) and flexibility (question 3) of the proposed score, the application of BayOpt on $f_{score}$ to find the best hyperparameters for t-SNE (question 2a) and UMAP (question 2b).
+
+\subsubsection*{Question 1}
+The proposed constraint preserving score is a function of the input constraints $f_{score}(\mathcal{S}, \mathcal{D})$.
+But we can have many set of constraints generated from a fixed number of labeled instances $k$ for each class.
+There are ${n_i} \choose k$ ways to choose $k$ labeled instances among $n_i$ instances the $i^{th}$ class, $i = 1..C$.
+With different set of labels, we can generate different set of constraints.
+Thus first question is that, how does $f_{score}$ vary with respect to different number of labeled instances?
+The second question is, with different set of constraints generated from a fixed number of labeled instances, is $f_{score}$ stable?
 
 
+\subsubsection*{Question 3}
 For the flexibility:
 We design the score independently to the DR methods.
 As shown in the above experiments, the constraint score can be used to evaluate the embedding quality of t-SNE or UMAP.
 These well-known methods are widely used since they have ability to preserve the neighborhood information, i.e. to make the data points in the same class close together.
 In this way, the local structure of the data is highlighted.
-But as pointed out in the distill article ``How to use t-sne effectively'' by \citet{wattenberg2016use}, the distance between clusters might not mean anything.
+But as pointed out in the article ``How to use t-sne effectively'' by \citet{wattenberg2016use}, the distance between clusters might not mean anything.
 
 The hyperparameters of t-SNE and UMAP make these methods difficult to use correctly but also make them flexible.
 These methods can produce different visualizations and reveal different hidden structures in the data.
@@ -118,7 +149,6 @@ $f_{score}$ takes a set of constraints as input to find the best visualization w
 Naturally, the constraints generated from the class labels reflect the class-relationship between the data points in the same class.
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental Results}
 
@@ -128,13 +158,13 @@ Naturally, the constraints generated from the class labels reflect the class-rel
 \section{Discussion}
 
 \par
-Discuss the variance of the proposed score (w.r.t to different set of constraints, different number of constraitns).
+Discuss the variance of the proposed score (w.r.t to different set of constraints, different number of constraints).
 Say, the constraint-based score is a stochastic function.
 Say, how BayOpt can take into account the uncertainty (the variance of the score) to estimate the maximum of this stochastic function.
 
 
 \par
-The violated constraints in our methods correspond to the shortcomming of t-SNE in \cite{wattenberg2016use}.
+The violated constraints in our methods correspond to the shortcoming of t-SNE in \cite{wattenberg2016use}.
 t-SNE can not preserve the within-cluster distances and between-clusters distances.
 [TODO: Add reproduced figures].
 The $q_{ij}$-based score can help to understand the defective of the visualization.
@@ -165,8 +195,8 @@ Both the constraint-based score and the BayOpt's internal steps are explainable 
 
 \par (1) Repeat the problem of hyperparameter tuning for DR methods and our solution:
 
-+ The proposed constraint-based score is indenpendent to how the embedding is produced and can be used with any DR methods.
-This score is built upon a limited number of constraints but can distinguish the visualizations prefering local structure and those prefereing global structure.
++ The proposed constraint-based score is independent to how the embedding is produced and can be used with any DR methods.
+This score is built upon a limited number of constraints but can distinguish the visualizations preferring local structure and those preferring global structure.
 
 + A finding that Bayesian Optimization approach fits well in our problem.
 
@@ -180,7 +210,7 @@ This score is built upon a limited number of constraints but can distinguish the
 
 + By combining this score with BayOpt approach, we can tune many hyperparameters at the same time for many widely used DR methods like t-SNE or UMAP.
 
-+ BayOpt takes into account the uncertainty in the score values and also explainable. We can observe the internal optimization step to anwser the question: why to choose the next promissing hyperparameters to try?
++ BayOpt takes into account the uncertainty in the score values and also explainable. We can observe the internal optimization step to answer the question: why to choose the next promising hyperparameters to try?
 
 
 \vspace{8pt}
@@ -190,7 +220,7 @@ This score is built upon a limited number of constraints but can distinguish the
 
 + Integrate the user's feedback in two stages of our workflow.
 The users can select the pairwise constraints or label some points (used to generate the constraints) to build the score.
-They can also manualy select the next hyperparameters to evaluate in a customized interactive BayOpt framework.
+They can also manually select the next hyperparameters to evaluate in a customized interactive BayOpt framework.
 
 + Take the preference of the users on the presented visualizations to evaluate the quality of the visualization. We search for if the best visualization selected by the user corresponds to the result of our method.
 
