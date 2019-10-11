@@ -25,10 +25,14 @@ cp plots/DIGITS/umap/2D/auc_rnx.png ../tex/figures/DIGITS_umap_auc_rnx.png
 cp plots/COIL20/umap/2D/qij_score.png ../tex/figures/COIL20_umap_qij_score.png
 cp plots/COIL20/umap/2D/auc_rnx.png ../tex/figures/COIL20_umap_auc_rnx.png
 
+cp plots/FASHION1000/umap/2D/qij_score.png ../tex/figures/FASHION1000_umap_qij_score.png
+cp plots/FASHION1000/umap/2D/auc_rnx.png ../tex/figures/FASHION1000_umap_auc_rnx.png
+
 
 # # (3) figures contour predicted score from BO
 cp plots/DIGITS/umap/qij/predicted_score.png ../tex/figures/DIGITS_umap_predicted_score.png
 cp plots/COIL20/umap/qij/predicted_score.png ../tex/figures/COIL20_umap_predicted_score.png
+cp plots/FASHION1000/umap/qij/predicted_score.png ../tex/figures/FASHION1000_umap_predicted_score.png
 
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
@@ -38,11 +42,15 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
 
         echo "COPY SCORE COMPARE: " $DATASET_NAME $METHOD
         cp plots/${DATASET_NAME}/${METHOD}/plot_compare.png \
-           ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_compare_scores.png
+            ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_compare_scores.png
 
         # # (6) figures grid of selected vizs
         cp plots/${DATASET_NAME}/${METHOD}/show.png \
-           ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_show.png
+            ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_show.png
+
+        # # (1.b) Score stability for tsne
+        cp plots/${DATASET_NAME}/${METHOD}/scores.png \
+            ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_scores.png
 
     done
 
@@ -55,10 +63,16 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
     cp plots/${DATASET_NAME}/umap/metamap_scores_100.png \
        ${TARGET_DIR}/${DATASET_NAME}_umap_metamap.png
 
+    # # (8) Plots BayOpt in action for tsne
+    echo "COPY BayOpt prediction for tsne:"
+    cp plots/${DATASET_NAME}/tsne/qij/bo_summary.png \
+        ${TARGET_DIR}/${DATASET_NAME}_tsne_bo.png
 done
 
-# # (5) 
-
+# # (7) Score flexibility
+cp plots/FASHION_MOBILENET/tsne/score_flexibility.png ../tex/figures/FASHION_MOBILENET_score_flexibility.png
+cp plots/20NEWS5/tsne/score_flexibility.png ../tex/figures/20NEWS5_score_flexibility.png
+cp plots/NEURON_1K/tsne/score_flexibility.png ../tex/figures/NEURON_1K_score_flexibility.png
 
 ################################################################################################
 # Command for reproducing figures/data
