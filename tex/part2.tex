@@ -1,3 +1,6 @@
+%!TEX spellcheck
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
 
@@ -23,11 +26,12 @@
 
 % %+ Note about the nature of BayOpt that, it can work with any non-convex multi-modal objective function and it assures to find the global extremum.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental Setups}
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Datasets}
 
 The six used datasets are summaries in Table.~\ref{tbl:dataset}.
@@ -89,7 +93,7 @@ Dataset name & Samples & Description \\
 \end{tabular}
 \end{table*}
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Constraint Generation}
 
 The input for our proposed constraint preserving scores is ensemble of constraints in form of similar links and dissimilar links.
@@ -116,6 +120,7 @@ We will show in the next section the experimental setup for the proof of concept
 Indeed, with 10 labeled points for each of 10 classes of the DIGITS dataset for example, they are around 5.6\% of total labels but can generate 450 similar links and 4500 dissimilar links.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Proof of Concept}
 We design the experiments to answer the research questions concerning to the stability (question 1) and flexibility (question 3) of the proposed score, the application of BayOpt on $f_{score}$ to find the best hyperparameters for t-SNE (question 2a) and UMAP (question 2b).
 
@@ -152,8 +157,129 @@ Naturally, the constraints generated from the class labels reflect the class-rel
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental Results}
 
+\subsection{Stability of Constraint Preserving Score}
 
 
+\subsection{BayOpt for Tuning One Parameter of t-SNE}
+
+\subsubsection*{Compare $f_{score}$ with $AUC_{log}RNX$ and BIC}
+
+\begin{figure*}
+\centering
+
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{DIGITS_tsne_compare_scores}
+    \caption{DIGITS}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{COIL20_tsne_compare_scores}
+    \caption{COIL20}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{NEURON_1K_tsne_compare_scores}
+    \caption{NEURON\_1K}
+\end{subfigure}
+
+\vfill
+
+\begin{subfigure}[b]{0.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{FASHION1000_tsne_compare_scores}
+    \caption{FASHION1000}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{FASHION_MOBILENET_tsne_compare_scores}
+    \caption{FASHION\_MOBILENET}
+\end{subfigure}
+~
+\begin{subfigure}[b]{0.32\textwidth}
+    \includegraphics[width=\textwidth]{20NEWS5_tsne_compare_scores}
+    \caption{20NEWS5 (TODO)}
+\end{subfigure}
+
+\caption{Comparing constraint score, $AUC_{log}RNX$ score and BIC score for the embeddings of tSNE.}
+\end{figure*}
+
+
+\subsubsection*{BayOpt in Action}
+
+\begin{figure*}
+\centering
+\begin{subfigure}[b]{.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{DIGITS_tsne_bo.png}
+    \caption{\emph{DIGITS}}
+\end{subfigure}
+~
+\begin{subfigure}[b]{.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{COIL20_tsne_bo.png}
+    \caption{\emph{COIL20}}
+\end{subfigure}
+~
+\begin{subfigure}[b]{.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{NEURON_1K_tsne_bo.png}
+    \caption{\emph{NEURON\_1K}}
+\end{subfigure}
+
+\vfill
+
+\begin{subfigure}[b]{.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{FASHION1000_tsne_bo.png}
+    \caption{\emph{FASHION1000}}
+\end{subfigure}
+~
+\begin{subfigure}[b]{.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{FASHION_MOBILENET_tsne_bo.png}
+    \caption{\emph{FASHION\_MOBILENET}}
+\end{subfigure}
+~
+\begin{subfigure}[b]{.32\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{20NEWS5_tsne_bo.png}
+    \caption{\emph{5NEWS}}
+\end{subfigure}
+
+\end{figure*}
+
+
+\subsubsection*{Metamaps and Visualizations}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{BayOpt for Tuning Two Parameters of UMAP}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Flexibility of the Proposed Score}
+
+\begin{figure*}\label{fig:flex-1}
+\centering
+\includegraphics[width=\textwidth]{{FASHION_MOBILENET_score_flexibility}.png}
+\caption{Flexibility of $f_{score}$ for \emph{FASHION\_MOBILENET} dataset}
+\end{figure*}
+
+\begin{figure*}\label{fig:flex-2}
+\centering
+\includegraphics[width=\textwidth]{{20NEWS5_score_flexibility}.png}
+\caption{Flexibility of $f_{score}$ for \emph{5NEWS} dataset}
+\end{figure*}
+
+\begin{figure*}\label{fig:flex-3}
+\centering
+\includegraphics[width=\textwidth]{{NEURON_1K_score_flexibility}.png}
+\caption{Flexibility of $f_{score}$ for \emph{NEURON\_1K} dataset}
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion}
 
