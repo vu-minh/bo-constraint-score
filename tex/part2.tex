@@ -97,20 +97,21 @@ Dataset name & Samples & Description \\
 \subsection{Constraint Generation}
 
 The input for our proposed constraint preserving scores is ensemble of constraints in form of similar links and dissimilar links.
-However, it is hard to control the effect of the number of constraints each type to the score function and the quality of them.
+However, it is hard to control the quality of the constraints.
 For example, a similar link between two different data points is not expected.
+The number of constraints each type also affects the stability of the score.
 In order to correctly evaluate the score function, we do not use the pairwise constraints directly, but use a small subset of instances with labels to generate the constraints instead.
 
 Give a dataset of $C$ classes, for each class we take randomly $k$ labeled instances to generate the constraints.
 Suppose that the number of instances in each class is larger than $k$ ($k$ is usually very small).
 A similar link is formed by choosing a random pair from $k$ labeled instances of a class.
-The number of all possible similar links are given in equation~\ref{equ:n-sim-link}.
+The number of all possible similar links is given by:
 \begin{equation}\label{equ:n-sim-link}
 n_{sim\_link} = C {k \choose 2} = \frac{1}{2} C k (k-1)
 \end{equation}
-A dissimilar link is formed by firstly choosing two different classes among $C$ classes (${C \choose 2}$ ways),
+A dissimilar link is formed by first choosing two different classes among $C$ classes (${C \choose 2}$ ways),
 then choosing a pair of two instances from these two chosen classes ($k^2$ pairs).
-The number of all possible dissimilar links are given in equation~\ref{equ:n-dis-link}.
+The number of all possible dissimilar links is given by:
 \begin{equation}\label{equ:n-dis-link}
 n_{dis\_link} = {C \choose 2} k^2 = \frac{1}{2} C (C-1) k^2
 \end{equation}
@@ -122,20 +123,17 @@ Indeed, with 10 labeled points for each of 10 classes of the DIGITS dataset for 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Proof of Concept}
-We design the experiments to answer the research questions concerning to the stability (question 1) and flexibility (question 3) of the proposed score, the application of BayOpt on $f_{score}$ to find the best hyperparameters for t-SNE (question 2a) and UMAP (question 2b).
+We design the experiments to answer the research questions concerning to the stability and flexibility of the proposed score and how BayOpt is applied to $f_{score}$ to find the best hyperparameters for both t-SNE and UMAP.
 
-\subsubsection*{Question 1}
+\subsubsection*{Questions on the score's stability}
 The proposed constraint preserving score is a function of the input constraints $f_{score}(\mathcal{S}, \mathcal{D})$.
-But we can have many set of constraints generated from a fixed number of labeled instances $k$ for each class.
-There are ${n_i} \choose k$ ways to choose $k$ labeled instances among $n_i$ instances the $i^{th}$ class, $i = 1..C$.
-With different set of labels, we can generate different set of constraints.
-Thus first question is that, how does $f_{score}$ vary with respect to different number of labeled instances?
-The second question is, with different set of constraints generated from a fixed number of labeled instances, is $f_{score}$ stable?
+The first question is that, how does $f_{score}$ vary with respect to different number of labeled instances?
+Moreover, with a fixed number of labeled instances, we can generate different set of pairwise constraints.
+The second question is, with different set of constraints generated from the same fixed number of labeled instances, is $f_{score}$ stable?
 
 
-\subsubsection*{Question 3}
-For the flexibility:
-We design the score independently to the DR methods.
+\subsubsection*{Question on the score's flexibility}
+$f_{score}$ is designed to be independent to the DR methods.
 As shown in the above experiments, the constraint score can be used to evaluate the embedding quality of t-SNE or UMAP.
 These well-known methods are widely used since they have ability to preserve the neighborhood information, i.e. to make the data points in the same class close together.
 In this way, the local structure of the data is highlighted.
