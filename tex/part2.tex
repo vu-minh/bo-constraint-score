@@ -1,32 +1,6 @@
 %!TEX spellcheck
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
-
-% + Explain the internal step in BayOpt.
-% Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
-
-% \begin{figure}
-% \centering
-% \includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step5}.png}
-% \caption{BayOpt after 5 steps.}\label{fig:bayopt5}
-% \end{figure}
-
-
-% \begin{figure}
-% \centering
-% \includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step10}.png}
-% \caption{BayOpt after 10 steps.}\label{fig:bayopt10}
-% \end{figure}
-
-% + Explain how the utility function are constructed and optimized, and answer why optimize the utility function (surrogate function), we can optimize at the same time the target function (the constraint-based score function).
-
-% + Explain the exploitation-exploration trade-off in BayOpt (and estimate the number of times we need to try before reaching to the global maximum).
-
-% %+ Note about the nature of BayOpt that, it can work with any non-convex multi-modal objective function and it assures to find the global extremum.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental Setups}
 
@@ -34,7 +8,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Datasets}
 
-The six used datasets are summaries in Table.~\ref{tbl:dataset}.
+Six diverse datasets (of grayscale and color images, text and gene expressions) are used to show the application of our method to the real world dataset. (See Table.~\ref{tbl:dataset} for some samples of each dataset.)
+
 \emph{DIGITS} is a subset of the optical recognition of handwritten digits dataset~\cite{kaynak1995methods} of 8x8 grayscale images.
 \emph{COIL20} \cite{nene1996} is a dataset of 32x32 grayscale images of 20 rotated objects.
 \emph{FASHION\_1K} contains 1000 grayscale images of size 28x28, sampled from Fashion-MNIST\cite{xiao2017/online} clothing dataset.
@@ -120,10 +95,21 @@ Intuitively, the more labeled points we had, the more constraints are generated 
 We will show in the next section the experimental setup for the proof of concept.
 Indeed, with 10 labeled points for each of 10 classes of the DIGITS dataset for example, they are around 5.6\% of total labels but can generate 450 similar links and 4500 dissimilar links.
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Proof of Concept}
-We design the experiments to answer the research questions concerning to the stability and flexibility of the proposed score and how BayOpt is applied to $f_{score}$ to find the best hyperparameters for both t-SNE and UMAP.
+We design the experiments to answer the research questions concerning to the stability and flexibility of the proposed score and the application of BayOpt to $f_{score}$.
+As a proof of concept, we create a grid of hyperparameters for t-SNE and UMAP, and then calculate $f_{score}$ for each embedding corresponding to each combination.
+The hyperparameters are sampled in natural logarithmic scale (log-scale) since we want to focus on the values which are not too large.
+In the case of t-SNE, the grid is an integer vector of perplexity values from 2 to $N // 3$ in log-scale, in which $N$ is the number of instances of the dataset.
+In the case of UMAP, the two dimensional grid is all combinations of its two hyperparameters.
+The first dimension is an integer vector of $n\_neighbor$ values from 2 to $N // 3$ in log-scale.
+The second dimension is a vector of 10 real values of $min\_dist$ from 0.001 to 1.0 in log-scale.
+This grid helps us to analyze the behavior of the proposed $f_{score}$ w.r.t. different combinations of hyperparameters.
+The $f_{score}$ values on this grid are also used as ground-truth score values to evaluate the prediction of BayOpt approach.
+It is important to note that, the creation of this grid is computationally expensive and increases exponentially with the number of hyperparameters.
+The grid is only used as proof of concept to evaluate the reliability of the BayOpt approach on the proposed score.
+As shown in the next section, BayOpt approach solves the scalability problem efficiently, in which only dozens of evaluations are required to find the best hyperparameters for all experimented datasets.
+
 
 \subsubsection*{Questions on the score's stability}
 The proposed constraint preserving score is a function of the input constraints $f_{score}(\mathcal{S}, \mathcal{D})$.
@@ -131,9 +117,16 @@ The first question is that, how does $f_{score}$ vary with respect to different 
 Moreover, with a fixed number of labeled instances, we can generate different set of pairwise constraints.
 The second question is, with different set of constraints generated from the same fixed number of labeled instances, is $f_{score}$ stable?
 
+\subsubsection*{Questions on application of BayOpt on $f_{score}$}
+BayOpt is widely used for hyperparameter tuning problem when the target function is well-defined.
+In supervised setting or in clustering problem where we can access the class labels, the target function is simply a metric which measures the quality of the prediction or clustering.
+The goal of BayOpt is to find the best hyperparameter to maximize the quality measurement for the given task.
+In the case of visualization problem, the quality measurement is not well-defined yet.
+Throughout experiments, we show that the proposed $f_{score}$ works well under BayOpt framework.
+
 
 \subsubsection*{Question on the score's flexibility}
-$f_{score}$ is designed to be independent to the DR methods.
+
 As shown in the above experiments, the constraint score can be used to evaluate the embedding quality of t-SNE or UMAP.
 These well-known methods are widely used since they have ability to preserve the neighborhood information, i.e. to make the data points in the same class close together.
 In this way, the local structure of the data is highlighted.
@@ -153,8 +146,37 @@ Naturally, the constraints generated from the class labels reflect the class-rel
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
+
+% + Explain the internal step in BayOpt.
+% Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
+
+% \begin{figure}
+% \centering
+% \includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step5}.png}
+% \caption{BayOpt after 5 steps.}\label{fig:bayopt5}
+% \end{figure}
+
+
+% \begin{figure}
+% \centering
+% \includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step10}.png}
+% \caption{BayOpt after 10 steps.}\label{fig:bayopt10}
+% \end{figure}
+
+% + Explain how the utility function are constructed and optimized, and answer why optimize the utility function (surrogate function), we can optimize at the same time the target function (the constraint-based score function).
+
+% + Explain the exploitation-exploration trade-off in BayOpt (and estimate the number of times we need to try before reaching to the global maximum).
+
+% %+ Note about the nature of BayOpt that, it can work with any non-convex multi-modal objective function and it assures to find the global extremum.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental Results}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Stability of Constraint Preserving Score}
 
 Stability of the score: analyze Fig.~\ref{fig:score:stability:COIL20} and explain how BayOpt approach can take into account the variance (uncertainty) of the score.
@@ -182,7 +204,7 @@ Stability of the score: analyze Fig.~\ref{fig:score:stability:COIL20} and explai
      \label{fig:score:stability:COIL20}
 \end{figure*}
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Tuning One Parameter of t-SNE}
 
 \subsubsection*{BayOpt in Action}
@@ -300,8 +322,6 @@ Metamap and sample visualizations for \emph{DIGITS} (Fig.~\ref{fig:tsne:meta:DIG
     \label{fig:tsne:meta:NEURON1K}
 \end{figure*}
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Tuning Two Parameters of UMAP}
 
@@ -385,8 +405,6 @@ Metamap and sample visualizations for \emph{COIL20} (Fig.~\ref{fig:umap:meta:COI
         \caption{Sample vizs FASHION1000}
     \end{subfigure}
 \end{figure*}
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Flexibility of the Proposed Score}
