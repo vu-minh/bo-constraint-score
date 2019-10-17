@@ -97,7 +97,7 @@ Indeed, with 10 labeled points for each of 10 classes of the DIGITS dataset for 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Proof of Concept}
-We design the experiments to answer the research questions concerning to the stability and flexibility of the proposed score and the application of BayOpt to $f_{score}$.
+We design the experiments to answer the research questions concerning to the stability (Section~\ref{sec:x}) and flexibility (Section~\ref{sec:z}) of the proposed score and the application of BayOpt to $f_{score}$ (Section~\ref{sec:y}).
 As a proof of concept, we create a grid of hyperparameters for t-SNE and UMAP, and then calculate $f_{score}$ for each embedding corresponding to each combination.
 The hyperparameters are sampled in natural logarithmic scale (log-scale) since we want to focus on the values which are not too large.
 In the case of t-SNE, the grid is an integer vector of perplexity values from 2 to $N // 3$ in log-scale, in which $N$ is the number of instances of the dataset.
@@ -111,73 +111,13 @@ The grid is only used as proof of concept to evaluate the reliability of the Bay
 As shown in the next section, BayOpt approach solves the scalability problem efficiently, in which only dozens of evaluations are required to find the best hyperparameters for all experimented datasets.
 
 
-\subsubsection*{Questions on the score's stability}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Stability of Constraint Preserving Score}
 The proposed constraint preserving score is a function of the input constraints $f_{score}(\mathcal{S}, \mathcal{D})$.
 The first question is that, how does $f_{score}$ vary with respect to different number of labeled instances?
 Moreover, with a fixed number of labeled instances, we can generate different set of pairwise constraints.
-The second question is, with different set of constraints generated from the same fixed number of labeled instances, is $f_{score}$ stable?
-
-\subsubsection*{Questions on application of BayOpt on $f_{score}$}
-BayOpt is widely used for hyperparameter tuning problem when the target function is well-defined.
-In supervised setting or in clustering problem where we can access the class labels, the target function is simply a metric which measures the quality of the prediction or clustering.
-The goal of BayOpt is to find the best hyperparameter to maximize the quality measurement for the given task.
-In the case of visualization problem, the quality measurement is not well-defined yet.
-Throughout experiments, we show that the proposed $f_{score}$ works well under BayOpt framework.
-
-
-\subsubsection*{Question on the score's flexibility}
-
-As shown in the above experiments, the constraint score can be used to evaluate the embedding quality of t-SNE or UMAP.
-These well-known methods are widely used since they have ability to preserve the neighborhood information, i.e. to make the data points in the same class close together.
-In this way, the local structure of the data is highlighted.
-But as pointed out in the article ``How to use t-sne effectively'' by \citet{wattenberg2016use}, the distance between clusters might not mean anything.
-
-The hyperparameters of t-SNE and UMAP make these methods difficult to use correctly but also make them flexible.
-These methods can produce different visualizations and reveal different hidden structures in the data.
-To evaluate the embedding quality of such flexible methods, we need a flexible score.
-The state of the art $AUC_{log}RNX$ metric or the BIC-based score has no flexibility to capture different visualization results.
-
-$AUC_{log}RNX$ metric evaluates how the neighborhood information is preserved.
-The BIC-based score evaluates the trade-off between KL loss and the value of perplexity in t-SNE.
-In contrast, the $f_{score}$ evaluates how the constraints are preserved.
-
-$f_{score}$ takes a set of constraints as input to find the best visualization which respects the constraints.
-Naturally, the constraints generated from the class labels reflect the class-relationship between the data points in the same class.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% \section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
-
-% + Explain the internal step in BayOpt.
-% Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
-
-% \begin{figure}
-% \centering
-% \includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step5}.png}
-% \caption{BayOpt after 5 steps.}\label{fig:bayopt5}
-% \end{figure}
-
-
-% \begin{figure}
-% \centering
-% \includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step10}.png}
-% \caption{BayOpt after 10 steps.}\label{fig:bayopt10}
-% \end{figure}
-
-% + Explain how the utility function are constructed and optimized, and answer why optimize the utility function (surrogate function), we can optimize at the same time the target function (the constraint-based score function).
-
-% + Explain the exploitation-exploration trade-off in BayOpt (and estimate the number of times we need to try before reaching to the global maximum).
-
-% %+ Note about the nature of BayOpt that, it can work with any non-convex multi-modal objective function and it assures to find the global extremum.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Experimental Results}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Stability of Constraint Preserving Score}
+The second question is thus, with different set of constraints generated from the same fixed number of labeled instances, is $f_{score}$ stable?
 
 Stability of the score: analyze Fig.~\ref{fig:score:stability:COIL20} and explain how BayOpt approach can take into account the variance (uncertainty) of the score.
 
@@ -204,7 +144,19 @@ Stability of the score: analyze Fig.~\ref{fig:score:stability:COIL20} and explai
      \label{fig:score:stability:COIL20}
 \end{figure*}
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Application of BayOpt on $f_{score}$}
+BayOpt is widely used for hyperparameter tuning problem when the target function is well-defined.
+In supervised setting or in clustering problem where we can access the class labels, the target function is simply a metric which measures the quality of the prediction or clustering.
+However in visualization problem, the target function for measuring the quality of the visualization is not well-defined yet.
+Throughout experiments, we show that the proposed $f_{score}$ can work well under BayOpt framework as a flexible quality measurement.
+Indeed, BayOpt is a general framework which can work with any complex target function like $AUC_{log}RNX$ score or BIC-based score function.
+In practice, $AUC_{log}RNX$ does not always work well UMAP's embedding, especially in the case of tuning two UMAP's hyperparameters at the same time.
+BIC-based score tiered 
+$f_{score}$, $AUC_{log}RNX$ and BIC-based scores are compared in both tasks of tuning one hyperparameter for tSNE (Sec~\ref{sec:x}) and tuning two hyperparameters for UMAP (Sec~\ref{sec:y}).
+
 \subsection{BayOpt for Tuning One Parameter of t-SNE}
 
 \subsubsection*{BayOpt in Action}
@@ -406,8 +358,26 @@ Metamap and sample visualizations for \emph{COIL20} (Fig.~\ref{fig:umap:meta:COI
     \end{subfigure}
 \end{figure*}
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Flexibility of the Proposed Score}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Flexibility of the Proposed Score}
+
+t-SNE/LargeVis and UMAP are widely used since they have ability to preserve the neighborhood information, i.e. to make the data points in the same class close together.
+In this way, the local structure of the data is highlighted.
+But as pointed out in the article ``How to use t-sne effectively'' by \citet{wattenberg2016use}, the distance between clusters might not mean anything.
+The hyperparameters of t-SNE and UMAP make these methods difficult to use correctly but also make them flexible.
+These methods can produce different visualizations and reveal different hidden structures in the data.
+To evaluate the embedding quality of such flexible methods, we need a flexible score.
+The state of the art $AUC_{log}RNX$ metric or the BIC-based score has no flexibility to capture different visualization results.
+
+$AUC_{log}RNX$ metric evaluates how the neighborhood information is preserved.
+The BIC-based score evaluates the trade-off between KL loss and the value of perplexity in t-SNE.
+In contrast, the $f_{score}$ evaluates how the constraints are preserved.
+
+$f_{score}$ takes a set of constraints as input to find the best visualization which respects the constraints.
+Naturally, the constraints generated from the class labels reflect the class-relationship between the data points in the same class.
+% However, if we have another subset of \emph{`semantic'} labels
 
 Demo score's flexibility for \emph{FASHION\_MOBILENET}(Fig.~\ref{fig:flex:fashionmobilenet}), \emph{5NEWS} (Fig.~\ref{fig:flex:5news}) and \emph{NEURON\_1K} (Fig.~\ref{fig:flex:neuron}).
 
@@ -435,7 +405,7 @@ Demo score's flexibility for \emph{FASHION\_MOBILENET}(Fig.~\ref{fig:flex:fashio
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion}
+\section{Discussion and Future Work}
 
 \par
 Discuss the variance of the proposed score (w.r.t to different set of constraints, different number of constraints).
@@ -468,10 +438,26 @@ The user can interact directly in the loop of Bayesian Optimization method to se
 \par
 Both the constraint-based score and the BayOpt's internal steps are explainable even for the non-technical users. 
 
+\vspace{8pt}
+\par (4) Future work:
+
+(a) User experiment:
+
++ Integrate the user's feedback in two stages of our workflow.
+The users can select the pairwise constraints or label some points (used to generate the constraints) to build the score.
+They can also manually select the next hyperparameters to evaluate in a customized interactive BayOpt framework.
+
++ Take the preference of the users on the presented visualizations to evaluate the quality of the visualization. We search for if the best visualization selected by the user corresponds to the result of our method.
+
+
+(b) Integrate directly the pairwise constraints into the optimization process of BayOpt.
+BayOpt is now used as a generic toolbox to find the extreme of a blackbox costly objective function.
+Our idea is to use the pairwise constraint to modify the kernel in the covariance function of Gaussian Process model, which is the core element of BayOpt.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion and Future Work}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
 
 \par (1) Repeat the problem of hyperparameter tuning for DR methods and our solution:
 
@@ -491,144 +477,3 @@ This score is built upon a limited number of constraints but can distinguish the
 + By combining this score with BayOpt approach, we can tune many hyperparameters at the same time for many widely used DR methods like t-SNE or UMAP.
 
 + BayOpt takes into account the uncertainty in the score values and also explainable. We can observe the internal optimization step to answer the question: why to choose the next promising hyperparameters to try?
-
-
-\vspace{8pt}
-\par (4) Future work:
-
-(a) User experiment:
-
-+ Integrate the user's feedback in two stages of our workflow.
-The users can select the pairwise constraints or label some points (used to generate the constraints) to build the score.
-They can also manually select the next hyperparameters to evaluate in a customized interactive BayOpt framework.
-
-+ Take the preference of the users on the presented visualizations to evaluate the quality of the visualization. We search for if the best visualization selected by the user corresponds to the result of our method.
-
-
-(b) Integrate directly the pairwise constraints into the optimization process of BayOpt.
-BayOpt is now used as a generic toolbox to find the extreme of a blackbox costly objective function.
-Our idea is to use the pairwise constraint to modify the kernel in the covariance function of Gaussian Process model, which is the core element of BayOpt.
-
-
-\section*{Annexes}
-
-\subsection{Stability of $f_{score}$}
-
-Stability of $f_{score}$ for all 6 datasets with t-SNE embeddings (Fig.~\ref{fig:score:umap:stability:annex}) and UMAP embeddings (Fig.~\ref{fig:score:umap:stability:annex})
-
-\begin{figure*}[pos=h]
-    \centering
-    \begin{subfigure}[b]{0.152\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{DIGITS_tsne_scores}
-        \caption{DIGITS}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \includegraphics[width=\textwidth]{COIL20_tsne_scores}
-        \caption{COIL20}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \includegraphics[width=\textwidth]{NEURON_1K_tsne_scores}
-        \caption{NEURON\_1K}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{FASHION1000_tsne_scores}
-        \caption{FASHION1000}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \includegraphics[width=\textwidth]{FASHION_MOBILENET_tsne_scores}
-        \caption{F\_MOBILENET}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \includegraphics[width=\textwidth]{20NEWS5_tsne_scores}
-        \caption{20NEWS5}
-    \end{subfigure}
-    \caption{Stability of constraint preserving score with respect to different number of labeled instances for each class. The scores are calculated for all t-SNE embeddings.}
-    \label{fig:score:tsne:stability:annex}
-\end{figure*}
-
-
-\begin{figure*}[pos=h]
-    \centering
-    \begin{subfigure}[b]{0.152\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{DIGITS_umap_scores}
-        \caption{DIGITS}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \includegraphics[width=\textwidth]{COIL20_umap_scores}
-        \caption{COIL20}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \includegraphics[width=\textwidth]{NEURON_1K_umap_scores}
-        \caption{NEURON\_1K}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{FASHION1000_umap_scores}
-        \caption{FASHION1000}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \includegraphics[width=\textwidth]{FASHION_MOBILENET_umap_scores}
-        \caption{F\_MOBILENET}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.152\textwidth}
-        \includegraphics[width=\textwidth]{20NEWS5_umap_scores}
-        \caption{20NEWS5}
-    \end{subfigure}
-    \caption{Stability of constraint preserving score with respect to different number of labeled instances for each class. The scores are calculated for all UMAP embeddings with varied \emph{n\_neighbors} and fixed \emph{min\_dist} of 0.1.}
-    \label{fig:score:umap:stability:annex}
-\end{figure*}
-
-
-\subsection{Compare $f_{score}$ with $AUC_{log}RNX$ (default min\_dist 0.1)}
-See Fig.~\ref{fig:umap:compare}.
-
-\begin{figure*}[pos=h]
-    \centering
-    \begin{subfigure}[b]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{DIGITS_umap_compare_scores}
-        \caption{DIGITS}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{COIL20_umap_compare_scores}
-        \caption{COIL20}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{NEURON_1K_umap_compare_scores}
-        \caption{NEURON\_1K}
-    \end{subfigure}
-    \vfill
-    \begin{subfigure}[b]{0.32\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{FASHION1000_umap_compare_scores}
-        \caption{FASHION1000}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{FASHION_MOBILENET_umap_compare_scores}
-        \caption{FASHION\_MOBILENET}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{20NEWS5_umap_compare_scores}
-        \caption{20NEWS5}
-    \end{subfigure}
-    \caption{Comparing constraint score and $AUC_{log}RNX$ score for the embeddings of UMAP with fixed \texttt{min\_dist=0.1}.}
-    \label{fig:umap:compare}
-\end{figure*}
-
