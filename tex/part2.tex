@@ -25,30 +25,29 @@ Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Experimental Setups}
+\section{Experimental Setups}\label{sec:XP}
 
 
-\subsection{Datasets}
+\subsection{Presentation of the Experimental Datasets}
 
-The six used datasets are summaries in Table.~\ref{tbl:dataset}.
+In our experiments, datasets with very different properties are used. The six used datasets are summaries in Table~\ref{tbl:dataset}.
 \emph{DIGITS} is a subset of the optical recognition of handwritten digits dataset~\cite{kaynak1995methods} of 8x8 grayscale images.
 \emph{COIL20} \cite{nene1996} is a dataset of 32x32 grayscale pictures of 20 rotated objects.
 \emph{FASHION\_1K} contains 1000 grayscale images of size 28x28, sampled from Fashion-MNIST\cite{xiao2017/online} clothing dataset.
-The grayscale images from there above datasets are normalized and used directly in the DR methods.
+The grayscale images from these datasets are normalized and used directly in the DR methods.
 
-\emph{FASHION\_MOBILENET} contains features extracted from a subset of Fashion Product images dataset~\cite{fashionproduct}.
-The MobileNet\cite{} with pre-trained weights from ImageNet is used for feature extraction, a transfer learning technique that uses the representation of the learned network (trained on a large-scale image classification task) to extract meaningful features for new samples.
-The last fully connected layer of the network is replaced by a global average pooling layer\cite{} to obtain the flatten output vector of 1280 dimensions.
-To speed up the DR methods, PCA is then applied to take only 75 features.
+\emph{FASHION\_MOBILENET} contains features extracted from a subset of the Fashion Product images dataset~\cite{fashionproduct}.
+In order to construct this dataset, MobileNet~\cite{} with pre-trained weights from ImageNet is used for feature extraction. This transfer learning technique uses the representation of the learned network (trained on a large-scale image classification task) to extract meaningful features for new samples.
+The last fully connected layer of the network is replaced by a global average pooling layer~\cite{} to obtain the flatten output vector of 1280 dimensions.
+To speed up the DR methods, PCA is then applied to consider only 75 features.
 
-\emph{5NEWS} contains the text of 5 groups selected from the 20 Newsgroups dataset which are converted to a matrix of token counts via TF-IDF method.
-The count vectors are then fed into Latent Dirichlet Allocation (LDA) model to extract 15 hidden topics, which are 15 features used for DR methods.
+\emph{5NEWS} contains the text of 5 groups selected from the 20 Newsgroups dataset, which are converted to a matrix of token counts via the TF-IDF method.
+The count vectors are then fed into Latent Dirichlet Allocation (LDA) model to extract 15 hidden topics, which are the 15 features used by DR methods.
 
-The open \emph{NEURON\_1K}~\cite{neuron1k} dataset contains 1301 Brain Cells from an E18 Mouse, processed and provided by 10X Genomics, a company who provides chromium single cell gene expression solution and publics several genetic datasets.\footnote{https://www.10xgenomics.com/resources/datasets/, The datasets are licensed under the Creative Commons Attribution license.}
-The processed data have 10 PCA features and labeled in 6 classes found by a graph-based clustering method.
+The \emph{NEURON\_1K}~\cite{neuron1k} dataset contains 1301 Brain Cells from an E18 Mouse, processed and provided by 10X Genomics, a company who provides chromium single cell gene expression solution and makes available several genetic datasets\footnote{https://www.10xgenomics.com/resources/datasets/; The datasets are licensed under the Creative Commons Attribution license.}.
+The processed data have 10 PCA features and contains 6 labels that have been found by a graph-based clustering method.
 
-
-\begin{table*}[width=\textwidth,cols=6,pos=h]
+\begin{table*}%[width=\textwidth,cols=6,pos=h]
 \caption{Description of six selected datasets with samples for the image datasets.}\label{tbl:dataset}
 \begin{tabular}{m{3cm} m{4.8cm} m{8cm}}
 \toprule
@@ -73,13 +72,13 @@ Dataset name & Samples & Description \\
 \emph{FASHION\_MOBILENET}
     & \includegraphics[width=\linewidth]{FASHION_PRODUCT_samples}
     & 1494 color images of various sizes belonging to 7 classes
-    (\path{'Bags', 'Bottomwear', 'Jewellery', 'Sandal', 'Shoes', 'Topwear', 'Watches'}),
+    (\verb|'Bags', 'Bottomwear', 'Jewellery', 'Sandal', 'Shoes', 'Topwear', 'Watches'|),
     sampled from Fashion Product images dataset.\\
 
 \emph{5NEWS}
     & \includegraphics[width=\linewidth]{20NEWS5_samples}
     & 5 groups of 2957 emails selected from 20Newsgroups dataset,
-    including \path{'rec.autos', 'rec.sport.baseball','sci.crypt', 'sci.space', 'comp.sys.mac.hardware'}. \\
+    including \verb|'rec.autos', 'rec.sport.baseball','sci.crypt', 'sci.space', 'comp.sys.mac.hardware'|. \\
 
 \emph{NEURON\_1K}
     &
@@ -90,7 +89,7 @@ Dataset name & Samples & Description \\
 \end{table*}
 
 
-\subsection{Constraint Generation}
+\subsection{Constraint Generation}\label{subsec:constraint_generation}
 
 The input for our proposed constraint preserving scores is ensemble of constraints in form of similar links and dissimilar links.
 
@@ -120,12 +119,12 @@ Naturally, the constraints generated from the class labels reflect the class-rel
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Experimental Results}
+\section{Experimental Results}\label{sec:results}
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion}
+\section{Discussion}\label{sec:discussion}
 
 \par
 Discuss the variance of the proposed score (w.r.t to different set of constraints, different number of constraitns).
@@ -161,7 +160,7 @@ Both the constraint-based score and the BayOpt's internal steps are explainable 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion and Future Work}
+\section{Conclusion and Future Work}\label{sec:ccl}
 
 \par (1) Repeat the problem of hyperparameter tuning for DR methods and our solution:
 
