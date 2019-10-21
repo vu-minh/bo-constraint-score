@@ -1,26 +1,11 @@
-%%
-%% Copyright 2019 Elsevier Ltd
-%%
-%% This file is part of the 'CAS Bundle'.
-%% --------------------------------------
-%%
-%% It may be distributed under the conditions of the LaTeX Project Public
-%% License, either version 1.2 of this license or (at your option) any
-%% later version.  The latest version of this license is in
-%%    http://www.latex-project.org/lppl.txt
-%% and version 1.2 or later is part of all distributions of LaTeX
-%% version 1999/12/01 or later.
-%%
-%% The list of all files belonging to the 'CAS Bundle' is
-%% given in the file `manifest.txt'.
-%%
-%% Template article for cas-sc documentclass for
-%% single column output. For double columns, use cas-dc.
+\documentclass[final,3p,times,twocolumn]{elsarticle}
 
-%\documentclass[a4paper,fleqn,longmktitle]{cas-sc}
-\documentclass[a4paper,fleqn]{cas-dc}
+%\usepackage{lineno,hyperref}
+%\modulolinenumbers[5]
 
-\usepackage[numbers]{natbib}
+\journal{Neurocomputing}
+
+%\usepackage[numbers]{natbib}
 %\usepackage[authoryear]{natbib}
 %\usepackage[authoryear,longnamesfirst]{natbib}
 
@@ -28,18 +13,21 @@
 \usepackage{caption}
 \usepackage{subcaption} % for subfigure
 \usepackage{makecell}  % for multiline cell in table
+
+\usepackage{amsmath, amssymb}
+\usepackage{tabulary,booktabs}
+
 \graphicspath{{figures/}}
 
-
 \begin{document}
-\let\WriteBookmarks\relax
-\def\floatpagepagefraction{1}
-\def\textpagefraction{.001}
-\shorttitle{Automatic Hyperparameter Tuning for DR methods}
-\shortauthors{V.M. Vu, A. Bibal, B. Fr\'enay}
+%\let\WriteBookmarks\relax
+%\def\floatpagepagefraction{1}
+%\def\textpagefraction{.001}
+%\shorttitle{User-Constraint scores for Automatic Hyperparameter Tuning of DR methods}
+%\shortauthors{V.M. Vu, A. Bibal, B. Fr\'enay}
 %\begin{frontmatter}
 
-\title[mode = title]{Constraint-Preserving Scores for Automatic Hyperparameter Tuning of Dimensionality Reduction Methods for Visualization}
+\title{User-Constraint Scores for Automatic Hyperparameter Tuning of Dimensionality Reduction Methods for Visualization}
 
 \author[]{Viet~Minh Vu}
 \author{Adrien Bibal}
@@ -52,16 +40,16 @@
 \input{abstract}
 
 \maketitle
-% \input{part1}
+\input{part1}
 \input{part2}
 
 
 \appendix
 % \input{appendix}
 
-%% Loading bibliography style file
-%\bibliographystyle{model1-num-names}
-\bibliographystyle{cas-model2-names}
+%% `Elsevier LaTeX' style
+\bibliographystyle{elsarticle-num}
+%%%%%%%%%%%%%%%%%%%%%%%
 
 % Loading bibliography database
 \bibliography{my-refs}
