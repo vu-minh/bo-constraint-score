@@ -1,4 +1,3 @@
-%!TEX spellcheck
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,12 +96,12 @@ Indeed, with 10 labeled points for each of 10 classes of the DIGITS dataset for 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Proof of Concept}
-We design the experiments to answer the research questions concerning to the stability (Section~\ref{sec:x}) and flexibility (Section~\ref{sec:z}) of the proposed score and the application of BayOpt to $f_{score}$ (Section~\ref{sec:y}).
-As a proof of concept, we create a grid of hyperparameters for t-SNE and UMAP, and then calculate $f_{score}$ for each embedding corresponding to each combination.
+We design the experiments to answer the research questions concerning to the stability (Section~\ref{sec:result:stability}) and flexibility (Section~\ref{sec:result:flexibility}) of the proposed score and the application of BayOpt to $f_{score}$ (Section~\ref{sec:result:bo}).
+As a proof of concept, we create a grid of hyperparameters for t-SNE, LargeVis and UMAP, and then calculate $f_{score}$ for each embedding corresponding to each combination.
 The hyperparameters are sampled in natural logarithmic scale (log-scale) since we want to focus on the values which are not too large.
-In the case of t-SNE, the grid is an integer vector of perplexity values from 2 to $N // 3$ in log-scale, in which $N$ is the number of instances of the dataset.
+In the case of t-SNE and LargeVis, the grid is an integer vector of perplexity values from 2 to $N / 3$ in log-scale, in which $N$ is the number of instances of the dataset.
 In the case of UMAP, the two dimensional grid is all combinations of its two hyperparameters.
-The first dimension is an integer vector of $n\_neighbor$ values from 2 to $N // 3$ in log-scale.
+The first dimension is an integer vector of $n\_neighbor$ values from 2 to $N / 3$ in log-scale.
 The second dimension is a vector of 10 real values of $min\_dist$ from 0.001 to 1.0 in log-scale.
 This grid helps us to analyze the behavior of the proposed $f_{score}$ w.r.t. different combinations of hyperparameters.
 The $f_{score}$ values on this grid are also used as ground-truth score values to evaluate the prediction of BayOpt approach.
@@ -113,13 +112,26 @@ As shown in the next section, BayOpt approach solves the scalability problem eff
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Stability of Constraint Preserving Score}
+\section{Stability of Constraint Preserving Score}\label{sec:result:stability}
 The proposed constraint preserving score is a function of the input constraints $f_{score}(\mathcal{S}, \mathcal{D})$.
 The first question is that, how does $f_{score}$ vary with respect to different number of labeled instances?
 Moreover, with a fixed number of labeled instances, we can generate different set of pairwise constraints.
 The second question is thus, with different set of constraints generated from the same fixed number of labeled instances, is $f_{score}$ stable?
+In order to answer these two questions, $f_{score}$ is evaluated for five different numbers of labeled instances (3, 5, 10 and 15).
+The labeled points are independent and not accumulated, i.e., the 5 labeled instances in the second setting do not contain the 3 labeled instances in the first setting.
+$f_{score}$ is a function of pairwise constraints, which can vary while the number of constraints is fixed.
+Thus, in each setting with a fixed number of labeled instances, 20 different set of pairwise constraints are generated.
+We will show the average value and one standard deviation of $f_{score}$.
+For t-SNE and LargeVis, $f_{score}$ is evaluated for different perplexity.
+For UMAP, $f_{score}$ is evaluated for different number of neighbors (\emph{n\_neighbors}) while fixing the second hyperparameter \emph{min\_dist} to its default value of 0.1.
 
-Stability of the score: analyze Fig.~\ref{fig:score:stability:COIL20} and explain how BayOpt approach can take into account the variance (uncertainty) of the score.
+Fig.~\ref{fig:score:stability:COIL20} shows the score for \emph{COIL20} dataset with the embeddings of UMAP (with fixed \emph{min\_dist} of 0.1), t-SNE and LargeVis.
+The values of hyperparameter (perplexity and \emph{n\_neighbor}) are shown in natural logarithmic scale.
+The following findings are shown for \emph{COIL20} dataset but also true for others experimented datasets.
+First, the proposed constraint preserving score has the form like a convex function.
+$f_{score}$ is not smooth but it can distinguish the characteristic of the embeddings of all DR methods.
+$f_{score}$ increases when perplexity/\emph{n_neighbors} increases, reaches to its maximum value, and decreases when perplexity/\emph{n\_neighbors} is too large.
+
 
 \begin{figure*}[pos=h]
      \centering
@@ -147,16 +159,19 @@ Stability of the score: analyze Fig.~\ref{fig:score:stability:COIL20} and explai
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Application of BayOpt on $f_{score}$}
+\section{Application of BayOpt on $f_{score}$}\label{sec:result:bo}
 BayOpt is widely used for hyperparameter tuning problem when the target function is well-defined.
 In supervised setting or in clustering problem where we can access the class labels, the target function is simply a metric which measures the quality of the prediction or clustering.
 However in visualization problem, the target function for measuring the quality of the visualization is not well-defined yet.
 Throughout experiments, we show that the proposed $f_{score}$ can work well under BayOpt framework as a flexible quality measurement.
 Indeed, BayOpt is a general framework which can work with any complex target function like $AUC_{log}RNX$ score or BIC-based score function.
 In practice, $AUC_{log}RNX$ does not always work well UMAP's embedding, especially in the case of tuning two UMAP's hyperparameters at the same time.
-BIC-based score tiered 
+BIC-based score tiered
 $f_{score}$, $AUC_{log}RNX$ and BIC-based scores are compared in both tasks of tuning one hyperparameter for tSNE (Sec~\ref{sec:x}) and tuning two hyperparameters for UMAP (Sec~\ref{sec:y}).
 
+Detail clearly the strategy used (EI), the hyperparam (xi=0.1) and its purpose for exploration.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Tuning One Parameter of t-SNE}
 
 \subsubsection*{BayOpt in Action}
@@ -361,7 +376,7 @@ Metamap and sample visualizations for \emph{COIL20} (Fig.~\ref{fig:umap:meta:COI
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Flexibility of the Proposed Score}
+\section{Flexibility of the Proposed Score}\label{sec:result:flexibility}
 
 t-SNE/LargeVis and UMAP are widely used since they have ability to preserve the neighborhood information, i.e. to make the data points in the same class close together.
 In this way, the local structure of the data is highlighted.
@@ -436,7 +451,7 @@ The user can interact directly in the loop of Bayesian Optimization method to se
 
 
 \par
-Both the constraint-based score and the BayOpt's internal steps are explainable even for the non-technical users. 
+Both the constraint-based score and the BayOpt's internal steps are explainable even for the non-technical users.
 
 \vspace{8pt}
 \par (4) Future work:
