@@ -1,4 +1,3 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental Setups}
@@ -26,7 +25,7 @@ The open \emph{NEURON\_1K}~\cite{neuron1k} dataset contains 1301 brain cells fro
 The processed data have 10 PCA features and labeled in 6 classes found by a graph-based clustering method.
 
 
-\begin{table*}[width=\textwidth,cols=6,pos=h]
+\begin{table*}%[width=\textwidth,cols=6,pos=h]
 \caption{Description of six selected datasets.}\label{tbl:dataset}
 \begin{tabular}{m{3cm} m{4.8cm} m{8cm}}
 \toprule
@@ -51,13 +50,13 @@ Dataset name & Samples & Description \\
 \emph{FASHION\_MOBILENET}
     & \includegraphics[width=\linewidth]{FASHION_PRODUCT_samples}
     & 1494 color images of various sizes belonging to 7 classes
-    (\path{'Bags', 'Bottomwear', 'Jewellery', 'Sandal', 'Shoes', 'Topwear', 'Watches'}),
+    (\emph{'Bags', 'Bottomwear', 'Jewellery', 'Sandal', 'Shoes', 'Topwear', 'Watches'}),
     sampled from Fashion Product images dataset.\\
 
 \emph{5NEWS}
     & \includegraphics[width=\linewidth]{20NEWS5_samples}
     & 5 groups of 2957 emails selected from 20Newsgroups dataset,
-    including \path{'rec.autos', 'rec.sport.baseball','sci.crypt', 'sci.space', 'comp.sys.mac.hardware'}. \\
+    including \emph{'rec.autos', 'rec.sport.baseball','sci.crypt', 'sci.space', 'comp.sys.mac.hardware'}. \\
 
 \emph{NEURON\_1K}
     &
@@ -127,7 +126,7 @@ For t-SNE and LargeVis, $f_{score}$ is evaluated for different perplexity.
 For UMAP, $f_{score}$ is evaluated for different \emph{n\_neighbors} while fixing the second hyperparameter \emph{min\_dist} to its default value of 0.1.
 The \emph{n\_neighbors} in UMAP plays the same role as perplexity in t-SNE, which indicates the expected number of neighbors of each points.
 
-\begin{figure}[pos=h]
+\begin{figure}%[pos=h]
 \begin{subfigure}[b]{0.3\linewidth}
      \centering
      \includegraphics[width=\linewidth]{COIL20_umap_scores}
@@ -221,7 +220,7 @@ The next predicted perplexity to evaluate is the most promising value according 
 When the new perplexity is evaluated, BayOpt gets the new score value and update it's GP model.
 More detail and visual explanation on how BayOpt works with the proposed score function can be found in the Appendix~\ref{app:x}.
 
-\begin{figure}[pos=h]
+\begin{figure}%[pos=h]
     \begin{subfigure}[b]{.3\linewidth}
         \centering
         \includegraphics[width=\linewidth]{DIGITS_tsne_bo.png}
@@ -278,7 +277,7 @@ $f_{score}$ agrees only with $AUC_{log}RNX$ but not BIC-based score in \emph{FAS
 And $f_{score}$ agrees only with BIC-based score but not $AUC_{log}RNX$ score in \emph{NEURON\_1K}, \emph{5NEWS} and \emph{DIGITS} datasets.
 This result suggest that, $f_{score}$ can be used in complement with other quality scores.
 
-\begin{figure}[pos=h]
+\begin{figure}%[pos=h]
     \centering
     \begin{subfigure}[b]{0.3\linewidth}
         \centering
@@ -330,7 +329,7 @@ The second, third and fourth metamaps are colored by the values of $f_{score}$, 
 The embeddings with high score (superior than 96\% of maximum score) are also highlighted.
 In this way, we discover the different regions of best results according different quality scores.
 
-\begin{figure*}[pos=h]
+\begin{figure*}%[pos=h]
     \centering
     \begin{subfigure}[b]{\textwidth}
         \includegraphics[width=\textwidth]{{NEURON_1K_tsne_metamap}.png}
@@ -356,7 +355,7 @@ As suggested by different scores, we can easily discover different region in the
 \subsubsection*{BayOpt in Action}
 BayOpt for tuning two parameters of UMAP with \emph{COIL20} (Fig.~\ref{fig:bo:umap:COIL20}) and \emph{FASHION\_1K} (Fig.~\ref{fig:bo:umap:FASHION1000})
 
-\begin{figure}[pos=h]
+\begin{figure}%[pos=h]
     \begin{subfigure}[b]{.85\linewidth}
         \includegraphics[width=\textwidth]{COIL20_umap_auc_rnx}
         \caption{$AUC_{log}RNX$}
@@ -377,7 +376,7 @@ BayOpt for tuning two parameters of UMAP with \emph{COIL20} (Fig.~\ref{fig:bo:um
     \label{fig:bo:umap:COIL20}
 \end{figure}
 
-\begin{figure}[pos=h]
+\begin{figure}%[pos=h]
     \begin{subfigure}[b]{.85\linewidth}
         \includegraphics[width=\textwidth]{FASHION1000_umap_auc_rnx}
         \caption{$AUC_{log}RNX$}
@@ -457,21 +456,21 @@ Naturally, the constraints generated from the class labels reflect the class-rel
 
 Demo score's flexibility for \emph{FASHION\_MOBILENET}(Fig.~\ref{fig:flex:fashionmobilenet}), \emph{5NEWS} (Fig.~\ref{fig:flex:5news}) and \emph{NEURON\_1K} (Fig.~\ref{fig:flex:neuron}).
 
-\begin{figure*}[pos=h]
+\begin{figure*}%[pos=h]
     \centering
     \includegraphics[width=\textwidth]{{FASHION_MOBILENET_score_flexibility}.png}
     \caption{Flexibility of $f_{score}$ for \emph{FASHION\_MOBILENET} dataset}
     \label{fig:flex:fashionmobilenet}
 \end{figure*}
 
-\begin{figure*}[pos=h]
+\begin{figure*}%[pos=h]
     \centering
     \includegraphics[width=\textwidth]{{20NEWS5_score_flexibility}.png}
     \caption{Flexibility of $f_{score}$ for \emph{5NEWS} dataset}
     \label{fig:flex:5news}
 \end{figure*}
 
-\begin{figure*}[pos=h]
+\begin{figure*}%[pos=h]
     \centering
     \includegraphics[width=\textwidth]{{NEURON_1K_score_flexibility}.png}
     \caption{Flexibility of $f_{score}$ for \emph{NEURON\_1K} dataset}
