@@ -1,3 +1,4 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Quality metrics}\label{appendix:qual_metrics}
 Let $d^{x}_{ij}$ and $d^{y}_{ij}$ be, respectively, the distance between instances $i$ and $j$ in HD and LD.
 Let $d^x$ and $d^y$ be the distances matrices for all pair of points in HD and LD.
@@ -44,3 +45,170 @@ Here are the mathematical formulas for the five selected metrics.
             $$
         \end{itemize}
 \end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Stability of $f_{score}$}
+
+Stability of $f_{score}$ for all 6 datasets with t-SNE embeddings (Fig.~\ref{fig:score:umap:stability:annex}) and UMAP embeddings (Fig.~\ref{fig:score:umap:stability:annex})
+
+\begin{figure*}[pos=h]
+    \centering
+    \begin{subfigure}[b]{0.152\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{DIGITS_tsne_scores}
+        \caption{DIGITS}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \includegraphics[width=\textwidth]{COIL20_tsne_scores}
+        \caption{COIL20}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \includegraphics[width=\textwidth]{NEURON_1K_tsne_scores}
+        \caption{NEURON\_1K}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{FASHION1000_tsne_scores}
+        \caption{FASHION1000}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \includegraphics[width=\textwidth]{FASHION_MOBILENET_tsne_scores}
+        \caption{F\_MOBILENET}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \includegraphics[width=\textwidth]{20NEWS5_tsne_scores}
+        \caption{20NEWS5}
+    \end{subfigure}
+    \caption{Stability of constraint preserving score with respect to different number of labeled instances for each class. The scores are calculated for all t-SNE embeddings.}
+    \label{fig:score:tsne:stability:annex}
+\end{figure*}
+
+
+\begin{figure*}[pos=h]
+    \centering
+    \begin{subfigure}[b]{0.152\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{DIGITS_umap_scores}
+        \caption{DIGITS}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \includegraphics[width=\textwidth]{COIL20_umap_scores}
+        \caption{COIL20}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \includegraphics[width=\textwidth]{NEURON_1K_umap_scores}
+        \caption{NEURON\_1K}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{FASHION1000_umap_scores}
+        \caption{FASHION1000}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \includegraphics[width=\textwidth]{FASHION_MOBILENET_umap_scores}
+        \caption{F\_MOBILENET}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.152\textwidth}
+        \includegraphics[width=\textwidth]{20NEWS5_umap_scores}
+        \caption{20NEWS5}
+    \end{subfigure}
+    \caption{Stability of constraint preserving score with respect to different number of labeled instances for each class. The scores are calculated for all UMAP embeddings with varied \emph{n\_neighbors} and fixed \emph{min\_dist} of 0.1.}
+    \label{fig:score:umap:stability:annex}
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Metamap and samples for t-SNE's embeddings with \emph{DIGITS} dataset}
+
+Metamap and sample visualizations for \emph{DIGITS} (Fig.~\ref{fig:tsne:meta:DIGITS}).
+\begin{figure*}[pos=h]
+    \centering
+    \begin{subfigure}[b]{\textwidth}
+        \includegraphics[width=\textwidth]{{DIGITS_tsne_metamap}.png}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{\textwidth}
+        \includegraphics[width=\textwidth]{DIGITS_tsne_show}
+    \end{subfigure}
+    \caption{Metamap and sample visualizations for the selected parameters for \emph{DIGITS} dataset.}
+    \label{fig:tsne:meta:DIGITS}
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Compare $f_{score}$ with $AUC_{log}RNX$ (default min\_dist 0.1)}
+See Fig.~\ref{fig:umap:compare}.
+
+\begin{figure*}[pos=h]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{DIGITS_umap_compare_scores}
+        \caption{DIGITS}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{COIL20_umap_compare_scores}
+        \caption{COIL20}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{NEURON_1K_umap_compare_scores}
+        \caption{NEURON\_1K}
+    \end{subfigure}
+    \vfill
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{FASHION1000_umap_compare_scores}
+        \caption{FASHION1000}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{FASHION_MOBILENET_umap_compare_scores}
+        \caption{FASHION\_MOBILENET}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{20NEWS5_umap_compare_scores}
+        \caption{20NEWS5}
+    \end{subfigure}
+    \caption{Comparing constraint score and $AUC_{log}RNX$ score for the embeddings of UMAP with fixed \texttt{min\_dist=0.1}.}
+    \label{fig:umap:compare}
+\end{figure*}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
+
++ Explain the internal step in BayOpt.
+Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step5}.png}
+\caption{BayOpt after 5 steps.}\label{fig:bayopt5}
+\end{figure}
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.25]{{ucb_kappa5_constraint1.0_DIGITS_step10}.png}
+\caption{BayOpt after 10 steps.}\label{fig:bayopt10}
+\end{figure}
+
++ Explain how the utility function are constructed and optimized, and answer why optimize the utility function (surrogate function), we can optimize at the same time the target function (the constraint-based score function).
+
++ Explain the exploitation-exploration trade-off in BayOpt (and estimate the number of times we need to try before reaching to the global maximum).
+
+%+ Note about the nature of BayOpt that, it can work with any non-convex multi-modal objective function and it assures to find the global extremum.
