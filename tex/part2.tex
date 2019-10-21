@@ -113,48 +113,71 @@ As shown in the next section, BayOpt approach solves the scalability problem eff
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Stability of Constraint Preserving Score}\label{sec:result:stability}
-The proposed constraint preserving score is a function of the input constraints $f_{score}(\mathcal{S}, \mathcal{D})$.
+
+\begin{figure*}[pos=h]
+\begin{subfigure}[b]{0.32\textwidth}
+     \centering
+     \includegraphics[width=\textwidth]{COIL20_umap_scores}
+     \caption{UMAP with COIL20}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+     \centering
+     \includegraphics[width=\textwidth]{COIL20_tsne_scores}
+     \caption{t-SNE with COIL20}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+     \centering
+     \includegraphics[width=\textwidth]{COIL20_largevis_scores}
+     \caption{LargeVis with COIL20}
+\end{subfigure}
+\caption{Stability of the constraint preserving scores with UMAP, t-SNE and LargeVis for COIL20 dataset.
+The filled region highlights the best range of hyperparameters which make the score value superior to 96\% of maximum score value.}
+\label{fig:score:stability:COIL20}
+\end{figure*}
+
+The proposed constraint preserving score is a function of the pairwise constraints $f_{score}(\mathcal{S}, \mathcal{D})$ which are generated automatically from the input labeled instances.
 The first question is that, how does $f_{score}$ vary with respect to different number of labeled instances?
 Moreover, with a fixed number of labeled instances, we can generate different set of pairwise constraints.
-The second question is thus, with different set of constraints generated from the same fixed number of labeled instances, is $f_{score}$ stable?
+The second question is, with different set of constraints generated from the same fixed number of labeled instances, is $f_{score}$ stable?
 In order to answer these two questions, $f_{score}$ is evaluated for five different numbers of labeled instances (3, 5, 10 and 15).
 The labeled points are independent and not accumulated, i.e., the 5 labeled instances in the second setting do not contain the 3 labeled instances in the first setting.
 $f_{score}$ is a function of pairwise constraints, which can vary while the number of constraints is fixed.
 Thus, in each setting with a fixed number of labeled instances, 20 different set of pairwise constraints are generated.
-We will show the average value and one standard deviation of $f_{score}$.
+We will show the average value and the standard deviation of $f_{score}$.
 For t-SNE and LargeVis, $f_{score}$ is evaluated for different perplexity.
-For UMAP, $f_{score}$ is evaluated for different number of neighbors (\emph{n\_neighbors}) while fixing the second hyperparameter \emph{min\_dist} to its default value of 0.1.
+For UMAP, $f_{score}$ is evaluated for different \emph{n\_neighbors} while fixing the second hyperparameter \emph{min\_dist} to its default value of 0.1.
+The \emph{n\_neighbors} in UMAP plays the same role as perplexity in t-SNE, which indicates the expected number of neighbors of each points.
 
 Fig.~\ref{fig:score:stability:COIL20} shows the score for \emph{COIL20} dataset with the embeddings of UMAP (with fixed \emph{min\_dist} of 0.1), t-SNE and LargeVis.
 The values of hyperparameter (perplexity and \emph{n\_neighbor}) are shown in natural logarithmic scale.
 The following findings are shown for \emph{COIL20} dataset but also true for others experimented datasets.
 First, the proposed constraint preserving score has the form like a convex function.
 $f_{score}$ is not smooth but it can distinguish the characteristic of the embeddings of all DR methods.
-$f_{score}$ increases when perplexity/\emph{n_neighbors} increases, reaches to its maximum value, and decreases when perplexity/\emph{n\_neighbors} is too large.
+$f_{score}$ increases when the number of neighbors increases, reaches to its maximum value, and decreases when perplexity/\emph{n\_neighbors} is too large.
+Second, when the number of labeled instances increase, $f_{score}$ is more stable since the variance (presented by the standard deviation) dramatically decrease.
+Third, the score is calculated only for discrete samples of the hyperparameter, there is always distortion in the value of $f_{score}$.
+Selecting the best hyperparameter corresponding to the maximum score value may be not a reasonable choice since there are several hyperparameters that give almost the same score.
+It can be better if we select a range of best hyperparameters that have the score value larger than a threshold, 96\% the maximum score value for example.
+Fig.~\ref{fig:score:stability:COIL20} demonstrates that the best hyperparameters ranges are consistent w.r.t. different number of labeled instances.
 
+In the case of LargeVis, there are the \emph{flat} regions where the score does not change too much.
+The reason is that, LargeVis is designed for large dataset and thus when being applied to the medium-sized datasets as in our experiments, the impact of perplexity is not important.
+In contrast, t-SNE and UMAP are very sensitive to its hyperparameters, especially in the case of very small and very large number of neighbors.
+Intuitively, when the number of neighbors is small, the points are not grouped in the visualization.
+The similar constraints are unlikely preserved while the dissimilar constraints have more change to be preserved since the points stay aways from each other.
+In this case $f_{score}(\mathcal{S})$ is very low and $f_{score}(\mathcal{D})$ is high, that makes $f_{score}$ low.
+Inversely, when the number of neighbors is large, every point is neighbor to each other, which make the visualization a big cluster.
+In this case, the similar constraints are likely preserved while the dissimilar constraints are note, that make $f_{score}(\mathcal{S})$ hight and $f_{score}(\mathcal{D})$ low.
 
-\begin{figure*}[pos=h]
-     \centering
-     \begin{subfigure}[b]{0.32\textwidth}
-         \centering
-         \includegraphics[width=\textwidth]{COIL20_umap_scores}
-         \caption{UMAP with COIL20}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.32\textwidth}
-         \centering
-         \includegraphics[width=\textwidth]{COIL20_tsne_scores}
-         \caption{t-SNE with COIL20}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.32\textwidth}
-         \centering
-         \includegraphics[width=\textwidth]{COIL20_largevis_scores}
-         \caption{LargeVis with COIL20}
-     \end{subfigure}
-     \caption{Stability of the constraint preserving scores with three methods UMAP, t-SNE and LargeVis for COIL20 dataset.}
-     \label{fig:score:stability:COIL20}
-\end{figure*}
+In summary, the local structures (neighborhood information) of the dataset are presented by the small groups in the visualization.
+The clearer these groups are highlighted, the more likely the similar constraints of the points within groups and the dissimilar constraints of the points between different groups are preserved.
+The proposed score has well captured this characteristic,  it reaches to the high values only when both the similar and dissimilar constraints are preserved.
+Thus $f_{score}$ can be used to quantitatively evaluate the quality of the visualization and can be comparable to the state of the art quality metrics.
+Moreover, for all selected datasets, the above experimental results indicated that {\bf 10 labeled instances per class} is sufficient for obtaining a stable score.
+Since LargeVis is not sensitive to its perplexity, we will tune hyperparameters for t-SNE and UMAP on all six selected dataset using BayOpt approach.
+The results are presented in the next section.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -162,14 +185,28 @@ $f_{score}$ increases when perplexity/\emph{n_neighbors} increases, reaches to i
 \section{Application of BayOpt on $f_{score}$}\label{sec:result:bo}
 BayOpt is widely used for hyperparameter tuning problem when the target function is well-defined.
 In supervised setting or in clustering problem where we can access the class labels, the target function is simply a metric which measures the quality of the prediction or clustering.
-However in visualization problem, the target function for measuring the quality of the visualization is not well-defined yet.
+However in visualization problem, the target function for measuring the quality of the visualization is more difficult to define.
 Throughout experiments, we show that the proposed $f_{score}$ can work well under BayOpt framework as a flexible quality measurement.
 Indeed, BayOpt is a general framework which can work with any complex target function like $AUC_{log}RNX$ score or BIC-based score function.
-In practice, $AUC_{log}RNX$ does not always work well UMAP's embedding, especially in the case of tuning two UMAP's hyperparameters at the same time.
-BIC-based score tiered
-$f_{score}$, $AUC_{log}RNX$ and BIC-based scores are compared in both tasks of tuning one hyperparameter for tSNE (Sec~\ref{sec:x}) and tuning two hyperparameters for UMAP (Sec~\ref{sec:y}).
+In practice, $AUC_{log}RNX$ does not always work well with UMAP's embedding, especially in the case of tuning two UMAP's hyperparameters at the same time.
+BIC-based score is tiered to t-SNE and does not work for other DR methods.
+$f_{score}$ is designed to be independent to the DR methods and to be flexible to the input constraints.
 
-Detail clearly the strategy used (EI), the hyperparam (xi=0.1) and its purpose for exploration.
+In this section, the input constraints are generated from 10 labeled instances in each class for any given dataset.
+$f_{score}$, $AUC_{log}RNX$ and BIC-based scores are compared in both tasks of tuning one hyperparameter for tSNE (Sec~\ref{sec:x}) and tuning two hyperparameters for UMAP (Sec~\ref{sec:y}).
+In the next section, a different set of labeled points which does not base on the available class labels of the dataset is used.
+$f_{score}$ which is flexible by design, can find the best visualization which respects the new constraints.
+This is a task that $AUC_{log}RNX$ or BIC-based score can not do.
+
+For all hyperparameter tuning tasks under BayOpt framework, we prefer the exploration strategy to make sure we can discover the largest as possible the parameter space.
+Three technical points that guarantees the accuracy in predicting the best hyperparameters the quick convergence of BayOpt in our experiments are follows.
+(1) The hyperparameters are sample in natural logarithmic domain to focus the computation on not-so-large values, which are usually used in practice.
+(2) Expected Improvement (EI) acquisition function is used as a surrogate function in the underlying Gaussian Process (GP) model of BayOpt.
+The exploration strategy is set using a large value of parameter $\xi$ of EI, which controls the trade-off between global search (exploration) and local optimization (exploitation).
+All our experiments for all datasets are run with $\xi=0.1$ without any effort to tune this parameter.
+(3) Since there is always a small variance in the score value, there is some noise in the observations (the $f_{score}$ values) for BayOpt and the underlying kernel of GP model must be aware of this noise.
+This can be done by adding the small values to the diagonal of the GP's kernel matrix.
+This reminds us to always take into account not only the noise in the observation but also the uncertainty in the prediction of the GP model.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Tuning One Parameter of t-SNE}
