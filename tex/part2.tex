@@ -13,7 +13,7 @@ Six diverse datasets (of grayscale and color images, text and gene expressions) 
 \emph{FASHION\_1K} contains 1000 grayscale images of size 28x28, sampled from Fashion-MNIST\cite{xiao2017/online} clothing dataset.
 The grayscale images from three above datasets are normalized and used directly in the DR methods.
 
-\emph{FASHION\_MOBILENET} dataset contains samples of 7 most numerous classes from a subset of Fashion Product images dataset~\cite{fashionproduct}.
+\emph{FASHION\_MOBILENET} dataset (\emph{FASH\_MOBI} for short) contains samples of seven most numerous classes from a subset of Fashion Product images dataset~\cite{fashionproduct}.
 The MobileNet\cite{howard2017mobilenets} with pre-trained weights from ImageNet is used for feature extraction, a transfer learning technique that uses the representation of the learned network (trained on a large-scale image classification task) to extract meaningful features for new samples.
 The last fully connected layer of the network is replaced by a global average pooling layer\cite[Sec.3.2]{lin2013network} to obtain the flattened output vector of 1280 dimensions.
 To speed up the DR methods, PCA is then applied to take only 75 features.
@@ -47,7 +47,7 @@ Dataset name & Samples & Description \\
     & 1000 grayscale images of size 28x28 of 10 classes, sampled from Fashion-MNIST dataset.
     The raw images of 768 dimensions are used directly for the DR methods.\\
 
-\emph{FASHION\_MOBILENET}
+\emph{FASH\_MOBI}
     & \includegraphics[width=\linewidth]{FASHION_PRODUCT_samples}
     & 1494 color images of various sizes belonging to 7 classes
     (\emph{'Bags', 'Bottomwear', 'Jewellery', 'Sandal', 'Shoes', 'Topwear', 'Watches'}),
@@ -210,6 +210,47 @@ This reminds us to always take into account not only the noise in the observatio
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Tuning One Parameter of t-SNE}
 
+\begin{figure}%[pos=h]
+    \begin{subfigure}[b]{.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{DIGITS_tsne_bo.png}
+        \caption{\emph{DIGITS}}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{COIL20_tsne_bo.png}
+        \caption{\emph{COIL20}}
+    \end{subfigure}
+    \vfill
+    \begin{subfigure}[b]{.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{FASHION1000_tsne_bo.png}
+        \caption{\emph{FASHION\_1K}}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{FASHION_MOBILENET_tsne_bo.png}
+        \caption{\emph{FASH\_MOBI}}
+    \end{subfigure}
+    ~
+    \vfill
+    \begin{subfigure}[b]{.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{20NEWS5_tsne_bo.png}
+        \caption{\emph{5NEWS}}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{NEURON_1K_tsne_bo.png}
+        \caption{\emph{NEURON\_1K}}
+    \end{subfigure}
+    \caption{BayOpt appoarch for  t-SNE}
+    \label{fig:tsne:bo:all}
+\end{figure}
+
 Fig.~\ref{fig:tsne:bo:all} demonstrates how BayOpt works for tuning t-SNE's perplexity for all six selected datasets.
 As proved empirically in the previous section, 10 labeled instances for each class suffice for a stable score.
 The scores calculated for all sampled perplexity values ($\in [0, N/3]$, with $N$ is number of instances in a dataset) are used as ground truth.
@@ -219,47 +260,6 @@ The score value for each perplexity $p_i$ is calculated and all the pairs $(p_i,
 The next predicted perplexity to evaluate is the most promising value according to the GP model that can have a higher $f_{score}$.
 When the new perplexity is evaluated, BayOpt gets the new score value and update it's GP model.
 More detail and visual explanation on how BayOpt works with the proposed score function can be found in the Appendix~\ref{app:x}.
-
-\begin{figure}%[pos=h]
-    \begin{subfigure}[b]{.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{DIGITS_tsne_bo.png}
-        \caption{\emph{DIGITS}}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{COIL20_tsne_bo.png}
-        \caption{\emph{COIL20}}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{NEURON_1K_tsne_bo.png}
-        \caption{\emph{NEURON\_1K}}
-    \end{subfigure}
-    \vfill
-    \begin{subfigure}[b]{.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{FASHION1000_tsne_bo.png}
-        \caption{\emph{FASHION1000}}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{FASHION_MOBILENET_tsne_bo.png}
-        \caption{\emph{F\_MOBI}}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{.3\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{20NEWS5_tsne_bo.png}
-        \caption{\emph{5NEWS}}
-    \end{subfigure}
-    ~
-    \caption{BayOpt in action for t-SNE}
-    \label{fig:tsne:bo:all}
-\end{figure}
 
 It should note that, BayOpt does approximate the score function but tries to find its maximum value instead.
 The best predicted perplexity range where the predicted score is superior to 96\% of the maximum predicted score is highlighted.
@@ -272,7 +272,7 @@ Instead of evaluating the score functions for all values of perplexity, BayOpt f
 
 \subsubsection*{Compare $f_{score}$, $AUC_{log}RNX$ and BIC-based score}
 Fig.~\ref{fig:tsne:compare} illustrates the best perplexity range found by $f_{score}$, $AUC_{log}RNX$ and BIC-based score for six datasets.
-$f_{score}$ agrees with both $AUC_{log}RNX$ and BIC-based scores in \emph{COIl20}, \emph{FASHION\_MOBILENET} datasets.
+$f_{score}$ agrees with both $AUC_{log}RNX$ and BIC-based scores in \emph{COIl20}, \emph{FASH\_MOBI} datasets.
 $f_{score}$ agrees only with $AUC_{log}RNX$ but not BIC-based score in \emph{FASHION\_1K} dataset.
 And $f_{score}$ agrees only with BIC-based score but not $AUC_{log}RNX$ score in \emph{NEURON\_1K}, \emph{5NEWS} and \emph{DIGITS} datasets.
 This result suggest that, $f_{score}$ can be used in complement with other quality scores.
@@ -298,19 +298,19 @@ This result suggest that, $f_{score}$ can be used in complement with other quali
     \begin{subfigure}[b]{0.3\linewidth}
         \centering
         \includegraphics[width=\linewidth]{FASHION1000_tsne_compare_scores}
-        \caption{FASHION1000}
+        \caption{FASHION\_1K}
     \end{subfigure}
     ~
     \begin{subfigure}[b]{0.3\linewidth}
         \includegraphics[width=\linewidth]{FASHION_MOBILENET_tsne_compare_scores}
-        \caption{F\_MOBI}
+        \caption{FASH\_MOBI}
     \end{subfigure}
     ~
     \begin{subfigure}[b]{0.3\linewidth}
         \includegraphics[width=\linewidth]{20NEWS5_tsne_compare_scores}
         \caption{5NEWS}
     \end{subfigure}
-    \caption{Comparing constraint score, $AUC_{log}RNX$ score and BIC score for the embeddings of t-SNE.}
+    \caption{Comparison of constraint score, $AUC_{log}RNX$ score and BIC score for t-SNE's embeddings.}
     \label{fig:tsne:compare}
 \end{figure}
 
@@ -343,7 +343,7 @@ In this way, we discover the different regions of best results according differe
 \end{figure*}
 
 The sample visualizations in Fig.~\ref{fig:tsne:meta:NEURON1K} served for a qualitative evaluation of the best visualization found by different score.
-They are also ranked quantitatively/objectively by its score values as: very preferred ($\Uparrow\Uparrow$), preferred ($\Uparrow$), good enough ($\talloblong$), not preferred ($\Downarrow$) and unfavorable ($\Downarrow\Downarrow$).
+They are also ranked quantitatively/objectively by its score values as: very preferred ($\Uparrow\Uparrow$), preferred ($\Uparrow$), good enough ($[]$), not preferred ($\Downarrow$) and unfavorable ($\Downarrow\Downarrow$).
 The good visualization predicted by BayOpt (whose the tuned hyperparameter in the best predicted range) is denoted by star symbol ($\star$).
 As indicated by Wattenberg et. al.~\cite{wattenberg2016how}, we may need more than one plot to understand the hidden pattern in the data.
 As suggested by different scores, we can easily discover different region in the solution space and thus discover different structures in the data for which one score can not reveal them all.
@@ -454,12 +454,12 @@ $f_{score}$ takes a set of constraints as input to find the best visualization w
 Naturally, the constraints generated from the class labels reflect the class-relationship between the data points in the same class.
 % However, if we have another subset of \emph{`semantic'} labels
 
-Demo score's flexibility for \emph{FASHION\_MOBILENET}(Fig.~\ref{fig:flex:fashionmobilenet}), \emph{5NEWS} (Fig.~\ref{fig:flex:5news}) and \emph{NEURON\_1K} (Fig.~\ref{fig:flex:neuron}).
+Demo score's flexibility for \emph{FASH\_MOBI}(Fig.~\ref{fig:flex:fashionmobilenet}), \emph{5NEWS} (Fig.~\ref{fig:flex:5news}) and \emph{NEURON\_1K} (Fig.~\ref{fig:flex:neuron}).
 
 \begin{figure*}%[pos=h]
     \centering
     \includegraphics[width=\textwidth]{{FASHION_MOBILENET_score_flexibility}.png}
-    \caption{Flexibility of $f_{score}$ for \emph{FASHION\_MOBILENET} dataset}
+    \caption{Flexibility of $f_{score}$ for \emph{FASH\_MOBI} dataset}
     \label{fig:flex:fashionmobilenet}
 \end{figure*}
 
