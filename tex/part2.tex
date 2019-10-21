@@ -114,29 +114,6 @@ As shown in the next section, BayOpt approach solves the scalability problem eff
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Stability of Constraint Preserving Score}\label{sec:result:stability}
 
-\begin{figure*}[pos=h]
-\begin{subfigure}[b]{0.32\textwidth}
-     \centering
-     \includegraphics[width=\textwidth]{COIL20_umap_scores}
-     \caption{UMAP with COIL20}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.32\textwidth}
-     \centering
-     \includegraphics[width=\textwidth]{COIL20_tsne_scores}
-     \caption{t-SNE with COIL20}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.32\textwidth}
-     \centering
-     \includegraphics[width=\textwidth]{COIL20_largevis_scores}
-     \caption{LargeVis with COIL20}
-\end{subfigure}
-\caption{Stability of the constraint preserving scores with UMAP, t-SNE and LargeVis for COIL20 dataset.
-The filled region highlights the best range of hyperparameters which make the score value superior to 96\% of maximum score value.}
-\label{fig:score:stability:COIL20}
-\end{figure*}
-
 The proposed constraint preserving score is a function of the pairwise constraints $f_{score}(\mathcal{S}, \mathcal{D})$ which are generated automatically from the input labeled instances.
 The first question is that, how does $f_{score}$ vary with respect to different number of labeled instances?
 Moreover, with a fixed number of labeled instances, we can generate different set of pairwise constraints.
@@ -149,6 +126,29 @@ We will show the average value and the standard deviation of $f_{score}$.
 For t-SNE and LargeVis, $f_{score}$ is evaluated for different perplexity.
 For UMAP, $f_{score}$ is evaluated for different \emph{n\_neighbors} while fixing the second hyperparameter \emph{min\_dist} to its default value of 0.1.
 The \emph{n\_neighbors} in UMAP plays the same role as perplexity in t-SNE, which indicates the expected number of neighbors of each points.
+
+\begin{figure}[pos=h]
+\begin{subfigure}[b]{0.3\linewidth}
+     \centering
+     \includegraphics[width=\linewidth]{COIL20_umap_scores}
+     \caption{UMAP}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.3\linewidth}
+     \centering
+     \includegraphics[width=\linewidth]{COIL20_tsne_scores}
+     \caption{t-SNE}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.3\linewidth}
+     \centering
+     \includegraphics[width=\linewidth]{COIL20_largevis_scores}
+     \caption{LargeVis}
+\end{subfigure}
+\caption{Stability of the constraint preserving scores with UMAP, t-SNE and LargeVis for COIL20 dataset.
+The filled region highlights the best range of hyperparameters which make the score value superior to 96\% of maximum score value.}
+\label{fig:score:stability:COIL20}
+\end{figure}
 
 Fig.~\ref{fig:score:stability:COIL20} shows the score for \emph{COIL20} dataset with the embeddings of UMAP (with fixed \emph{min\_dist} of 0.1), t-SNE and LargeVis.
 The values of hyperparameter (perplexity and \emph{n\_neighbor}) are shown in natural logarithmic scale.
@@ -195,8 +195,8 @@ $f_{score}$ is designed to be independent to the DR methods and to be flexible t
 In this section, the input constraints are generated from 10 labeled instances in each class for any given dataset.
 $f_{score}$, $AUC_{log}RNX$ and BIC-based scores are compared in both tasks of tuning one hyperparameter for tSNE (Sec~\ref{sec:x}) and tuning two hyperparameters for UMAP (Sec~\ref{sec:y}).
 In the next section, a different set of labeled points which does not base on the available class labels of the dataset is used.
-$f_{score}$ which is flexible by design, can find the best visualization which respects the new constraints.
-This is a task that $AUC_{log}RNX$ or BIC-based score can not do.
+$f_{score}$ which is flexible by design, can find the best visualization w.r.t. the new constraints.
+This task can not be archived by $AUC_{log}RNX$ or BIC-based score.
 
 For all hyperparameter tuning tasks under BayOpt framework, we prefer the exploration strategy to make sure we can discover the largest as possible the parameter space.
 Three technical points that guarantees the accuracy in predicting the best hyperparameters the quick convergence of BayOpt in our experiments are follows.
@@ -211,107 +211,124 @@ This reminds us to always take into account not only the noise in the observatio
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Tuning One Parameter of t-SNE}
 
-\subsubsection*{BayOpt in Action}
-See Fig.~\ref{fig:tsne:bo:all}.
+Fig.~\ref{fig:tsne:bo:all} demonstrates how BayOpt works for tuning t-SNE's perplexity for all six selected datasets.
+As proved empirically in the previous section, 10 labeled instances for each class suffice for a stable score.
+The scores calculated for all sampled perplexity values ($\in [0, N/3]$, with $N$ is number of instances in a dataset) are used as ground truth.
+For all datasets of various size (from 1000 to around 3000 data points), we only need to evaluate the score values for 15 selected perplexities.
+These points are selected by BayOpt iteratively, starting with five perplexities randomly initialized.
+The score value for each perplexity $p_i$ is calculated and all the pairs $(p_i, f_{score}(p_i))$ are used to train the underlying GP model of BayOpt.
+The next predicted perplexity to evaluate is the most promising value according to the GP model that can have a higher $f_{score}$.
+When the new perplexity is evaluated, BayOpt gets the new score value and update it's GP model.
+More detail and visual explanation on how BayOpt works with the proposed score function can be found in the Appendix~\ref{app:x}.
 
-\begin{figure*}[pos=h]
-    \begin{subfigure}[b]{.32\textwidth}
+\begin{figure}[pos=h]
+    \begin{subfigure}[b]{.3\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{DIGITS_tsne_bo.png}
+        \includegraphics[width=\linewidth]{DIGITS_tsne_bo.png}
         \caption{\emph{DIGITS}}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.32\textwidth}
+    \begin{subfigure}[b]{.3\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{COIL20_tsne_bo.png}
+        \includegraphics[width=\linewidth]{COIL20_tsne_bo.png}
         \caption{\emph{COIL20}}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.32\textwidth}
+    \begin{subfigure}[b]{.3\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{NEURON_1K_tsne_bo.png}
+        \includegraphics[width=\linewidth]{NEURON_1K_tsne_bo.png}
         \caption{\emph{NEURON\_1K}}
     \end{subfigure}
     \vfill
-    \begin{subfigure}[b]{.32\textwidth}
+    \begin{subfigure}[b]{.3\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{FASHION1000_tsne_bo.png}
+        \includegraphics[width=\linewidth]{FASHION1000_tsne_bo.png}
         \caption{\emph{FASHION1000}}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.32\textwidth}
+    \begin{subfigure}[b]{.3\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{FASHION_MOBILENET_tsne_bo.png}
-        \caption{\emph{FASHION\_MOBILENET}}
+        \includegraphics[width=\linewidth]{FASHION_MOBILENET_tsne_bo.png}
+        \caption{\emph{F\_MOBI}}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.32\textwidth}
+    \begin{subfigure}[b]{.3\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{20NEWS5_tsne_bo.png}
+        \includegraphics[width=\linewidth]{20NEWS5_tsne_bo.png}
         \caption{\emph{5NEWS}}
     \end{subfigure}
     ~
     \caption{BayOpt in action for t-SNE}
     \label{fig:tsne:bo:all}
-\end{figure*}
+\end{figure}
+
+It should note that, BayOpt does approximate the score function but tries to find its maximum value instead.
+The best predicted perplexity range where the predicted score is superior to 96\% of the maximum predicted score is highlighted.
+BayOpt with the $f_{score}$ target function converges quickly, only after dozen of iterations.
+Fig.~\ref{fig:tsne:bo:all} shows the best prediction at convergence state of BayOpt for all datasets after 15 iterations.
+BayOpt does not only find the best hyperparameter but also indicate the region in which it is not certain about its prediction.
+This is usually the region of high perplexity values where the $f_{score}$ has large distortion.
+Instead of evaluating the score functions for all values of perplexity, BayOpt framework can intelligently choose a limited number of potential perplexities to evaluate and assures to always find a global maximum.
 
 
-\subsubsection*{Compare $f_{score}$ with $AUC_{log}RNX$ and BIC}
-See Fig.~\ref{fig:tsne:compare}.
+\subsubsection*{Compare $f_{score}$, $AUC_{log}RNX$ and BIC-based score}
+Fig.~\ref{fig:tsne:compare} illustrates the best perplexity range found by $f_{score}$, $AUC_{log}RNX$ and BIC-based score for six datasets.
+$f_{score}$ agrees with both $AUC_{log}RNX$ and BIC-based scores in \emph{COIl20}, \emph{FASHION\_MOBILENET} datasets.
+$f_{score}$ agrees only with $AUC_{log}RNX$ but not BIC-based score in \emph{FASHION\_1K} dataset.
+And $f_{score}$ agrees only with BIC-based score but not $AUC_{log}RNX$ score in \emph{NEURON\_1K}, \emph{5NEWS} and \emph{DIGITS} datasets.
+This result suggest that, $f_{score}$ can be used in complement with other quality scores.
 
-\begin{figure*}[pos=h]
+\begin{figure}[pos=h]
     \centering
-    \begin{subfigure}[b]{0.32\textwidth}
+    \begin{subfigure}[b]{0.3\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{DIGITS_tsne_compare_scores}
+        \includegraphics[width=\linewidth]{DIGITS_tsne_compare_scores}
         \caption{DIGITS}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{COIL20_tsne_compare_scores}
+    \begin{subfigure}[b]{0.3\linewidth}
+        \includegraphics[width=\linewidth]{COIL20_tsne_compare_scores}
         \caption{COIL20}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{NEURON_1K_tsne_compare_scores}
+    \begin{subfigure}[b]{0.3\linewidth}
+        \includegraphics[width=\linewidth]{NEURON_1K_tsne_compare_scores}
         \caption{NEURON\_1K}
     \end{subfigure}
     \vfill
-    \begin{subfigure}[b]{0.32\textwidth}
+    \begin{subfigure}[b]{0.3\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{FASHION1000_tsne_compare_scores}
+        \includegraphics[width=\linewidth]{FASHION1000_tsne_compare_scores}
         \caption{FASHION1000}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{FASHION_MOBILENET_tsne_compare_scores}
-        \caption{FASHION\_MOBILENET}
+    \begin{subfigure}[b]{0.3\linewidth}
+        \includegraphics[width=\linewidth]{FASHION_MOBILENET_tsne_compare_scores}
+        \caption{F\_MOBI}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{0.32\textwidth}
-        \includegraphics[width=\textwidth]{20NEWS5_tsne_compare_scores}
+    \begin{subfigure}[b]{0.3\linewidth}
+        \includegraphics[width=\linewidth]{20NEWS5_tsne_compare_scores}
         \caption{5NEWS}
     \end{subfigure}
-    \caption{Comparing constraint score, $AUC_{log}RNX$ score and BIC score for the embeddings of tSNE.}
+    \caption{Comparing constraint score, $AUC_{log}RNX$ score and BIC score for the embeddings of t-SNE.}
     \label{fig:tsne:compare}
-\end{figure*}
+\end{figure}
 
 
 \subsubsection*{Metamaps and Visualizations}
-Metamap and sample visualizations for \emph{DIGITS} (Fig.~\ref{fig:tsne:meta:DIGITS}) and \emph{NEURON\_1K} (Fig.~\ref{fig:tsne:meta:NEURON1K}).
-
-\begin{figure*}[pos=h]
-    \centering
-    \begin{subfigure}[b]{\textwidth}
-        \includegraphics[width=\textwidth]{{DIGITS_tsne_metamap}.png}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{\textwidth}
-        \includegraphics[width=\textwidth]{DIGITS_tsne_show}
-    \end{subfigure}
-    \caption{Metamap and sample visualizations for the selected parameters for \emph{DIGITS} dataset.}
-    \label{fig:tsne:meta:DIGITS}
-\end{figure*}
+As a proof of concept, the embeddings with all integer values of perplexity are calculated.
+A metamap is used in order to visualize the solution space of t-SNE, i.e., to represent all the embeddings with different perplexities.
+In this metamap, each point is an embedding corresponding to one perplexity.
+The metamap is constructed by applying a visualization method (t-SNE or UMAP) on the ensemble of pre-calculated embeddings.
+The metamaps presented in this section are built by UMAP with \emph{n\_neighbors} = 50 and \emph{min\_dist} = 0.1.
+The large value of \emph{n\_neighbors} is to reveal the global structure, i.e, the relation of all embeddings in a general view. 
+An example of metamap for the \emph{NEURON\_1K} dataset and sample visualizations are shown in Fig.~\ref{fig:tsne:meta:NEURON1K}.
+(See Appendix~\ref{app:x} for another metamap and sample visualizations of the \emph{NEURON\_1K} dataset).
+In this figure, some selected perplexity values are indicated in the first metamap and the corresponding visualizations are shown below.
+The second, third and fourth metamaps are colored by the values of $f_{score}$, $AUC_{log}RNX$ and BIC-based score respectively.
+The embeddings with high score (superior than 96\% of maximum score) are also highlighted.
+In this way, we discover the different regions of best results according different quality scores.
 
 \begin{figure*}[pos=h]
     \centering
@@ -325,6 +342,10 @@ Metamap and sample visualizations for \emph{DIGITS} (Fig.~\ref{fig:tsne:meta:DIG
     \caption{Metamap and sample visualizations for the selected parameters for \emph{NEURON\_1K} dataset.}
     \label{fig:tsne:meta:NEURON1K}
 \end{figure*}
+
+The sample visualizations in Fig.~\ref{fig:tsne:meta:NEURON1K} served for a qualitative evaluation of the best visualization found by different score.
+They are also ranked quantitatively/objectively by its score values as: very preferred ($\Uparrow\Uparrow$), preferred ($\Uparrow$), good enough ($\talloblong$), not preferred ($\Downarrow$) and unfavorable ($\Downarrow\Downarrow$).
+The good visualization predicted by BayOpt (whose the tuned hyperparameter in the best predicted range) is denoted by star symbol ($\star$).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Tuning Two Parameters of UMAP}
