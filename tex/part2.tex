@@ -27,7 +27,7 @@ The processed data have 10 PCA features and labeled in 6 classes found by a grap
 
 \begin{table*}%[width=\textwidth,cols=6,pos=h]
 \caption{Description of six selected datasets.}\label{tbl:dataset}
-\begin{tabular}{m{3cm} m{4.8cm} m{8cm}}
+\begin{tabular}{m{2.2cm} m{5.4cm} m{7.4cm}}
 \toprule
 Dataset name & Samples & Description \\
 \midrule
@@ -165,10 +165,10 @@ In the case of LargeVis, there are the \emph{flat} regions where the score does 
 The reason is that, LargeVis is designed for large dataset and thus when being applied to the medium-sized datasets as in our experiments, the impact of perplexity is not important.
 In contrast, t-SNE and UMAP are very sensitive to its hyperparameters, especially in the case of very small and very large number of neighbors.
 Intuitively, when the number of neighbors is small, the points are not grouped in the visualization.
-The similar constraints are unlikely preserved while the dissimilar constraints have more change to be preserved since the points stay aways from each other.
+The similar constraints are unlikely preserved while the dissimilar constraints have more change to be preserved since the points stay away from each other.
 In this case $f_{score}(\mathcal{S})$ is very low and $f_{score}(\mathcal{D})$ is high, that makes $f_{score}$ low.
 Inversely, when the number of neighbors is large, every point is neighbor to each other, which make the visualization a big cluster.
-In this case, the similar constraints are likely preserved while the dissimilar constraints are note, that make $f_{score}(\mathcal{S})$ hight and $f_{score}(\mathcal{D})$ low.
+In this case, the similar constraints are likely preserved while the dissimilar constraints are note, that make $f_{score}(\mathcal{S})$ high and $f_{score}(\mathcal{D})$ low.
 
 In summary, the local structures (neighborhood information) of the dataset are presented by the small groups in the visualization.
 The clearer these groups are highlighted, the more likely the similar constraints of the points within groups and the dissimilar constraints of the points between different groups are preserved.
@@ -183,16 +183,12 @@ The results are presented in the next section.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Application of BayOpt on $f_{score}$}\label{sec:result:bo}
 BayOpt is widely used for hyperparameter tuning problem when the target function is well-defined.
-In supervised setting or in clustering problem where we can access the class labels, the target function is simply a metric which measures the quality of the prediction or clustering.
-However in visualization problem, the target function for measuring the quality of the visualization is more difficult to define.
-Throughout experiments, we show that the proposed $f_{score}$ can work well under BayOpt framework as a flexible quality measurement.
-Indeed, BayOpt is a general framework which can work with any complex target function like $AUC_{log}RNX$ score or BIC-based score function.
+BayOpt is a general framework which can work with any complex target function like $AUC_{log}RNX$ score or BIC-based score function.
 In practice, $AUC_{log}RNX$ does not always work well with UMAP's embedding, especially in the case of tuning two UMAP's hyperparameters at the same time.
 BIC-based score is tiered to t-SNE and does not work for other DR methods.
 $f_{score}$ is designed to be independent to the DR methods and to be flexible to the input constraints.
-
 In this section, the input constraints are generated from 10 labeled instances in each class for any given dataset.
-$f_{score}$, $AUC_{log}RNX$ and BIC-based scores are compared in both tasks of tuning one hyperparameter for tSNE (Sec~\ref{sec:x}) and tuning two hyperparameters for UMAP (Sec~\ref{sec:y}).
+$f_{score}$, $AUC_{log}RNX$ and BIC-based scores are compared in both tasks of tuning one hyperparameter for t-SNE (Sec~\ref{sec:x}) and tuning two hyperparameters for UMAP (Sec~\ref{sec:y}).
 In the next section, a different set of labeled points which does not base on the available class labels of the dataset is used.
 $f_{score}$ which is flexible by design, can find the best visualization w.r.t. the new constraints.
 This task can not be archived by $AUC_{log}RNX$ or BIC-based score.
@@ -211,43 +207,43 @@ This reminds us to always take into account not only the noise in the observatio
 \subsection{BayOpt for Tuning One Parameter of t-SNE}
 
 \begin{figure}%[pos=h]
-    \begin{subfigure}[b]{.48\linewidth}
+    \begin{subfigure}[b]{.46\linewidth}
         \centering
         \includegraphics[width=\linewidth]{DIGITS_tsne_bo.png}
         \caption{\emph{DIGITS}}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.48\linewidth}
+    \begin{subfigure}[b]{.46\linewidth}
         \centering
         \includegraphics[width=\linewidth]{COIL20_tsne_bo.png}
         \caption{\emph{COIL20}}
     \end{subfigure}
     \vfill
-    \begin{subfigure}[b]{.48\linewidth}
+    \begin{subfigure}[b]{.46\linewidth}
         \centering
         \includegraphics[width=\linewidth]{FASHION1000_tsne_bo.png}
         \caption{\emph{FASHION\_1K}}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.48\linewidth}
+    \begin{subfigure}[b]{.46\linewidth}
         \centering
         \includegraphics[width=\linewidth]{FASHION_MOBILENET_tsne_bo.png}
         \caption{\emph{FASH\_MOBI}}
     \end{subfigure}
     ~
     \vfill
-    \begin{subfigure}[b]{.48\linewidth}
+    \begin{subfigure}[b]{.46\linewidth}
         \centering
         \includegraphics[width=\linewidth]{20NEWS5_tsne_bo.png}
         \caption{\emph{5NEWS}}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.48\linewidth}
+    \begin{subfigure}[b]{.46\linewidth}
         \centering
         \includegraphics[width=\linewidth]{NEURON_1K_tsne_bo.png}
         \caption{\emph{NEURON\_1K}}
     \end{subfigure}
-    \caption{BayOpt appoarch for  t-SNE}
+    \caption{BayOpt approach for  t-SNE}
     \label{fig:tsne:bo:all}
 \end{figure}
 
@@ -269,7 +265,6 @@ BayOpt does not only find the best hyperparameter but also indicate the region i
 This is usually the region of high perplexity values where the $f_{score}$ has large distortion.
 Instead of evaluating the score functions for all values of perplexity, BayOpt framework can intelligently choose a limited number of potential perplexities to evaluate and assures to always find a global maximum.
 
-
 \subsubsection*{Compare $f_{score}$, $AUC_{log}RNX$ and BIC-based score}
 Fig.~\ref{fig:tsne:compare} illustrates the best perplexity range found by $f_{score}$, $AUC_{log}RNX$ and BIC-based score for six datasets.
 $f_{score}$ agrees with both $AUC_{log}RNX$ and BIC-based scores in \emph{COIl20}, \emph{FASH\_MOBI} datasets.
@@ -277,7 +272,7 @@ $f_{score}$ agrees only with $AUC_{log}RNX$ but not BIC-based score in \emph{FAS
 And $f_{score}$ agrees only with BIC-based score but not $AUC_{log}RNX$ score in \emph{NEURON\_1K}, \emph{5NEWS} and \emph{DIGITS} datasets.
 This result suggest that, $f_{score}$ can be used in complement with other quality scores.
 
-\begin{figure}%[pos=h]
+\begin{figure}[h]%[pos=h]
     \centering
     \begin{subfigure}[b]{0.3\linewidth}
         \centering
@@ -314,7 +309,6 @@ This result suggest that, $f_{score}$ can be used in complement with other quali
     \label{fig:tsne:compare}
 \end{figure}
 
-
 \subsubsection*{Metamaps and Visualizations}
 As a proof of concept, the embeddings with all integer values of perplexity are calculated.
 A metamap is used in order to visualize the solution space of t-SNE, i.e., to represent all the embeddings with different perplexities.
@@ -329,7 +323,7 @@ The second, third and fourth metamaps are colored by the values of $f_{score}$, 
 The embeddings with high score (superior than 96\% of maximum score) are also highlighted.
 In this way, we discover the different regions of best results according different quality scores.
 
-\begin{figure*}%[pos=h]
+\begin{figure*}[h]%[pos=h]
     \centering
     \begin{subfigure}[b]{\textwidth}
         \includegraphics[width=\textwidth]{{NEURON_1K_tsne_metamap}.png}
@@ -345,23 +339,25 @@ In this way, we discover the different regions of best results according differe
 The sample visualizations in Fig.~\ref{fig:tsne:meta:NEURON1K} served for a qualitative evaluation of the best visualization found by different score.
 They are also ranked quantitatively/objectively by its score values as: very preferred ($\Uparrow\Uparrow$), preferred ($\Uparrow$), good enough ($[]$), not preferred ($\Downarrow$) and unfavorable ($\Downarrow\Downarrow$).
 The good visualization predicted by BayOpt (whose the tuned hyperparameter in the best predicted range) is denoted by star symbol ($\star$).
-As indicated by Wattenberg et. al.~\cite{wattenberg2016how}, we may need more than one plot to understand the hidden pattern in the data.
+As indicated by Wattenberg et. al.~\cite{wattenberg2016use}, we may need more than one plot to understand the hidden pattern in the data.
 As suggested by different scores, we can easily discover different region in the solution space and thus discover different structures in the data for which one score can not reveal them all.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Tuning Two Parameters of UMAP}
 
-\subsubsection*{BayOpt in Action}
-BayOpt for tuning two parameters of UMAP with \emph{COIL20} (Fig.~\ref{fig:bo:umap:COIL20}) and \emph{FASHION\_1K} (Fig.~\ref{fig:bo:umap:FASHION1000})
+\subsubsection*{Compare $f_{score}$ with $AUC_{log}RNX$ (default min\_dist 0.1)}
 
-\begin{figure}%[pos=h]
-    \begin{subfigure}[b]{.85\linewidth}
+\subsubsection*{BayOpt in Action}
+BayOpt for tuning two parameters of UMAP with \emph{COIL20} (Fig.~\ref{fig:bo:umap:COIL20}).
+
+\begin{figure}[h]%[pos=h]
+    \begin{subfigure}[b]{.73\linewidth}
         \includegraphics[width=\textwidth]{COIL20_umap_auc_rnx}
         \caption{$AUC_{log}RNX$}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.85\linewidth}
+    \begin{subfigure}[b]{.73\linewidth}
         \includegraphics[width=\textwidth]{COIL20_umap_qij_score}
         \caption{constraint score}
     \end{subfigure}
@@ -376,35 +372,11 @@ BayOpt for tuning two parameters of UMAP with \emph{COIL20} (Fig.~\ref{fig:bo:um
     \label{fig:bo:umap:COIL20}
 \end{figure}
 
-\begin{figure}%[pos=h]
-    \begin{subfigure}[b]{.85\linewidth}
-        \includegraphics[width=\textwidth]{FASHION1000_umap_auc_rnx}
-        \caption{$AUC_{log}RNX$}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{.85\linewidth}
-        \includegraphics[width=\textwidth]{FASHION1000_umap_qij_score}
-        \caption{constraint score}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{\linewidth}
-        \centering
-        \includegraphics[width=\textwidth]{FASHION1000_umap_predicted_score}
-        \caption{BO predicted score}
-    \end{subfigure}
-    ~
-    \caption{\emph{FASHION\_1K}}
-    \label{fig:bo:umap:FASHION1K}
-\end{figure}
-
-\subsubsection*{Compare $f_{score}$ with $AUC_{log}RNX$ (default min\_dist 0.1)}
-See annex 2.
-
 \subsubsection*{Metamaps and Visualizations}
 
-Metamap and sample visualizations for \emph{COIL20} (Fig.~\ref{fig:umap:meta:COIL20}) and \emph{FASHION\_1K} (Fig.~\ref{fig:umap:meta:FASHION1000}).
+Metamap and sample visualizations for \emph{COIL20} (Fig.~\ref{fig:umap:meta:COIL20}).
 
-\begin{figure*}
+\begin{figure*}[h]
     \centering
     \begin{subfigure}[b]{\textwidth}
         \centering
@@ -417,22 +389,6 @@ Metamap and sample visualizations for \emph{COIL20} (Fig.~\ref{fig:umap:meta:COI
         \caption{Sample vizs COIL20}
     \end{subfigure}
 \end{figure*}
-
-
-\begin{figure*}
-    \centering
-    \begin{subfigure}[b]{\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{{FASHION1000_umap_metamap}.png}
-        \caption{Metamap for UMAP embeddings of FASHION1000 dataset.}
-    \end{subfigure}
-    ~
-    \begin{subfigure}[b]{\textwidth}
-        \includegraphics[width=\textwidth]{FASHION1000_umap_show}
-        \caption{Sample vizs FASHION1000}
-    \end{subfigure}
-\end{figure*}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -117,19 +117,18 @@ In this paper, among the possible quality measures, clustering quality measures 
 For these reasons, we only use cluster-label agnostic metrics.
 We also avoid quality measures that are linked to the objective function of SNE, e.g. Neighborhood Retrieval Visualizer (NeRV) \cite{venna2010}, (i) because they need the evaluation of their own perplexity parameter and (ii) because of the bias of measuring the quality of $t$-SNE and LargeVis with a quality metric too closely related to SNE.
 
-\begin{table}
-\renewcommand{\arraystretch}{1.0}
+\begin{table}%[width=\textwidth,cols=6,pos=h]
 \caption{Properties of the five cluster-label-agnostic quality metrics considered in this paper to assess visualizations.}\label{tab:metrics}
-\begin{tabular}{p{1.5cm} p{0.8cm} p{4.4cm}}
-\hline
+\begin{tabular}{p{1.4cm} p{0.7cm} p{4.6cm}}
+\toprule
 Metric name &  Range value & Description\\
-\hline \hline
+\midrule
 CC & $[0, 1]$ & Pearson correlation coefficient between pairwise distance vectors\\
 NMS & $[0, +\infty)$ & Stress based on comparison of pairwise distance orders\\
-CCA & $[0, +\infty)$ & Stress with accent put on low dim.\\
-NLM & $[0, +\infty)$ & Stress with accent put on high dim.\\
-AUC$_{log}$RNX & $[0, 1]$ & How neighbors in high dim. are preserved in low dim.\\
-\hline
+CCA & $[0, +\infty)$ & Stress with accent put on LD\\
+NLM & $[0, +\infty)$ & Stress with accent put on HD\\
+AUC$_{log}$RNX & $[0, 1]$ & How neighbors in HD are preserved in LD\\
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -228,25 +227,16 @@ in form of pair of input sample $x$ and function values $f(x)$.
 
 Let define $f(x_i)$ as the observation of the target function for the $i^{th}$ sample $x_i$.
 BayOpt constructs a statistical model describing the relationship between
-the tuning hypyerparamters and the target function.
-
-NEED REVIEW: Bayesian model-based optimization is intuitive: choose the next input values to evaluate based on the past results to concentrate the search on more promising values.
+the tuning hyperparameters and the target function.
+Bayesian model-based optimization is intuitive: choose the next input values to evaluate based on the past results to concentrate the search on more promising values.
 
 BayOpt has been applied successfully to the problem of hyperparameters tuning \cite{snoek2012practical} or experimental design / randomized experiments \cite{letham2019constrained}.
 We can consider the unknown objective function is our target function (score function) for all combinations of the hyperparameters.
-Since we can not evaluate all combinations of the hyperparameters,
-the target function is obviously unknown.
+Since we can not evaluate all combinations of the hyperparameters, the target function is obviously unknown.
 The goal is thus to find a best combination that maximize the target function.
-
-\vspace{8pt} \par
-TODO:
-
-Discuss: BayOpt can be applied to the BIC-based score~\cite{cao2017automatic}.
-However this score has two disadvantages:
-(1) it is tied to the loss function of t-SNE.
-(2) it works only with one hyperparameter (perplexity of t-SNE), and thus can not be generalized for other DR methods.
-Our proposed method can do better.
-
+In supervised setting or in clustering problem where we can access the class labels, the target function is simply a metric which measures the quality of the prediction or clustering.
+However in visualization problem, the target function for measuring the quality of the visualization is more difficult to define.
+Throughout experiments, we show that the proposed score function can work well under BayOpt framework as a flexible quality measurement.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

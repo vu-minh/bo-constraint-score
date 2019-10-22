@@ -188,6 +188,45 @@ See Fig.~\ref{fig:umap:compare}.
 \end{figure*}
 
 
+\section{BayOpt for UMAP}
+BayOpt for UMAP with {FASHION\_1K} datasets\ref{fig:bo:umap:FASHION1K} and metatmap.
+
+\begin{figure}%[pos=h]
+    \begin{subfigure}[b]{.73\linewidth}
+        \includegraphics[width=\textwidth]{FASHION1000_umap_auc_rnx}
+        \caption{$AUC_{log}RNX$}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{.73\linewidth}
+        \includegraphics[width=\textwidth]{FASHION1000_umap_qij_score}
+        \caption{constraint score}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{\linewidth}
+        \centering
+        \includegraphics[width=\textwidth]{FASHION1000_umap_predicted_score}
+        \caption{BO predicted score}
+    \end{subfigure}
+    ~
+    \caption{\emph{FASHION\_1K}}
+    \label{fig:bo:umap:FASHION1K}
+\end{figure}
+
+\begin{figure*}
+    \centering
+    \begin{subfigure}[b]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{{FASHION1000_umap_metamap}.png}
+        \caption{Metamap for UMAP embeddings of FASHION1000 dataset.}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{\textwidth}
+        \includegraphics[width=\textwidth]{FASHION1000_umap_show}
+        \caption{Sample vizs FASHION1000}
+    \end{subfigure}
+\end{figure*}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
 
