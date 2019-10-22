@@ -108,6 +108,15 @@ It is important to note that, the creation of this grid is computationally expen
 The grid is only used as proof of concept to evaluate the reliability of the BayOpt approach on the proposed score.
 As shown in the next section, BayOpt approach solves the scalability problem efficiently, in which only dozens of evaluations are required to find the best hyperparameters for all experimented datasets.
 
+For all hyperparameter tuning tasks under BayOpt framework, we prefer the exploration strategy to make sure we can discover the largest as possible the parameter space.
+Three technical points that guarantees the accuracy in predicting the best hyperparameters the quick convergence of BayOpt in our experiments are follows.
+(1) The hyperparameters are sample in natural logarithmic domain to focus the computation on not-so-large values, which are usually used in practice.
+(2) Expected Improvement (EI) acquisition function is used as a surrogate function in the underlying Gaussian Process (GP) model of BayOpt.
+The exploration strategy is set using a large value of parameter $\xi$ of EI, which controls the trade-off between global search (exploration) and local optimization (exploitation).
+All our experiments for all datasets are run with $\xi=0.1$ without any effort to tune this parameter.
+(3) Since there is always a small variance in the score value, there is some noise in the observations (the $f_{score}$ values) for BayOpt and the underlying kernel of GP model must be aware of this noise.
+This can be done by adding the small values to the diagonal of the GP's kernel matrix.
+This reminds us to always take into account not only the noise in the observation but also the uncertainty in the prediction of the GP model.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -192,16 +201,6 @@ $f_{score}$, $AUC_{log}RNX$ and BIC-based scores are compared in both tasks of t
 In the next section, a different set of labeled points which does not base on the available class labels of the dataset is used.
 $f_{score}$ which is flexible by design, can find the best visualization w.r.t. the new constraints.
 This task can not be archived by $AUC_{log}RNX$ or BIC-based score.
-
-For all hyperparameter tuning tasks under BayOpt framework, we prefer the exploration strategy to make sure we can discover the largest as possible the parameter space.
-Three technical points that guarantees the accuracy in predicting the best hyperparameters the quick convergence of BayOpt in our experiments are follows.
-(1) The hyperparameters are sample in natural logarithmic domain to focus the computation on not-so-large values, which are usually used in practice.
-(2) Expected Improvement (EI) acquisition function is used as a surrogate function in the underlying Gaussian Process (GP) model of BayOpt.
-The exploration strategy is set using a large value of parameter $\xi$ of EI, which controls the trade-off between global search (exploration) and local optimization (exploitation).
-All our experiments for all datasets are run with $\xi=0.1$ without any effort to tune this parameter.
-(3) Since there is always a small variance in the score value, there is some noise in the observations (the $f_{score}$ values) for BayOpt and the underlying kernel of GP model must be aware of this noise.
-This can be done by adding the small values to the diagonal of the GP's kernel matrix.
-This reminds us to always take into account not only the noise in the observation but also the uncertainty in the prediction of the GP model.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Tuning One Parameter of t-SNE}
@@ -308,7 +307,7 @@ And $f_{score}$ agrees only with BIC-based score but not $AUC_{log}RNX$ score in
 This result suggest that, $f_{score}$ can be used in complement with other quality scores.
 
 % \subsubsection*{Metamaps and Visualizations}
-\begin{figure*}[]%[pos=h]
+\begin{figure*}[ht]%
     \centering
     \begin{subfigure}[b]{.8\linewidth}
         \includegraphics[width=\linewidth]{NEURON_1K_tsne_metamap}
@@ -355,12 +354,12 @@ A naive approach requires thousands of evaluation for all discrete combinations.
 As a proof of concept, we evaluate $f_{score}$ and $AUC_{log}RNX$ score for all UMAP embeddings on a grid of around 150 integer values for \emph{n\_neighbors} $\in [2, N/3]$ (depending the size of the dataset) and 10 real values for \emph{min\_dist} $\in [0.001, 1]$ in natural logarithmic domain.
 
 \begin{figure}[]%[pos=h]
-    \begin{subfigure}[b]{.73\linewidth}
+    \begin{subfigure}[b]{.78\linewidth}
         \includegraphics[width=\textwidth]{COIL20_umap_auc_rnx}
         \caption{$AUC_{log}RNX$ score.}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.73\linewidth}
+    \begin{subfigure}[b]{.78\linewidth}
         \includegraphics[width=\textwidth]{COIL20_umap_qij_score}
         \caption{$f_{score}$}
     \end{subfigure}
@@ -383,13 +382,13 @@ In contrast, it is clear that $f_{score}$ in Fig.~\ref{fig:bo:umap:COIL20}(b) ca
 
 \begin{figure*}[]
     \centering
-    \begin{subfigure}[b]{\textwidth}
+    \begin{subfigure}[b]{.8\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{{COIL20_umap_metamap}.png}
+        \includegraphics[width=\linewidth]{{COIL20_umap_metamap}.png}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{\textwidth}
-        \includegraphics[width=\textwidth]{COIL20_umap_show}
+    \begin{subfigure}[b]{.8\linewidth}
+        \includegraphics[width=\linewidth]{COIL20_umap_show}
     \end{subfigure}
     \caption{Metamaps and sample visualizations with selected hyperparameters for the \emph{COIL20} dataset.}
     \label{fig:umap:meta:COIL20}
@@ -421,21 +420,21 @@ Demo score's flexibility for \emph{FASH\_MOBI}(Fig.~\ref{fig:flex:fashionmobilen
 
 \begin{figure*}%[pos=h]
     \centering
-    \includegraphics[width=\textwidth]{{FASHION_MOBILENET_score_flexibility}.png}
+    \includegraphics[width=.8\linewidth]{{FASHION_MOBILENET_score_flexibility}.png}
     \caption{Flexibility of $f_{score}$ for \emph{FASH\_MOBI} dataset}
     \label{fig:flex:fashionmobilenet}
 \end{figure*}
 
 \begin{figure*}%[pos=h]
     \centering
-    \includegraphics[width=\textwidth]{{20NEWS5_score_flexibility}.png}
+    \includegraphics[width=.8\linewidth]{{20NEWS5_score_flexibility}.png}
     \caption{Flexibility of $f_{score}$ for \emph{5NEWS} dataset}
     \label{fig:flex:5news}
 \end{figure*}
 
 \begin{figure*}%[pos=h]
     \centering
-    \includegraphics[width=\textwidth]{{NEURON_1K_score_flexibility}.png}
+    \includegraphics[width=.8\linewidth]{{NEURON_1K_score_flexibility}.png}
     \caption{Flexibility of $f_{score}$ for \emph{NEURON\_1K} dataset}
     \label{fig:flex:neuron}
 \end{figure*}
