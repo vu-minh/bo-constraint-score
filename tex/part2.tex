@@ -300,14 +300,9 @@ Instead of evaluating the score functions for all values of perplexity, BayOpt f
     \caption{Comparison of constraint score, $AUC_{log}RNX$ score and BIC score for t-SNE's embeddings.}
     \label{fig:tsne:compare}
 \end{figure}
-Fig.~\ref{fig:tsne:compare} illustrates the best perplexity range found by $f_{score}$, $AUC_{log}RNX$ and BIC-based score for six datasets.
-$f_{score}$ agrees with both $AUC_{log}RNX$ and BIC-based scores in \emph{COIl20}, \emph{FASH\_MOBI} datasets.
-$f_{score}$ agrees only with $AUC_{log}RNX$ but not BIC-based score in \emph{FASHION\_1K} dataset.
-And $f_{score}$ agrees only with BIC-based score but not $AUC_{log}RNX$ score in \emph{NEURON\_1K}, \emph{5NEWS} and \emph{DIGITS} datasets.
-This result suggest that, $f_{score}$ can be used in complement with other quality scores.
 
-% \subsubsection*{Metamaps and Visualizations}
-\begin{figure*}[ht]%
+% hardcoded position of figure for t-SNE-{Metamaps and Visualizations}
+\begin{figure*}[]%
     \centering
     \begin{subfigure}[b]{.8\linewidth}
         \includegraphics[width=\linewidth]{NEURON_1K_tsne_metamap}
@@ -319,12 +314,21 @@ This result suggest that, $f_{score}$ can be used in complement with other quali
     \caption{Metamap and sample visualizations for the selected parameters for \emph{NEURON\_1K} dataset.}
     \label{fig:tsne:meta:NEURON1K}
 \end{figure*}
+
+Fig.~\ref{fig:tsne:compare} illustrates the best perplexity range found by $f_{score}$, $AUC_{log}RNX$ and BIC-based score for six datasets.
+$f_{score}$ agrees with both $AUC_{log}RNX$ and BIC-based scores in \emph{COIl20}, \emph{FASH\_MOBI} datasets.
+$f_{score}$ agrees only with $AUC_{log}RNX$ but not BIC-based score in \emph{FASHION\_1K} dataset.
+And $f_{score}$ agrees only with BIC-based score but not $AUC_{log}RNX$ score in \emph{NEURON\_1K}, \emph{5NEWS} and \emph{DIGITS} datasets.
+This result suggest that, $f_{score}$ can be used in complement with other quality scores.
+
+% \subsubsection*{Metamaps and Visualizations}
+% See figure above
 As a proof of concept, the embeddings with all integer values of perplexity are calculated.
 A metamap is used in order to visualize the solution space of t-SNE, i.e., to represent all the embeddings with different perplexities.
 In this metamap, each point is an embedding corresponding to one perplexity.
 The metamap is constructed by applying a visualization method (t-SNE or UMAP) on the ensemble of pre-calculated embeddings.
 The metamaps presented in this section are built by UMAP with \emph{n\_neighbors} = 50 and \emph{min\_dist} = 0.1.
-The large value of \emph{n\_neighbors} is to reveal the global structure, i.e, the relation of all embeddings in a general view. 
+The large value of \emph{n\_neighbors} is to reveal the global structure, i.e, the relation of all embeddings in a general view.
 An example of metamap for the \emph{NEURON\_1K} dataset and sample visualizations are shown in Fig.~\ref{fig:tsne:meta:NEURON1K}.
 (See Appendix~\ref{app:x} for another metamap and sample visualizations of the \emph{DIGITS} dataset).
 In this figure, some selected perplexity values are indicated in the first metamap and the corresponding visualizations are shown below.
@@ -375,12 +379,12 @@ As a proof of concept, we evaluate $f_{score}$ and $AUC_{log}RNX$ score for all 
 \end{figure}
 
 Fig.~\ref{fig:bo:umap:COIL20}(a, b) show $AUC_{log}RNX$ and constraints scores of every combination of hyperparameters on the sample grid for the \emph{COIl20} dataset.
-The \emph{COIL20} dataset contained only 20 objects but under different rotations, which gives a very good example for the trade-off of how the local versus global structures are preserved in the visualization. (Some sample visualizations are in Fig.~\ref{fig:umap:meta:COIL20}(b)).
+The \emph{COIL20} dataset contained only 20 objects but under different rotations, which gives a very good example for the trade-off of how the local versus global structures are preserved in the visualization. (Some sample visualizations are in Fig.~\ref{fig:umap:meta:COIL20}).
 $AUC_{log}RNX$ can not investigate the relevant of the two hyperparameters, as indicated by the homogeneous zone on the left and on top of Fig.~\ref{fig:bo:umap:COIL20}(a).
 Indeed, when \emph{n\_neighbors} is small (between 3 and 8), \emph{min\_dist} does not have strong affect. And when \emph{min\_dist} is large enough (larger than 0.1), \emph{n\_neighbors} does not have strong affect either.
 In contrast, it is clear that $f_{score}$ in Fig.~\ref{fig:bo:umap:COIL20}(b) can identify a small, reasonable zone of the good hyperparameters.
 
-\begin{figure*}[]
+\begin{figure*}
     \centering
     \begin{subfigure}[b]{.8\linewidth}
         \centering
@@ -398,17 +402,14 @@ The predicted best hyperparameter combination is illustrated in Fig.~\ref{fig:bo
 Under BayOpt framework, only 40 combinations are selected and evaluated to find the best \emph{n\_neighbors} = 8 and \emph{min\_dist} = 0.01 for UMAP instead of evaluating more than 1000 combination in the sample grid.
 The predicted optimal hyperparameters are close to the ground truth optimum (\emph{n\_neighbors} = 9 and \emph{min\_dist} = 0.0022) despite a very limited number of evaluation.
 
+TODO:
+Intro to metamap and sample vis in Fig.~\ref{fig:umap:meta:COIL20}.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Flexibility of the Proposed Score}\label{sec:result:flexibility}
 
-t-SNE, LargeVis and UMAP are widely used since they have ability to preserve the neighborhood information, i.e. to make the data points in the same class close together.
-In this way, the local structure of the data is highlighted.
-But as pointed out in the article ``How to use t-sne effectively''~\cite{wattenberg2016use}, \emph{the distance between clusters might not mean anything}.
-The hyperparameters of t-SNE and UMAP make these methods difficult to use correctly but also make them flexible.
-These methods can produce different visualizations and reveal different hidden structures in the data.
-To evaluate the embedding quality of such flexible methods, we need a flexible score.
-The state of the art $AUC_{log}RNX$ metric or the BIC-based score has no flexibility to capture different visualization results.
+QUESTION here...
 
 $AUC_{log}RNX$ metric evaluates how the neighborhood information is preserved.
 The BIC-based score evaluates the trade-off between KL loss and the value of perplexity in t-SNE.
@@ -443,6 +444,28 @@ Demo score's flexibility for \emph{FASH\_MOBI}(Fig.~\ref{fig:flex:fashionmobilen
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion and Future Work}
+
+principle contribution: propose a flexible score which is independent to DR methods and integrate into BayOpt framework.
+
+\subsubsection*{Powerful methods still need hyperparameter tuning.}
+t-SNE, LargeVis and UMAP are widely used since they make reasonable visualizations in which data points in the same class are placed close together.
+In this way, the neighborhood information is preserved and the local structure of the data is highlighted.
+However, as pointed out in the article ``How to use t-sne effectively''~\cite{wattenberg2016use}, \emph{the distance between clusters in t-SNE embedding might not mean anything}.
+That means in t-SNE embeddings, sometimes the very related or similar groups are placed far apart while unrelated or different groups are placed close together.
+The reason is that, t-SNE can not to preserve the distance in the data and it also does not guarantee to preserve much global structure either.
+In contrast, UMAP introduces \emph{min\_dist} hyperparameter to control how tightly the connected components appear in the visualization.
+By using a small \emph{min\_dist}, one can expect the small concentrated groups in the visualization are well isolated.
+
+
+\subsubsection*{The proposed constraint preserving score is a flexible function.}
++ works well
++ change input constraint
++ change function form (triplet, contrastive)
+
+\subsubsection*{Constraint generation and Visualization Evaluation}
++ Auto or user
+
+\subsubsection*{Advantage of BayOpt}
 
 \par
 Discuss the variance of the proposed score (w.r.t to different set of constraints, different number of constraints).
@@ -514,3 +537,8 @@ This score is built upon a limited number of constraints but can distinguish the
 + By combining this score with BayOpt approach, we can tune many hyperparameters at the same time for many widely used DR methods like t-SNE or UMAP.
 
 + BayOpt takes into account the uncertainty in the score values and also explainable. We can observe the internal optimization step to answer the question: why to choose the next promising hyperparameters to try?
+
+The hyperparameters of t-SNE and UMAP make these methods difficult to use correctly but also make them flexible.
+These methods can produce different visualizations and reveal different hidden structures in the data.
+To evaluate the embedding quality of such flexible methods, we need a flexible score.
+The state of the art $AUC_{log}RNX$ metric or the BIC-based score has no flexibility to capture different visualization results.
