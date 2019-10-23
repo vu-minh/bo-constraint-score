@@ -478,19 +478,13 @@ Moreover, the internal prediction of BayOpt is also visible and explainable even
 We can run BayOpt iteratively to investigate why a hyperparameter is chosen or to directly guide the optimization process, i.e., the user can specify the parameter to evaluate and the GP model will update itself to learn from both evaluated and new probed observation.
 
 \subsubsection*{The proposed constraint preserving score is a flexible function.}
-Unlike $AUC_{log}RNX$ or BIC-based scores which do not depend on the external input data,
-$f_{score}$ is a function of its given ensemble of similar-link constraints $\mathcal{S}$ and dissimilar-link constraints $\mathcal{D}$.
-
-
-+ works well
-+ change input constraint
-+ change function form (triplet, contrastive)
-
-\par
-The violated constraints in our methods correspond to the shortcoming of t-SNE in \cite{wattenberg2016use}.
-t-SNE can not preserve the within-cluster distances and between-clusters distances.
-[TODO: Add reproduced figures].
-The $q_{ij}$-based score can help to understand the defective of the visualization.
+Unlike $AUC_{log}RNX$ or BIC-based scores which do not depend on the external input data, $f_{score}$ is a function of its given ensemble of similar-link constraints $\mathcal{S}$ and dissimilar-link constraints $\mathcal{D}$.
+$AUC_{log}RNX$ objectively measures how the neighborhood is preserved without taking into account the interest of the users whether they want to see local or global structure in the data.
+As demonstrated in Sec.~\ref{sec:result:flexibility} with three real world datasets, $f_{score}$ can discover the solution which satisfies the users' constraints (in term of labeled points) but is never selected by $AUC_{log}RNX$ nor BIC-based score.
+Moreover, the constraint score function can be easily modified to adapt with different criteria such as \emph{contrastive measure} or \emph{triplet measure}.
+They are the adapted version based on the idea of \emph{contrastive loss}~\cite[Sec.3]{logeswaran2018efficient} and \emph{triplet loss}~\cite[Sec.3.1]{schroff2015facenet}, which use several selected anchor points, their positive examples (connected by similar-links) and their negative examples (connected by dissimilar-links).
+% $\mathbb{E}_{y, y_+, y_-} \Big[ -\log \Big( \frac{exp(y^T y_+)}{exp(y^T y_+) + exp(y^T y_-)} \Big) \Big]$
+% $\mathbb{E}_{y, y_+, y_-} \Big[ max(0, ||y-y_+||^2 - ||y-y_-||^2  \Big]$
 
 \subsubsection*{$f_{score}$ is a general quality measurement score with an efficient computation.}
 The state of the art rank-based $AUC_{log}RNX$ can be used to measure the quality of any DR methods.
