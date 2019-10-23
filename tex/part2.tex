@@ -484,7 +484,7 @@ The state of the art rank-based $AUC_{log}RNX$ can be used to measure the qualit
 It measures how the neighborhood information in HD is preserved in LD and thus must access to both HD data and the embedding.
 In practice, it works well for the DR methods based on stochastic neighbors embedding family like t-SNE, but not for UMAP with different values of \emph{min\_dist}.
 Moreover it can not scale for large dataset since it has to calculate all the sets of k-nearest neighbors in HD for all values possible of $k$ from 2 to N.
-It has thus a high complexity of $O(DN^2logN)$~\cite{lee2005} ($D$ is the dimension of the original data, often be large for image data, $N$ is the number of data points in a dataset), which is higher than the complexity $O(DN^2) of t-SNE.
+It has thus a high complexity of $O(DN^2logN)$ ($D$ is the dimension of the original data, often be large for image data, $N$ is the number of data points in a dataset), which is higher than the complexity $O(DN^2)$ of t-SNE.
 On the other hand, BIC-based score can be used only for t-SNE but not other DR methods.
 It is designed as a modified cost function of t-SNE with a regularization term to penalize the too large perplexities.
 
