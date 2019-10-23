@@ -467,14 +467,14 @@ With the same number of labeled instances or same number of constraints, the sco
 Bayesian Optimization approach fits well in this situation since it can learn from noisy observation.
 The underlying predictive model of BayOpt framework is a Gaussian Process model.
 In the context of our work, GP model bases on the assumption stating that the similar input hyperparameters give similar embeddings and thus similar output score values.
-Practically we found that this assumption is true for all three selected DR methods and all experimented datasets.
-The proposed $f_{score}$ has well captured the small progressive change in the embeddings w.r.t. the change of the hyperparameters (See the curves in Fig.~\ref{fig:score:stability:COIL20} and the contour plot in Fig.~\ref{fig:bo:umap:COIL20:fscore}).
+Practically we found that this assumption is true for all three selected DR methods and all experimented datasets. (See the curves in Fig.~\ref{fig:score:stability:COIL20} and the contour plots in Fig.~\ref{fig:bo:umap:COIL20}).
+The proposed $f_{score}$ has well captured the small progressive change in the embeddings w.r.t. the change of the hyperparameters.
 When using $f_{score}$ as a target function of BayOpt framework, the GP model can learn from a limited number of evaluation to make prediction for all unobserved combination of hyperparameters.
 In our problem, there are three reason for which the prediction converges quickly to the global optimum (after 15 iterations for tuning t-SNE's perplexity and 40 iterations for tuning UMAP's two hyperparameters).
 (1) The proposed score function is well-formed and very simple to find its maximum.
 (2) The parameter space of BayOpt in our problem is small (in comparing with the parameter space for tuning a deep neural network).
-(3) The hyperparameters are sampled in log-scale in order to focus on the small values (that is equivalent to sample from a uniform distribution in logarithmic domain, and is easy to implement).
-Moreover, the internal prediction of BayOpt is also visible and explainable event for the non-technical users as shown in the Appendix~\ref{app:bo}.
+(3) Exploitation strategy used in BayOpt's Expected Improvement acquisition function, combining with the parameters sampled in log-scale helps us quickly discover the good range of parameters and eliminate the range of too small or too large values. (See the density of evaluated points in Fig~\ref{fig:tsne:bo:all} and Fig~\ref{fig:bo:umap:COIL20:prediction}).
+Moreover, the internal prediction of BayOpt is also visible and explainable event for the non-technical users as shown in Appendix~\ref{app:bo}.
 We can run BayOpt iteratively to investigate why a hyperparameter is chosen or to directly guide the optimization process, i.e., the user can specify the parameter to evaluate and the GP model will update itself to learn from both evaluated and new probed observation.
 
 \subsubsection*{The proposed constraint preserving score is a flexible function.}
@@ -486,24 +486,23 @@ They are the adapted version based on the idea of \emph{contrastive loss}~\cite[
 % $\mathbb{E}_{y, y_+, y_-} \Big[ -\log \Big( \frac{exp(y^T y_+)}{exp(y^T y_+) + exp(y^T y_-)} \Big) \Big]$
 % $\mathbb{E}_{y, y_+, y_-} \Big[ max(0, ||y-y_+||^2 - ||y-y_-||^2  \Big]$
 
-\subsubsection*{$f_{score}$ is a general quality measurement score with an efficient computation.}
-The state of the art rank-based $AUC_{log}RNX$ can be used to measure the quality of any DR methods.
-It measures how the neighborhood information in HD is preserved in LD and thus must access to both HD data and the embedding.
-In practice, it works well for the DR methods based on stochastic neighbors embedding family like t-SNE, but not for UMAP with different values of \emph{min\_dist}.
-Moreover it can not be applied for large scale dataset since it has to calculate all the sets of k-nearest neighbors in HD for all values possible of $k$ from 2 to N.
-It has thus a high complexity of $O(DN^2logN)$ ($D$ is the dimension of the original data, often be large for image data and should be considered, $N$ is the number of data points in a dataset), which is higher than the complexity $O(DN^2)$ of t-SNE.
-On the other hand, BIC-based score can be used only for t-SNE but not other DR methods.
-It is designed as a modified cost function of t-SNE with a regularization term to penalize the too large perplexities and is very easy to compute.
+\subsubsection*{$f_{score}$ requires an extra amount of labeled data but the score computation is simple and efficient.}
+In practice, dozen labels for each class is adequate that gives us a reliable score function which works well with different DR methods.
 $f_{score}$ has a complexity of $O(N^2)$ since it only requires access to the embedding typically in 2 or 3 dimensional space.
 The summation over all input pairwise constraints is trivial and efficiently vectorized.
-
+In contrast, the state of the art rank-based $AUC_{log}RNX$ works well only for the DR methods based on stochastic neighbors embedding family like t-SNE, but not for UMAP with different values of \emph{min\_dist} in practice.
+It measures how the neighborhood information in HD is preserved in LD and thus must access to both HD data and the embedding.
+It has a high complexity of $O(DN^2logN)$ ($D$ is the dimension of the original data, often be large for image data, $N$ is the number of data points in a dataset) and may not be applied for large scale dataset.
+BIC-based score, despite of its simplicity, can be used only for t-SNE but not other DR methods.
+It is designed as a modified cost function of t-SNE with a regularization term to penalize the too large perplexities.
+The proposed constraint preserving score is simpler than $AUC_{log}RNX$, well adapted with different DR methods and prove its efficiency through the task of hyperparameter tuning with wide variety of real world datasets.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Future Work}
+The principle contribution of this work is to propose a flexible constraint preserving score to quantitative measure the quality of any DR methods.
+This score is used in a Bayesian Optimization framework to find the best visualization of t-SNE, LargeVis and UMAP.
 
-The principle contribution of this work is to propose a flexible constraint preserving score which is independent to DR methods.
-This score is integrated into Bayesian Optimization framework to find best hyperparameters of a visualization method.
 
 \par (1) Repeat the problem of hyperparameter tuning for DR methods and our solution:
 
