@@ -1,10 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Experimental Setups}
+\section{Experimental Setups}\label{sec:xp:setup}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Datasets}
+\subsection{Datasets}\label{sec:xp:data}
 
 Six diverse datasets (of grayscale and color images, text and gene expressions) are used to show the application of our method to the real world dataset. (See Table.~\ref{tbl:dataset} for some samples of each dataset.)
 
@@ -67,7 +67,7 @@ Dataset name & Samples & Description \\
 \end{table*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Constraint Generation}
+\subsection{Constraint Generation}\label{sec:xp:constraint}
 
 The input for our proposed constraint preserving scores is ensemble of constraints in form of similar links and dissimilar links.
 However, it is hard to control the quality of the constraints.
@@ -94,7 +94,7 @@ We will show in the next section the experimental setup for the proof of concept
 Indeed, with 10 labeled points for each of 10 classes of the DIGITS dataset for example, they are around 5.6\% of total labels but can generate 450 similar links and 4500 dissimilar links.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Proof of Concept}
+\subsection{Proof of Concept}\label{sec:xp:proof}
 We design the experiments to answer the research questions concerning to the stability (Section~\ref{sec:result:stability}) and flexibility (Section~\ref{sec:result:flexibility}) of the proposed score and the application of BayOpt to $f_{score}$ (Section~\ref{sec:result:bo}).
 As a proof of concept, we create a grid of hyperparameters for t-SNE, LargeVis and UMAP, and then calculate $f_{score}$ for each embedding corresponding to each combination.
 The hyperparameters are sampled in natural logarithmic scale (log-scale) since we want to focus on the values which are not too large.
@@ -203,7 +203,7 @@ $f_{score}$ which is flexible by design, can find the best visualization w.r.t. 
 This task can not be archived by $AUC_{log}RNX$ or BIC-based score.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{BayOpt for Tuning One Parameter of t-SNE}
+\subsection{BayOpt for Tuning One Parameter of t-SNE}\label{sec:result:bo:tsne}
 \begin{figure}[]%[pos=h]
     \begin{subfigure}[b]{.46\linewidth}
         \centering
@@ -345,7 +345,7 @@ As suggested by different scores, we can easily discover different region in the
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{BayOpt for Tuning Two Parameters of UMAP}
+\subsection{BayOpt for Tuning Two Parameters of UMAP}\label{sec:result:bo:umap}
 UMAP has not only a solid theoretically foundations in manifold learning but also is very practical with a well documented guide on its hyperparameters \cite{mcinnes2018umap-software}.
 The first hyperparameter \emph{n\_neighbors} plays the same role as perplexity for t-SNE and LargeVis, which controls how to reveal local versus global structures in the data.
 \emph{n\_neighbors} affects the construction of the k-neighbor graph.
@@ -361,28 +361,31 @@ As a proof of concept, we evaluate $f_{score}$ and $AUC_{log}RNX$ score for all 
     \begin{subfigure}[b]{.78\linewidth}
         \includegraphics[width=\textwidth]{COIL20_umap_auc_rnx}
         \caption{$AUC_{log}RNX$ score.}
+        \label{fig:bo:umap:COIL20:rnx}
     \end{subfigure}
     ~
     \begin{subfigure}[b]{.78\linewidth}
         \includegraphics[width=\textwidth]{COIL20_umap_qij_score}
         \caption{$f_{score}$}
+        \label{fig:bo:umap:COIL20:fscore}
     \end{subfigure}
     ~
     \begin{subfigure}[b]{\linewidth}
         \centering
         \includegraphics[width=\textwidth]{COIL20_umap_predicted_score}
         \caption{BayOpt predicted score}
+        \label{fig:bo:umap:COIL20:prediction}
     \end{subfigure}
     ~
     \caption{BayOpt for tuning two hyperparameter of UMAP for \emph{COIL20} dataset.}
     \label{fig:bo:umap:COIL20}
 \end{figure}
 
-Fig.~\ref{fig:bo:umap:COIL20}(a, b) show $AUC_{log}RNX$ and constraints scores of every combination of hyperparameters on the sample grid for the \emph{COIl20} dataset.
+Fig.~\ref{fig:bo:umap:COIL20:rnx} and Fig.~\ref{fig:bo:umap:COIL20:fscore} show $AUC_{log}RNX$ and constraints scores of every combination of hyperparameters on the sample grid for the \emph{COIl20} dataset.
 The \emph{COIL20} dataset contained only 20 objects but under different rotations, which gives a very good example for the trade-off of how the local versus global structures are preserved in the visualization. (Some sample visualizations are in Fig.~\ref{fig:umap:meta:COIL20}).
-$AUC_{log}RNX$ can not investigate the relevant of the two hyperparameters, as indicated by the homogeneous zone on the left and on top of Fig.~\ref{fig:bo:umap:COIL20}(a).
+$AUC_{log}RNX$ can not investigate the relevant of the two hyperparameters, as indicated by the homogeneous zone on the left and on top of Fig.~\ref{fig:bo:umap:COIL20:rnx}.
 Indeed, when \emph{n\_neighbors} is small (between 3 and 8), \emph{min\_dist} does not have strong affect. And when \emph{min\_dist} is large enough (larger than 0.1), \emph{n\_neighbors} does not have strong affect either.
-In contrast, it is clear that $f_{score}$ in Fig.~\ref{fig:bo:umap:COIL20}(b) can identify a small, reasonable zone of the good hyperparameters.
+In contrast, it is clear that $f_{score}$ in Fig.~\ref{fig:bo:umap:COIL20:fscore} can identify a small, reasonable zone of the good hyperparameters.
 
 \begin{figure*}
     \centering
@@ -398,7 +401,7 @@ In contrast, it is clear that $f_{score}$ in Fig.~\ref{fig:bo:umap:COIL20}(b) ca
     \label{fig:umap:meta:COIL20}
 \end{figure*}
 
-The predicted best hyperparameter combination is illustrated in Fig.~\ref{fig:bo:umap:COIL20}(c).
+The predicted best hyperparameter combination is illustrated in Fig.~\ref{fig:bo:umap:COIL20:prediction}.
 Under BayOpt framework, only 40 combinations are selected and evaluated to find the best \emph{n\_neighbors} = 8 and \emph{min\_dist} = 0.01 for UMAP instead of evaluating more than 1000 combination in the sample grid.
 The predicted optimal hyperparameters are close to the ground truth optimum (\emph{n\_neighbors} = 9 and \emph{min\_dist} = 0.0022) despite a very limited number of evaluation.
 
@@ -445,28 +448,39 @@ Note param found by $f_{score}$ can not be found by other methods.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion and Future Work}
+\section{Discussion}\label{sec:discussion}
 
 t-SNE, LargeVis and UMAP are widely used since they make reasonable visualizations in which data points in the same class are placed close together.
 In this way, the neighborhood information is preserved and the local structure of the data is highlighted.
 However, as pointed out in the article ``How to use t-sne effectively''~\cite{wattenberg2016use}, \emph{the distance between clusters in t-SNE embedding might not mean anything}.
 That means in t-SNE embeddings, sometimes the very related or similar groups are placed far apart while unrelated or dissimilar groups are placed close together.
-The reason is that, t-SNE can not to preserve the distance in the data and it also does not guarantee to preserve much global structure either.
-As shown as in our experiments, the desired structure may exist in the whole solution space but the deterministic scores like $AUC_{log}RNX$ or BIC-based score can not reveal.
+The reason is that, t-SNE can not preserve the distance in the data and it also does not guarantee to preserve much global structure either.
+As shown as in our experiments, the desired structure may exist in the solution space but the deterministic scores like $AUC_{log}RNX$ or BIC-based score can not reveal.
 In contrast, to issue the problem of preserving global structure, UMAP introduces \emph{min\_dist} hyperparameter to control how tightly the connected components appear in the visualization.
 Small \emph{min\_dist} value can make the small concentrated groups in the visualization well isolated.
 But this hyperparameter should be jointly tuned with \emph{n\_neighbors} under a reliable score to ensure a good visualization output.
-We thus not only need a reliable quality measurement score to tune the hyperparameters but also need a flexible score which can reveal the user's desired structure.
+We thus not only need a reliable method to tune the hyperparameters but also need a flexible score which can reveal the user's desired structure.
+
+\subsubsection*{Bayesian method is a good choice for hyperparameter tuning problem.}
+The proposed $f_{score}$ has an advantage in its flexibility but the score value is not deterministic.
+With the same number of labeled instances or same number of constraints, the score may vary w.r.t. different set of constraint pairs.
+Bayesian Optimization approach fits well in this situation since it can learn from noisy observation.
+The underlying predictive model of BayOpt framework is a Gaussian Process model.
+In the context of our work, GP model bases on the assumption stating that the similar input hyperparameters give similar embeddings and thus similar output score values.
+Practically we found that this assumption is true for all three selected DR methods and all experimented datasets.
+The proposed $f_{score}$ has well captured the small progressive change in the embeddings w.r.t. the change of the hyperparameters (See the curves in Fig.~\ref{fig:score:stability:COIL20} and the contour plot in Fig.~\ref{fig:bo:umap:COIL20:fscore}).
+When using $f_{score}$ as a target function of BayOpt framework, the GP model can learn from a limited number of evaluation to make prediction for all unobserved combination of hyperparameters.
+In our problem, there are three reason for which the prediction converges quickly to the global optimum (after 15 iterations for tuning t-SNE's perplexity and 40 iterations for tuning UMAP's two hyperparameters).
+(1) The proposed score function is well-formed and very simple to find its maximum.
+(2) The parameter space of BayOpt in our problem is small (in comparing with the parameter space for tuning a deep neural network).
+(3) The hyperparameters are sampled in log-scale in order to focus on the small values (that is equivalent to sample from a uniform distribution in logarithmic domain, and is easy to implement).
+Moreover, the internal prediction of BayOpt is also visible and explainable event for the non-technical users as shown in the Appendix~\ref{app:bo}.
+We can run BayOpt iteratively to investigate why a hyperparameter is chosen or to directly guide the optimization process, i.e., the user can specify the parameter to evaluate and the GP model will update itself to learn from both evaluated and new probed observation.
 
 \subsubsection*{The proposed constraint preserving score is a flexible function.}
 Unlike $AUC_{log}RNX$ or BIC-based scores which do not depend on the external input data,
 $f_{score}$ is a function of its given ensemble of similar-link constraints $\mathcal{S}$ and dissimilar-link constraints $\mathcal{D}$.
 
-
-\par
-Discuss the variance of the proposed score (w.r.t to different set of constraints, different number of constraints).
-Say, the constraint-based score is a stochastic function.
-Say, how BayOpt can take into account the uncertainty (the variance of the score) to estimate the maximum of this stochastic function.
 
 + works well
 + change input constraint
@@ -478,53 +492,21 @@ t-SNE can not preserve the within-cluster distances and between-clusters distanc
 [TODO: Add reproduced figures].
 The $q_{ij}$-based score can help to understand the defective of the visualization.
 
-
 \subsubsection*{$f_{score}$ is a general quality measurement score with an efficient computation.}
 The state of the art rank-based $AUC_{log}RNX$ can be used to measure the quality of any DR methods.
 It measures how the neighborhood information in HD is preserved in LD and thus must access to both HD data and the embedding.
 In practice, it works well for the DR methods based on stochastic neighbors embedding family like t-SNE, but not for UMAP with different values of \emph{min\_dist}.
-Moreover it can not scale for large dataset since it has to calculate all the sets of k-nearest neighbors in HD for all values possible of $k$ from 2 to N.
-It has thus a high complexity of $O(DN^2logN)$ ($D$ is the dimension of the original data, often be large for image data, $N$ is the number of data points in a dataset), which is higher than the complexity $O(DN^2)$ of t-SNE.
+Moreover it can not be applied for large scale dataset since it has to calculate all the sets of k-nearest neighbors in HD for all values possible of $k$ from 2 to N.
+It has thus a high complexity of $O(DN^2logN)$ ($D$ is the dimension of the original data, often be large for image data and should be considered, $N$ is the number of data points in a dataset), which is higher than the complexity $O(DN^2)$ of t-SNE.
 On the other hand, BIC-based score can be used only for t-SNE but not other DR methods.
-It is designed as a modified cost function of t-SNE with a regularization term to penalize the too large perplexities.
-
-
-
-\subsubsection*{The constraint generation and the visualization quality can be evaluated by user.}
-+ Auto or user
-\par
-Easily generate pairwise constraints from labels.
-  Only need small amount of labeled points for each class to generate hundreds of constraints.
-  The proposed method only need 200 constraints to work well.
-  [TODO: Test with smaller number of constraints to see if it works. 200 constraints seem too much].
-\par
-Can replace the auto-generated constraints by the manual constraints of the real user.
-
-(a) User experiment:
-
-+ Integrate the user's feedback in two stages of our workflow.
-The users can select the pairwise constraints or label some points (used to generate the constraints) to build the score.
-They can also manually select the next hyperparameters to evaluate in a customized interactive BayOpt framework.
-
-+ Take the preference of the users on the presented visualizations to evaluate the quality of the visualization. We search for if the best visualization selected by the user corresponds to the result of our method.
-
-
-\subsubsection*{Bayesian method is a good choice for hyperparameter tuning problem.}
-
-\par
-The user can interact directly in the loop of Bayesian Optimization method to select the next hyperparameter to discover.
-
-\par
-Both the constraint-based score and the BayOpt's internal steps are explainable even for the non-technical users.
-
-(b) Integrate directly the pairwise constraints into the optimization process of BayOpt.
-BayOpt is now used as a generic toolbox to find the extreme of a blackbox costly objective function.
-Our idea is to use the pairwise constraint to modify the kernel in the covariance function of Gaussian Process model, which is the core element of BayOpt.
+It is designed as a modified cost function of t-SNE with a regularization term to penalize the too large perplexities and is very easy to compute.
+$f_{score}$ has a complexity of $O(N^2)$ since it only requires access to the embedding typically in 2 or 3 dimensional space.
+The summation over all input pairwise constraints is trivial and efficiently vectorized.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion}
+\section{Conclusion and Future Work}
 
 The principle contribution of this work is to propose a flexible constraint preserving score which is independent to DR methods.
 This score is integrated into Bayesian Optimization framework to find best hyperparameters of a visualization method.
@@ -552,3 +534,18 @@ The hyperparameters of t-SNE and UMAP make these methods difficult to use correc
 These methods can produce different visualizations and reveal different hidden structures in the data.
 To evaluate the embedding quality of such flexible methods, we need a flexible score.
 The state of the art $AUC_{log}RNX$ metric or the BIC-based score has no flexibility to capture different visualization results.
+
+Future work:
+
+(a) User experiment:
+\subsubsection*{The constraint generation can be guided by the users and the visualization quality can be evaluated by them.}
+Since the proposed constraint score proved to be stable w.r.t the number of labeled instances,
+we can use the user-defined labeled points to generate the pairwise constraints.
+As demonstrated with the labeled points of three different groups characterized by UMI count in the \emph{NEURAL\_1K} dataset, the users can define their need about the structure they look for.
+A potential future work is to let the users evaluate qualitatively the quality of the visualization and their satisfaction.
+
++ Integrate the user's feedback in two stages of our workflow.
+The users can select the pairwise constraints or label some points (used to generate the constraints) to build the score.
+They can also manually select the next hyperparameters to evaluate in a customized interactive BayOpt framework.
+
++ Take the preference of the users on the presented visualizations to evaluate the quality of the visualization. We search for if the best visualization selected by the user corresponds to the result of our method.
