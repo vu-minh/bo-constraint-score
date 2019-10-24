@@ -305,11 +305,11 @@ Instead of evaluating the score functions for all values of perplexity, BayOpt f
 % hard-coded position of figure for t-SNE-{Metamaps and Visualizations}
 \begin{figure*}[]%
     \centering
-    \begin{subfigure}[b]{.95\linewidth}
+    \begin{subfigure}[b]{\linewidth}
         \includegraphics[width=\linewidth]{NEURON_1K_tsne_metamap}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.95\linewidth}
+    \begin{subfigure}[b]{\linewidth}
         \includegraphics[width=\linewidth]{NEURON_1K_tsne_show}
     \end{subfigure}
     \caption{Metamap and sample visualizations for the selected parameters for \emph{NEURON\_1K} dataset.}
@@ -340,11 +340,11 @@ For the real world \emph{NEURON\_1K} dataset, three scores discover different re
 In Appendix~\ref{app:tsne:meta}, an example where $f_{score}$ highly agrees with BIC-based score for \emph{DIGITS} dataset is shown in Fig.~\ref{fig:app:tsne:meta:DIGITS}
 and an example where it agrees with both $AUC_{log}RNX$ and BIC-based score for \emph{FASHION\_1K} datasets is shown in Fig.~\ref{fig:app:tsne:meta:FASHION1K}.
 
-The sample visualizations in Fig.~\ref{fig:tsne:meta:NEURON1K} served for a qualitative evaluation of the best visualization found by different score.
-They are also ranked quantitatively/objectively by its score values as: very preferred ($\Uparrow\Uparrow$), preferred ($\Uparrow$), good enough ($[]$), not preferred ($\Downarrow$) and unfavorable ($\Downarrow\Downarrow$).
-The good visualization predicted by BayOpt (whose the tuned hyperparameter in the best predicted range) is denoted by star symbol ($\star$).
-As indicated by Wattenberg et. al.~\cite{wattenberg2016use}, we may need more than one plot to understand the hidden pattern in the data.
-As suggested by different scores, we can easily discover different region in the solution space and thus discover different structures in the data for which one score can not reveal them all.
+The sample visualizations in Fig.~\ref{fig:tsne:meta:NEURON1K} served for a qualitative evaluation of the best visualizations found by different scores.
+They are also ranked objectively by its score values as: very preferred ($\Uparrow\Uparrow$), preferred ($\Uparrow$), good enough ($[]$), not preferred ($\Downarrow$) and unfavorable ($\Downarrow\Downarrow$).
+The good visualization predicted by BayOpt is denoted by a star symbol ($\star$).
+As indicated by Wattenberg et. al.~\cite{wattenberg2016use}, we may need more than one plot to understand the hidden patterns in the data.
+As suggested by different scores, we can easily discover different regions in the solution space and thus discover different structures in the data for which one score can not reveal them all.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -385,37 +385,39 @@ As a proof of concept, we evaluate $f_{score}$ and $AUC_{log}RNX$ score for all 
     \label{fig:bo:umap:COIL20}
 \end{figure}
 
-Fig.~\ref{fig:bo:umap:COIL20:rnx} and Fig.~\ref{fig:bo:umap:COIL20:fscore} show $AUC_{log}RNX$ and constraints scores of every combination of hyperparameters on the sample grid for \emph{COIl20} dataset.
-This dataset contained only 20 objects but under different rotations, which gives a very good example for the trade-off of how the local versus global structures are preserved in the visualization. (Some sample visualizations are in Fig.~\ref{fig:umap:meta:COIL20}).
-$AUC_{log}RNX$ can not investigate the relevant of the two hyperparameters, as indicated by the homogeneous zone on the left and on top of Fig.~\ref{fig:bo:umap:COIL20:rnx}.
+Fig.~\ref{fig:bo:umap:COIL20:rnx} and Fig.~\ref{fig:bo:umap:COIL20:fscore} show $AUC_{log}RNX$ and $f_{score}$ of every combination of hyperparameters on the sample grid for \emph{COIL20} dataset.
+This dataset contained only 20 objects but under different rotations that gives a very good example for the trade-off of how the local versus global structures are preserved in the visualization.
+(Some sample visualizations are shown in Fig.~\ref{fig:umap:meta:COIL20}.)
+$AUC_{log}RNX$ can not investigate the relevant of the two hyperparameters, as indicated by the homogeneous zones on the left and on top of Fig.~\ref{fig:bo:umap:COIL20:rnx}.
 Indeed, when \emph{n\_neighbors} is small (between 3 and 8), \emph{min\_dist} does not have strong affect. And when \emph{min\_dist} is large enough (larger than 0.1), \emph{n\_neighbors} does not have strong affect either.
 In contrast, it is clear that $f_{score}$ in Fig.~\ref{fig:bo:umap:COIL20:fscore} can identify a small, reasonable zone of good combinations, which make the hyperparameter tuning task easier and more reliable.
 
-\begin{figure*}
+The predicted best hyperparameter combination is illustrated in Fig.~\ref{fig:bo:umap:COIL20:prediction}.
+Under BayOpt framework, only 40 combinations are selected and evaluated to find the best \emph{n\_neighbors} = 8 and \emph{min\_dist} = 0.01 instead of evaluating thousands of combinations in the sample grid.
+The predicted optimal hyperparameters are close to the ground truth optimum (\emph{n\_neighbors} = 9 and \emph{min\_dist} = 0.0022) despite a very limited number of evaluations.
+
+\begin{figure*}[ht!]
     \centering
-    \begin{subfigure}[b]{.95\linewidth}
+    \begin{subfigure}[b]{\linewidth}
         \centering
         \includegraphics[width=\linewidth]{COIL20_umap_metamap}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.95\linewidth}
+    \begin{subfigure}[b]{\linewidth}
         \includegraphics[width=\linewidth]{COIL20_umap_show}
     \end{subfigure}
     \caption{Metamaps and sample visualizations with selected hyperparameters for \emph{COIL20} dataset.}
     \label{fig:umap:meta:COIL20}
 \end{figure*}
 
-The predicted best hyperparameter combination is illustrated in Fig.~\ref{fig:bo:umap:COIL20:prediction}.
-Under BayOpt framework, only 40 combinations are selected and evaluated to find the best \emph{n\_neighbors} = 8 and \emph{min\_dist} = 0.01 for UMAP instead of evaluating thousands of combinations in the sample grid.
-The predicted optimal hyperparameters are close to the ground truth optimum (\emph{n\_neighbors} = 9 and \emph{min\_dist} = 0.0022) despite a very limited number of evaluation.
-
-The metamap of the solution space and several representative visualizations corresponding to different scenario are shown Fig.~\ref{fig:umap:meta:COIL20}.
-The first visualization, a best predicted combination according to $f_{score}$ found by BayOpt, reveals well both local and global structure which are represented by the isolated and concentrated small groups.
-The next two visualizations are considered to be good by $AUC_{log}RNX$ score but not by $f_{score}$.
+The metamap of the solution space and several representative visualizations corresponding to different scenarios are shown in Fig.~\ref{fig:umap:meta:COIL20}.
+The first visualization presents the best predicted combination according to $f_{score}$.
+It can reveal successfully both local and global structure which are represented by the isolated and concentrated small groups.
+The next two visualizations are considered to be good by $AUC_{log}RNX$ but not by $f_{score}$.
 In the second one, there are several overlapping groups since the points in same group are not tight close together.
-In contrast, the third one with over-tight groups which  both local and global structure.
+In contrast, the third one with over-tightened groups that fails to reveal both local and global structure.
 The last one is an counter-intuitive example, which is discouraged by both score.
-We can easily identify in the metamap the region of the unfavourable visualization which have too large \emph{n\_neighbors} and/or too large \emph{min\_dist}.
+We can easily identify in the metamap the region of the unfavourable visualizations which have too large \emph{n\_neighbors} and/or too large \emph{min\_dist}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -431,25 +433,25 @@ Naturally, the constraints generated from the class labels reflect the class-rel
 
 Demo score's flexibility for \emph{FASH\_MOBI}(Fig.~\ref{fig:flex:fashionmobilenet}), \emph{5NEWS} (Fig.~\ref{fig:flex:5news}) and \emph{NEURON\_1K} (Fig.~\ref{fig:flex:neuron}).
 
-Note param found by $f_{score}$ can not be found by other methods.
+Note: param found by $f_{score}$ can not be found by other methods.
 
 \begin{figure*}%[pos=h]
     \centering
-    \includegraphics[width=.95\linewidth]{{FASHION_MOBILENET_score_flexibility}.png}
+    \includegraphics[width=\linewidth]{{FASHION_MOBILENET_score_flexibility}}
     \caption{Flexibility of $f_{score}$ for \emph{FASH\_MOBI} dataset}
     \label{fig:flex:fashionmobilenet}
 \end{figure*}
 
 \begin{figure*}%[pos=h]
     \centering
-    \includegraphics[width=.95\linewidth]{{20NEWS5_score_flexibility}.png}
+    \includegraphics[width=\linewidth]{{20NEWS5_score_flexibility}}
     \caption{Flexibility of $f_{score}$ for \emph{5NEWS} dataset}
     \label{fig:flex:5news}
 \end{figure*}
 
 \begin{figure*}%[pos=h]
     \centering
-    \includegraphics[width=.95\linewidth]{{NEURON_1K_score_flexibility}.png}
+    \includegraphics[width=\linewidth]{{NEURON_1K_score_flexibility}}
     \caption{Flexibility of $f_{score}$ for \emph{NEURON\_1K} dataset}
     \label{fig:flex:neuron}
 \end{figure*}
