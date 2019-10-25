@@ -48,7 +48,7 @@ Here are the mathematical formulas for the five selected metrics.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Stability of $f_{score}$}
+\section{Stability of $f_{score}$}\label{app:score:stability}
 
 Stability of $f_{score}$ for all 6 datasets with t-SNE embeddings (Fig.~\ref{fig:score:umap:stability:annex}) and UMAP embeddings (Fig.~\ref{fig:score:umap:stability:annex})
 
@@ -129,20 +129,21 @@ Stability of $f_{score}$ for all 6 datasets with t-SNE embeddings (Fig.~\ref{fig
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Metamap and samples for t-SNE's embeddings with \emph{DIGITS} and \emph{FASHION\_1K} datasets}
+\section{Metamap and samples for t-SNE's embeddings with \emph{DIGITS} and \emph{FASHION\_1K} datasets}\label{app:tsne:meta}
 
-Metamap and sample visualizations for \emph{DIGITS} (Fig.~\ref{fig:tsne:meta:DIGITS}).
 \begin{figure*}%[pos=h]
     \centering
     \begin{subfigure}[b]{\textwidth}
-        \includegraphics[width=\textwidth]{{DIGITS_tsne_metamap}.png}
+        \includegraphics[width=\textwidth]{DIGITS_tsne_metamap}
+        \caption{Metamap and sample visualizations for the selected parameters for \emph{DIGITS} dataset.}
+    \label{fig:app:tsne:meta:DIGITS}
     \end{subfigure}
     ~
     \begin{subfigure}[b]{\textwidth}
-        \includegraphics[width=\textwidth]{DIGITS_tsne_show}
+        \includegraphics[width=\textwidth]{FASHION1000_tsne_show}
+        \caption{Metamap and sample visualizations for the selected parameters for \emph{FASHION\_1K} dataset.}
+    \label{fig:app:tsne:meta:FASHION1K}
     \end{subfigure}
-    \caption{Metamap and sample visualizations for the selected parameters for \emph{DIGITS} dataset.}
-    \label{fig:tsne:meta:DIGITS}
 \end{figure*}
 
 For the \emph{FASHION\_1K} dataset, the good perplexities found by $f_{score}$ agree with both $AUC_{log}RNX$ and BIC-based score.
@@ -152,7 +153,7 @@ and an counter-intuitive example for the bad region in the solution space are sh
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Compare $f_{score}$ with $AUC_{log}RNX$ (default min\_dist 0.1)}
+\section{Compare $f_{score}$ with $AUC_{log}RNX$ (default min\_dist 0.1)}\label{app:score:umap:compare}
 See Fig.~\ref{fig:umap:compare}.
 
 \begin{figure*}%[pos=h]
@@ -233,7 +234,7 @@ BayOpt for UMAP with {FASHION\_1K} datasets\ref{fig:bo:umap:FASHION1K} and metat
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Constraint-based Score as Target Function in Bayesian Optimization Approach}
+\section{Constraint-based Score as Target Function in Bayesian Optimization Approach}\label{app:bo:explain}
 
 + Explain the internal step in BayOpt.
 Can make use some figures Fig.~\ref{fig:bayopt5}, Fig.\ref{fig:bayopt10}.

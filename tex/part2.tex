@@ -4,29 +4,29 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Datasets}\label{sec:xp:data}
+\subsection{Experimental Datasets}\label{sec:xp:data}
 
-Six diverse datasets (of grayscale and color images, text and gene expressions) are used to demonstrate the application of our method approach. (See Table.~\ref{tbl:dataset} for some samples of each dataset.)
+Six datasets of gray-scale and color images, text and gene expressions are used to demonstrate the application of our method (see Table~\ref{tbl:dataset} for examples of instances for each dataset).
 
-\emph{DIGITS} is a subset of the optical recognition of handwritten digits dataset of 8x8 grayscale images \cite{kaynak1995methods}.
-\emph{COIL20} \cite{nene1996} is a dataset of 32x32 grayscale images of 20 rotated objects.
-\emph{FASHION\_1K} contains 1000 grayscale images of size 28x28, sampled from Fashion-MNIST clothing dataset~\cite{xiao2017/online}.
-The grayscale images from three above datasets are normalized and used directly in the DR methods.
+A first baseline dataset, \emph{DIGITS}, is a subset of the optical recognition of handwritten digits dataset of 8x8 gray-scale images \cite{kaynak1995methods}.
+The second baseline dataset, \emph{COIL20}, is a dataset of 32x32 gray-scale images of 20 rotated objects  \cite{nene1996}.
+The third baseline dataset, \emph{FASHION\_1K}, contains 1000 gray-scale images of size 28x28, sampled from Fashion-MNIST clothing dataset~\cite{xiao2017/online}.
+The gray-scale images from the three above datasets are normalized and used directly in the DR methods.
 
-\emph{FASHION\_MOBILENET} dataset (\emph{FASH\_MOBI} for short) contains samples of seven most numerous classes from a subset of the Fashion Product images dataset~\cite{fashionproduct}.
+Our first real-world image dataset, \emph{FASHION\_MOBILENET} dataset (\emph{FASH\_MOBI} for short), contains samples of the seven most numerous classes from the fashion product images dataset~\cite{fashionproduct}.
 The MobileNet\cite{howard2017mobilenets} with pre-trained weights from ImageNet is used for feature extraction, a transfer learning technique that uses the representation of the learned network (trained on a large-scale image classification task) to extract meaningful features for new samples.
-The last fully connected layer of the network is replaced by a global average pooling layer\cite[Sec.3.2]{lin2013network} to obtain the flattened output vector of 1280 dimensions.
+The last fully connected layer of the network is replaced by a global average pooling layer \cite{lin2013network} to obtain the flattened output vector of 1280 dimensions.
 To speed up DR methods for visualization task, PCA is then applied to take only 75 features.
 
-\emph{5NEWS} dataset contains the text of 5 groups selected from the 20 Newsgroups dataset which are converted to a matrix of token counts via Term Frequency Inverse Document Frequency (TF-IDF) method.
-The count vectors are then fed into Latent Dirichlet Allocation (LDA)~\cite{blei2003latent} model to extract 15 hidden topics, which are 15 features used for DR methods.
+The second real-word dataset is a textual dataset. The \emph{5NEWS} dataset contains the text of 5 groups selected from the 20 Newsgroups dataset, which are converted to a matrix of token counts via Term Frequency Inverse Document Frequency (TF-IDF) method.
+The count vectors are then fed into a Latent Dirichlet Allocation (LDA)~\cite{blei2003latent} model to extract 15 hidden topics, which are the 15 features used by the DR methods.
 
-The open \emph{NEURON\_1K} dataset~\cite{neuron1k} contains 1301 brain cells from an E18 mouse, processed and provided by 10X Genomics, a company who provides chromium single cell gene expression solution and releases several public genetic datasets.\footnote{https://www.10xgenomics.com/resources/datasets/, the datasets are licensed under the Creative Commons Attribution license.}
-The processed data have 10 PCA features and labeled in 6 classes found by a graph-based clustering method.
+Our last real-world dataset is the open \emph{NEURON\_1K} dataset~\cite{neuron1k}, which contains 1301 brain cells from an E18 mouse. These cells have been processed and provided by 10X Genomics, a company who provides chromium single cell gene expression solution and releases several public genetic datasets.\footnote{https://www.10xgenomics.com/resources/datasets/, the datasets are licensed under the Creative Commons Attribution license.}
+The processed data have 10 PCA features and 6 labels found by a graph-based clustering method.
 
 
 \begin{table*}%[width=\textwidth,cols=6,pos=h]
-\caption{Description of six selected datasets.}\label{tbl:dataset}
+\caption{Description of our six experimental datasets.}\label{tbl:dataset}
 \begin{tabular}{m{2.2cm} m{5.4cm} m{7.4cm}}
 \toprule
 Dataset name & Samples & Description \\
@@ -34,17 +34,17 @@ Dataset name & Samples & Description \\
 
 \emph{COIL20}
     & \includegraphics[width=\linewidth]{COIL20_samples}
-    & 1440 grayscale images of size 32x32, belonging to 20 classes.
+    & 1440 gray-scale images of size 32x32, belonging to 20 classes.
     The raw images of 1024 dimensions are used directly for the DR methods.\\
 
 \emph{DIGITS}
     & \includegraphics[width=\linewidth]{DIGITS_samples}
-    & 1797 grayscale images of size 8x8 of 10 digits.
+    & 1797 gray-scale images of size 8x8 of 10 digits.
     The raw images of 64 dimensions are used directly for the DR methods.\\
 
 \emph{FASHION\_1K}
     & \includegraphics[width=\linewidth]{FASHION1000_samples}
-    & 1000 grayscale images of size 28x28 of 10 classes, sampled from Fashion-MNIST dataset.
+    & 1000 gray-scale images of size 28x28 of 10 classes, sampled from Fashion-MNIST dataset.
     The raw images of 768 dimensions are used directly for the DR methods.\\
 
 \emph{FASH\_MOBI}
@@ -69,37 +69,29 @@ Dataset name & Samples & Description \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Constraint Generation}\label{sec:xp:constraint}
 
-The input for our constraint preserving scores is an ensemble of constraints in form of similar links and dissimilar links.
-However, it is hard to control the quality of the constraints when they are selected manually.
-For example, a similar link between two different data points is not expected.
-The number of constraints of each type also affects the stability of the score.
-In order to correctly evaluate the score function, we do not use the pairwise constraints directly, but use a small subset of labeled data points to generate the constraints instead.
+The input for our constraint preserving scores is an ensemble of constraints in the form of similar and dissimilar links.
+When labels are provided, they can be used to generate constraints. However, our method does not need many constraints to be stable, which means that we use a small subset of labeled instances to generate the constraints.
 
-Give a dataset of $C$ classes, for each class we take randomly $k$ labeled points.
-Suppose that the number of instances in each class is larger than $k$ ($k$ is usually very small).
-A similar link is formed by choosing a random pair of any two points from $k$ labeled points in one class.
-The number of all possible similar links is given by:
-\begin{equation}\label{equ:n-sim-link}
-n_{sim\_link} = C {k \choose 2} = \frac{1}{2} C k (k-1)
-\end{equation}
-A dissimilar link is formed by first choosing two different classes among $C$ classes (${C \choose 2}$ ways),
-then choosing a pair of two instances from these two chosen classes ($k^2$ pairs).
-The number of all possible dissimilar links is given by:
-\begin{equation}\label{equ:n-dis-link}
-n_{dis\_link} = {C \choose 2} k^2 = \frac{1}{2} C (C-1) k^2
-\end{equation}
+Given a dataset of $C$ classes, $k$ labeled instances are randomly considered for each class.
+Suppose that the number of instances in each class is larger than $k$ ($k$ is usually very small),
+a similar link is formed by choosing a random pair of instances of each class.
+This procedure leads to a number of similar links given by $|\mathcal{S}| = C {k \choose 2}$.
 
-Intuitively, the more labeled points we had, the more constraints are generated and the more stable the $f_{score}$ is.
-Indeed, with 10 labeled points for each of 10 classes of the DIGITS dataset for example, they are around 5.6\% of total labels but can generate 450 similar links and 4500 dissimilar links.
-The score calculated from such a number large of pairwise constraints is reliable.
-We will show in the next section the experimental setup for the proof of concept,
-which help prove empirically the reliability of the proposed score.
+The dissimilar links are formed by first choosing two different classes among the $C$ classes (${C \choose 2}$ ways),
+and then choosing a pair of two instances from these classes ($k^2$ pairs).
+The number of all possible dissimilar links is therefore given by $|\mathcal{D}| = {C \choose 2} k^2$.
+
+This means that the more labeled instances are considered (i.e., $k$ is larger), the more constraints are generated and the more stable the $f_{score}$ is.
+For instance, with 10 labeled points for each of the 10 classes of the DIGITS dataset, 450 similar links and 4500 dissimilar links can be generated.
+The experimental setup for proving empirically the reliability of the proposed score is presented in the next section.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Experimental Setup for Proof of Concept}\label{sec:xp:proof}
-We design the experiments to answer the research questions concerning to the stability (Section~\ref{sec:result:stability}) and flexibility (Section~\ref{sec:result:flexibility}) of the proposed score and the application of BayOpt to $f_{score}$ (Section~\ref{sec:result:bo}).
-As a proof of concept, we create a grid of hyperparameters for t-SNE, LargeVis and UMAP, and then calculate $f_{score}$ for each embedding corresponding to each combination.
-The hyperparameters are sampled in natural logarithmic scale (log-scale) since we want to focus on the values which are not too large.
+\subsection{Use of BayOpt in the Experiments}\label{sec:xp:proof}
+
+We design the experiments to prove that $f_{score}$ provides good visualizations (Section~\ref{sec:result:bo}), as well as to prove its stability (Section~\ref{sec:result:stability}) and its flexibility (Section~\ref{sec:result:flexibility}).
+
+In order to compute $f_{score}$ for each embedding corresponding to each combination, grid of hyperparameters for each of the three methods (t-SNE, LargeVis and UMAP) is used.
+The hyperparameter values are sampled in natural logarithmic scale (log-scale) since we want to focus on the values which are not too large.
 In the case of t-SNE and LargeVis, the grid is an integer vector of perplexity values from 2 to $N/3$ in log-scale, in which $N$ is the number of instances of the dataset.
 In the case of UMAP, the two dimensional grid is all combinations of its two hyperparameters.
 The first dimension is an integer vector of $n\_neighbor$ values from 2 to $N/3$ in log-scale.
@@ -123,7 +115,7 @@ This reminds us to always take into account not only the noise in the observatio
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Experimental Results}
+\section{Experimental Results}\label{sec:results}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Stability of Constraint Preserving Score}\label{sec:result:stability}
@@ -257,7 +249,7 @@ These points are selected by BayOpt iteratively, starting with five perplexities
 The score value for each perplexity $p_i$ is calculated and all the pairs $\{p_i, f_{score}(p_i)\}$ are used to train the underlying GP model of BayOpt.
 The next predicted perplexity to evaluate is the most promising value according to the GP model that can have a higher $f_{score}$.
 When the new perplexity is evaluated, BayOpt gets the new score value and update it's GP model.
-More detail and visual explanation on how BayOpt works with the proposed score function can be found in the Appendix~\ref{app:x}.
+More detail and visual explanation on how BayOpt works with the proposed score function can be found in \ref{app:bo:explain}.
 
 It should note that, BayOpt does not approximate the score function but tries to find its maximum value instead.
 Fig.~\ref{fig:tsne:bo:all} shows the best prediction at convergence state of BayOpt for all datasets after only 15 iterations.
@@ -307,11 +299,11 @@ Instead of evaluating the score functions for all values of perplexity, BayOpt f
 % hard-coded position of figure for t-SNE-{Metamaps and Visualizations}
 \begin{figure*}[]%
     \centering
-    \begin{subfigure}[b]{\linewidth}
+    \begin{subfigure}[b]{.8\linewidth}
         \includegraphics[width=\linewidth]{NEURON_1K_tsne_metamap}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{\linewidth}
+    \begin{subfigure}[b]{.8\linewidth}
         \includegraphics[width=\linewidth]{NEURON_1K_tsne_show}
     \end{subfigure}
     \caption{Metamap and sample visualizations for the selected parameters for \emph{NEURON\_1K} dataset.}
@@ -339,7 +331,7 @@ The second, third and fourth metamaps are colored by the values of $f_{score}$, 
 The embeddings with high score (superior than 96\% of maximum score) are also highlighted.
 In this way, we discover the different regions of best results according different quality scores.
 For the real world \emph{NEURON\_1K} dataset, three scores discover different regions in the solution space (visualized by the metamap), which help us observe the structure of the dataset under different aspects.
-In Appendix~\ref{app:tsne:meta}, an example where $f_{score}$ highly agrees with BIC-based score for \emph{DIGITS} dataset is shown in Fig.~\ref{fig:app:tsne:meta:DIGITS}
+In ~\ref{app:tsne:meta}, an example where $f_{score}$ highly agrees with BIC-based score for \emph{DIGITS} dataset is shown in Fig.~\ref{fig:app:tsne:meta:DIGITS}
 and an example where it agrees with both $AUC_{log}RNX$ and BIC-based score for \emph{FASHION\_1K} datasets is shown in Fig.~\ref{fig:app:tsne:meta:FASHION1K}.
 
 The sample visualizations in Fig.~\ref{fig:tsne:meta:NEURON1K} served for a qualitative evaluation of the best visualizations found by different scores.
@@ -400,12 +392,12 @@ The predicted optimal hyperparameters are close to the ground truth optimum (\em
 
 \begin{figure*}[ht!]
     \centering
-    \begin{subfigure}[b]{\linewidth}
+    \begin{subfigure}[b]{.8\linewidth}
         \centering
         \includegraphics[width=\linewidth]{COIL20_umap_metamap}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{\linewidth}
+    \begin{subfigure}[b]{.8\linewidth}
         \includegraphics[width=\linewidth]{COIL20_umap_show}
     \end{subfigure}
     \caption{Metamaps and sample visualizations with selected hyperparameters for \emph{COIL20} dataset.}
@@ -424,36 +416,61 @@ We can easily identify in the metamap the region of the unfavourable visualizati
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Flexibility of the Proposed Score}\label{sec:result:flexibility}
+In general, the visualization quality metrics presented in Sec.~\ref{subsec:qual_metrics_background} take a given embedding as an input and return a measurement result.
+E.g., $AUC_{log}RNX$ measures how well the neighborhood information is preserved and BIC-base score measures the trade-off between KL loss and the value of perplexity.
+For that reason, these scores are deterministic since the characteristic measured by them are fixed.
+It is impossible to modify the measurement criteria to evaluate the embeddings.
+In contrast, the proposed score is a function of input constraints to evaluate how these constraints are preserved.
+$f_{score}$ can measure different criteria depending on the relation encoded in the given input constraints and thus can be considered as a flexible measure.
+In the above experiments, the constraints generated from class labels reflect naturally the class-relationship between the data points.
+But if the users want to see different pattern in the data, they can specify different constraints to describe what they need.
+% These new constraints can be easily expressed as groups of several selected points to indicate that the points in same groups should be similar and the points in different groups should be dissimilar.
 
-$AUC_{log}RNX$ metric evaluates how the neighborhood information is preserved.
-The BIC-based score evaluates the trade-off between KL loss and the value of perplexity in t-SNE.
-In contrast, the $f_{score}$ evaluates how the constraints are preserved based on the external input of labeled points.
-Naturally, the constraints generated from the class labels reflect the class-relationship between the data points in the same class.
-% However, if we have another subset of \emph{`semantic'} labels
+We present concrete examples with t-SNE embedding for three real world datasets.
+The first example is for \emph{FASH\_MOBI} dataset with seven classes (sub-groups): \emph{’Bags’, ’Bottomwear’, ’Jewellery’, ’Sandal’,’Shoes’, ’Topwear’ and ’Watches’}.
+Given 10 labeled points for each class as input constraints, BayOpt finds the best perplexity of 82 for t-SNE embedding.
+As shown in the first plot in the top-left corner of Fig~\ref{fig:flexibility:FASHMOBI}, the seven classes are well detached to reveal the local structure.
+However, if we want to see a global structure in the visualization, we can consider the hierarchical categories of the groups.
+That means, we can group \emph{'Bag', 'Jewellery', 'Watches'} as \emph{'Accessories'} category, group \emph{'Sandal', 'Shoes'} into \emph{'Footware'} category and group \emph{'Topwear', 'Bottomware'} into \emph{'Apparel'} category.
+The tuned perplexity of 82 fits well for seven sub-categories but does not reveal these three \emph{master-categories} in the visualization.
+We retake the selected labeled points in seven original classes, regroup them according to the above hierarchy relation to have three group of selected points.
+The new pairwise constraints are generated and fed to $f_{score}$ function.
+The same BayOpt routine run on the new $f_{score}$ function (for 15 iterations) and give the new best perplexity of 113, which reveal better the structure of the master-categories as shown in the last in the bottom-right corner of Fig~\ref{fig:flexibility:FASHMOBI}.
 
-Demo score's flexibility for \emph{FASH\_MOBI}(Fig.~\ref{fig:flex:fashionmobilenet}), \emph{5NEWS} (Fig.~\ref{fig:flex:5news}) and \emph{NEURON\_1K} (Fig.~\ref{fig:flex:neuron}).
+The second example is for setting semantic labels for the textual \emph{5NEWS} dataset. (See~\ref{fig:flexibility:5NEWS}).
+The five original classes can be regrouped into the more general topics.
+E.g., group \emph{'rec.autos', 'rec.sport.baseball'} into a group of sportive records (\emph{'rec'}), group \emph{'sci.space', 'sci.crypt'} into a scientific news (\emph{'sci'}).
 
-Note: param found by $f_{score}$ can not be found by other methods.
+The last example is for the genetic dataset \emph{NEURON\_1K}.
+The original 1301 cells are grouped into 6 classes found by a graph-based clustering algorithm.
+These classes are characterized by the \emph{transcriptome profiles} of individual cells (presented in the RNA-sequences).
+However, an important aspect to characterize an individual cell is the count of absolute numbers of molecules - the \emph{Unique molecular identifier (UMI)}~\cite{kivioja2011counting}).
+The cells are regrouped into three new groups of having \emph{less than 6.5K molecules}, \emph{from 6.5K to 12.5K molecules} and \emph{more than 12.5K molecules}.
+Fig.~\ref{fig:flexibility:NEURON1K} illustrates the new visualization found by BayOpt with the new constraints.
+It should note that this optimal perplexity w.r.t. the labels based on \emph{UMI count} is never discovered by neither $AUC_{log}RNX$ nor BIC-based score.
 
-\begin{figure*}%[pos=h]
+\begin{figure*}[ht!]
     \centering
-    \includegraphics[width=\linewidth]{{FASHION_MOBILENET_score_flexibility}}
-    \caption{Flexibility of $f_{score}$ for \emph{FASH\_MOBI} dataset}
-    \label{fig:flex:fashionmobilenet}
-\end{figure*}
-
-\begin{figure*}%[pos=h]
-    \centering
-    \includegraphics[width=\linewidth]{{20NEWS5_score_flexibility}}
-    \caption{Flexibility of $f_{score}$ for \emph{5NEWS} dataset}
-    \label{fig:flex:5news}
-\end{figure*}
-
-\begin{figure*}%[pos=h]
-    \centering
-    \includegraphics[width=\linewidth]{{NEURON_1K_score_flexibility}}
-    \caption{Flexibility of $f_{score}$ for \emph{NEURON\_1K} dataset}
-    \label{fig:flex:neuron}
+    \begin{subfigure}[b]{.32\linewidth}
+        \includegraphics[width=\linewidth]{FASHION_MOBILENET_score_flexibility}
+        \caption{\emph{FASH\_MOBI} dataset}
+        \label{fig:flexibility:FASHMOBI}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{.32\linewidth}
+        \includegraphics[width=\linewidth]{20NEWS5_score_flexibility}
+        \caption{\emph{5NEWS} dataset}
+        \label{fig:flexibility:5NEWS}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{.32\linewidth}
+        \includegraphics[width=\linewidth]{NEURON_1K_score_flexibility}
+        \caption{\emph{NEURON\_1K} dataset}
+        \label{fig:flexibility:NEURON1K}
+    \end{subfigure}
+    ~
+    \caption{Flexibility of $f_{score}$.}
+    \label{fig:flexibility}
 \end{figure*}
 
 
@@ -472,7 +489,7 @@ Small \emph{min\_dist} value can make the small concentrated groups in the visua
 But this hyperparameter should be jointly tuned with \emph{n\_neighbors} under a reliable score to ensure a good visualization output.
 We thus not only need a reliable method to tune the hyperparameters but also need a flexible score which can reveal the user's desired structure.
 
-\subsubsection*{Bayesian method is a good choice for hyperparameter tuning problem.}
+\subsubsection*{Bayesian method works well with the proposed score for hyperparameter tuning problem.}
 The proposed $f_{score}$ has an advantage in its flexibility but the score value is not deterministic.
 With the same number of labeled points or same number of constraints, the score may vary w.r.t. different set of constraint pairs.
 Bayesian Optimization approach fits well in this situation since it can learn from noisy observation.
@@ -485,7 +502,7 @@ In our problem, there are three reason for which the prediction converges quickl
 (1) The proposed score function is well-formed and very simple to find its maximum.
 (2) The parameter space of BayOpt in our problem is small (in comparing with the parameter space for tuning a deep neural network).
 (3) Exploitation strategy used in BayOpt's Expected Improvement acquisition function, combining with the parameters sampled in log-scale helps us quickly discover the good range of parameters and eliminate the range of too small or too large values. (See the density of evaluated points in Fig~\ref{fig:tsne:bo:all} and Fig~\ref{fig:bo:umap:COIL20:prediction}).
-Moreover, the internal prediction of BayOpt is also visible and explainable event for the non-technical users as shown in Appendix~\ref{app:bo}.
+Moreover, the internal prediction of BayOpt is also visible and explainable event for the non-technical users as shown in ~\ref{app:bo:explain}.
 We can run BayOpt iteratively to investigate why a hyperparameter is chosen or to directly guide the optimization process, i.e., the user can specify the parameter to evaluate and the GP model will update itself to learn from both evaluated and new probed observation.
 
 \subsubsection*{The proposed constraint preserving score is a flexible function.}
@@ -510,7 +527,7 @@ The proposed constraint preserving score is simpler than $AUC_{log}RNX$, well ad
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion and Future Work}
+\section{Conclusion and Future Work}\label{sec:conclusion}
 The principle contribution of this work is to propose a flexible constraint preserving score to quantitative measure the quality of any DR methods.
 This score is used in a Bayesian Optimization framework to find the best visualization of t-SNE, LargeVis and UMAP.
 
@@ -553,3 +570,13 @@ The users can select the pairwise constraints or label some points (used to gene
 They can also manually select the next hyperparameters to evaluate in a customized interactive BayOpt framework.
 
 + Take the preference of the users on the presented visualizations to evaluate the quality of the visualization. We search for if the best visualization selected by the user corresponds to the result of our method.
+
+% \section{Quality metrics}\label{appendix:qual_metrics}
+
+% \section{Stability of $f_{score}$}\label{app:score:stability}
+
+% \section{Metamap and samples for t-SNE's embeddings with \emph{DIGITS} and \emph{FASHION\_1K} datasets}\ref{app:tsne:meta}
+
+% \section{Compare $f_{score}$ with $AUC_{log}RNX$ (default min\_dist 0.1)}\label{app:score:umap:compare}
+
+% \section{Constraint-based Score as Target Function in Bayesian Optimization Approach}\label{app:bo:explain}
