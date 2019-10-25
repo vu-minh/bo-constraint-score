@@ -695,25 +695,27 @@ def plot_viz_with_score_flexibility(
     plot_dir="",
     embedding_dir="",
 ):
-    label_name1, title1, best_param1, labels1 = config_label1
-    label_name2, title2, best_param2, labels2 = config_label2
+    label_name1, title1, best_param1, labels1, label_names1 = config_label1
+    label_name2, title2, best_param2, labels2, label_names2 = config_label2
 
-    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(24, 6))
+    fig, [[ax0, ax1], [ax2, ax3]] = plt.subplots(2, 2, figsize=(8, 9))
     sub_text = [
-        [f"(a1)/Best perplexity {best_param1}", f"(a2)/Best perplexity {best_param1}"],
-        [f"(b1)/Best perplexity {best_param2}", f"(b2)/Best perplexity {best_param2}"],
+        [f"Best perplexity {best_param1}", f"Best perplexity {best_param1}"],
+        [f"Best perplexity {best_param2}", f"Best perplexity {best_param2}"],
     ]
+
     for [ax_lbl1, ax_lbl2], best_param, [t1, t2] in zip(
-        [[ax0, ax1], [ax2, ax3]], [best_param1, best_param2], sub_text
+        [[ax0, ax2], [ax1, ax3]], [best_param1, best_param2], sub_text
     ):
         Z = joblib.load(f"{embedding_dir}/{int(best_param)}.z")
 
-        ax_lbl1.scatter(Z[:, 0], Z[:, 1], s=6, c=labels1, alpha=0.7, cmap="Spectral")
-        ax_lbl1.set_title(title1)
-        ax_lbl1.text(0, 0.9, t1, transform=ax_lbl1.transAxes, fontsize=16)
-        ax_lbl2.scatter(Z[:, 0], Z[:, 1], s=6, c=labels2, alpha=0.7, cmap="Paired")
-        ax_lbl2.text(0, 0.9, t2, transform=ax_lbl2.transAxes, fontsize=16)
-        ax_lbl2.set_title(title2)
+        # ax_lbl1.set_title(title1)
+        s1 = ax_lbl1.scatter(Z[:, 0], Z[:, 1], s=6, c=labels1, alpha=0.7, cmap="Spectral")
+        ax_lbl1.text(0.98, 0.02, t1, transform=ax_lbl1.transAxes, fontsize=16, ha="right")
+        
+        # ax_lbl2.set_title(title2)
+        s2 = ax_lbl2.scatter(Z[:, 0], Z[:, 1], s=6, c=labels2, alpha=0.7, cmap="Paired")
+        ax_lbl2.text(0.98, 0.02, t2, transform=ax_lbl2.transAxes, fontsize=16, ha="right")
 
     for ax in [ax0, ax1, ax2, ax3]:
         ax.axes.get_yaxis().set_visible(False)
@@ -722,20 +724,35 @@ def plot_viz_with_score_flexibility(
             ax.spines[axis].set_linewidth(0.5)
         # ax.axes.set_aspect("equal")
 
-    # ax0.text(
-    #     0,
-    #     0,
-    #     f"Best perplexity of {best_param1} using constraints from labels of cluster indices",
-    #     transform=ax0.transAxes,
-    # )
-    # ax2.text(
-    #     0,
-    #     0,
-    #     f"Best perplexity of {best_param2} using constraints from labels of UMI count",
-    #     transform=ax2.transAxes,
-    # )
+    # legend
+    if label_names1 is None:
+        label_names1 = range(len(np.unique(labels1)))
+    handles1, _ = s1.legend_elements()
+    legend1 = ax0.legend(handles1, label_names1, 
+        fancybox=True,
+        loc='upper left',
+        bbox_to_anchor=(0., 1.25),
+        borderaxespad=0.1,
+        ncol=min(4, len(label_names1)), # note to change according to dataset
+        title=title1,
+        fontsize="small"
+    )
+
+    if label_names2 is None:
+        label_names2 = range(len(np.unique(labels2)))
+    handles2, _ = s2.legend_elements()
+    legend1 = ax2.legend(handles2, label_names2, 
+        fancybox=True,
+        loc='lower left',
+        bbox_to_anchor=(0,-0.2),
+        borderaxespad=0.1,
+        ncol=min(4, len(label_names2)),
+        title=title2,
+        fontsize="small"
+    )
 
     plt.tight_layout()
+    plt.subplots_adjust(wspace=0.175, hspace=0.02)
     # plt.subplots_adjust(wspace=0.1)  # , bottom=0.1, top=0.9, left=0.05, right=0.95)
     fig.savefig(f"{plot_dir}/score_flexibility.png")
     plt.close()
@@ -827,41 +844,49 @@ if __name__ == "__main__":
             "NEURON_1K": {
                 "tsne": {
                     "label1": [
-                        "graph_based_cluster",
-                        "Points colored by graph-based cluster indices",
-                        68,
+                        "graph_based_cluster", # label name
+                        "Points colored by graph-based cluster indices", # title/description
+                        68, # best param
+                        # list labels of each point will be added
+                        # list names for each label will be added
                     ],
                     "label2": ["umi", "Points colored by UMI count", 144],
+                    "label2_correct": ["less than 6.5K", "from 6.5K to 12.5K", "more than 12.5K"]
                 }
             },
             "20NEWS5": {
                 "tsne": {
-                    "label1": ["cat", "Points colored by group categories", 130],
+                    "label1": ["cat", "Group sub-categories", 130],
                     "label2": [
                         "matcat",
-                        "Points colored by hierarchical master categories",
+                        "Semantic master-categories",
                         44,
                     ],
                 }
             },
             "FASHION_MOBILENET": {
                 "tsne": {
-                    "label1": ["class_subcat", "subcat", 82],
-                    "label2": ["class_matcat", "matcat", 113],
+                    "label1": ["class_subcat", "Group sub-categories", 82],
+                    "label2": ["class_matcat", "Hierarchical master-categories", 113],
                 }
             },
         }
         config = config_labels[dataset_name][method_name]
         config_label1 = config["label1"]
         config_label2 = config["label2"]
-        labels1, _ = dataset.load_additional_labels(
+        labels1, label_names1 = dataset.load_additional_labels(
             dataset_name, label_name=config_label1[0]
         )
-        labels2, _ = dataset.load_additional_labels(
+        labels2, label_names2 = dataset.load_additional_labels(
             dataset_name, label_name=config_label2[0]
         )
-        config_label1.append(labels1)
-        config_label2.append(labels2)
+
+        # hard-coded to fix custom labels of NEURON_1K dataset
+        if dataset_name == "NEURON_1K":
+            label_names2 = config["label2_correct"]
+
+        config_label1 += [labels1, label_names1]
+        config_label2 += [labels2, label_names2]
 
         plt.rcParams.update({"font.size": 14})
         plot_viz_with_score_flexibility(
