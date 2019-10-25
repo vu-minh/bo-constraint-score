@@ -13,6 +13,7 @@
 \usepackage{caption}
 \usepackage{subcaption} % for subfigure
 \usepackage{makecell}  % for multiline cell in table
+\usepackage[hyphens]{url} % can help show url in bibtex
 
 \usepackage{amsmath, amssymb}
 \usepackage{tabulary,booktabs}
@@ -46,6 +47,8 @@
 \appendix
 % \input{appendix}
 
+% show References section title (https://tex.stackexchange.com/questions/137371/title-references-is-missing-in-elsarticle-class)
+\section*{\refname}
 %% `Elsevier LaTeX' style
 \bibliographystyle{elsarticle-num}
 %%%%%%%%%%%%%%%%%%%%%%%
