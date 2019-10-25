@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Experiments}\label{sec:xp:setup}
+\section{Experimental Setup}\label{sec:xp:setup}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -123,7 +123,10 @@ This reminds us to always take into account not only the noise in the observatio
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Result on the Stability of $f_{score}$}\label{sec:result:stability}
+\section{Experimental Results}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Stability of Constraint Preserving Score}\label{sec:result:stability}
 
 The proposed constraint preserving score is a function of the pairwise constraints $f_{score}(\mathcal{S}, \mathcal{D})$ which are generated automatically from the input labeled points.
 The first question is that, how does $f_{score}$ vary with respect to different number of labeled points?
@@ -190,8 +193,7 @@ The results are presented in the next section.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Result of Bayesian Optimization Method for Hyperparameter Tuning with $f_{score}$}\label{sec:result:bo}
+\subsection{Application of Bayesian Optimization Method for Hyperparameter Tuning with $f_{score}$}\label{sec:result:bo}
 BayOpt is widely used for hyperparameter tuning problem when the target function is well-defined.
 BayOpt is a general framework which can work with any complex target function like $AUC_{log}RNX$ score or BIC-based score function.
 In practice, $AUC_{log}RNX$ does not always work well with UMAP's embedding, especially in the case of tuning two UMAP's hyperparameters at the same time.
@@ -204,7 +206,7 @@ $f_{score}$ which is flexible by design, can find the best visualization w.r.t. 
 This task can not be achieved neither by $AUC_{log}RNX$ nor by BIC-based score.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{BayOpt for Tuning One Parameter of t-SNE}\label{sec:result:bo:tsne}
+\subsubsection{BayOpt for Tuning One Parameter of t-SNE}\label{sec:result:bo:tsne}
 
 \begin{figure}%[pos=h]
     \begin{subfigure}[b]{.46\linewidth}
@@ -264,7 +266,7 @@ BayOpt does not only find the best hyperparameter but also indicate the region i
 This is usually the region of high perplexity values where the $f_{score}$ has large distortion.
 Instead of evaluating the score functions for all values of perplexity, BayOpt framework can intelligently choose a limited number of potential perplexities to evaluate and assures to always find a global maximum when it converges.
 
-\subsubsection*{Compare $f_{score}$, $AUC_{log}RNX$ and BIC-based score}
+% \subsubsection*{Compare $f_{score}$, $AUC_{log}RNX$ and BIC-based score}
 \begin{figure}%[pos=h]
     \centering
     \begin{subfigure}[b]{0.3\linewidth}
@@ -323,7 +325,7 @@ And $f_{score}$ agrees only with BIC-based score but not $AUC_{log}RNX$ score in
 This result suggest that, $f_{score}$ can be used in complement with other quality scores.
 In order to compare thoroughly the best solutions found by these three scores, we can use the metamap which is detailed right after this section.
 
-\subsubsection*{Metamaps and Visualizations}
+% \subsubsection*{Metamaps and Visualizations}
 % See figure above
 As a proof of concept, the embeddings with all integer values of perplexity are calculated.
 A metamap is used in order to visualize the solution space of t-SNE, i.e., to represent all the embeddings with different perplexities.
@@ -348,7 +350,7 @@ As suggested by different scores, we can easily discover different regions in th
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{BayOpt for Tuning Two Parameters of UMAP}\label{sec:result:bo:umap}
+\subsubsection{BayOpt for Tuning Two Parameters of UMAP}\label{sec:result:bo:umap}
 
 UMAP has not only a solid theoretically foundations in manifold learning but also is very practical with a well documented guide on its hyperparameters \cite{mcinnes2018umap-software}.
 The first hyperparameter \emph{n\_neighbors} plays the same role as perplexity for t-SNE and LargeVis, which controls how to reveal local versus global structures in the data.
@@ -421,9 +423,7 @@ We can easily identify in the metamap the region of the unfavourable visualizati
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Result on the Flexibility of $f_{score}$}\label{sec:result:flexibility}
-
-QUESTION here...
+\subsection{Flexibility of the Proposed Score}\label{sec:result:flexibility}
 
 $AUC_{log}RNX$ metric evaluates how the neighborhood information is preserved.
 The BIC-based score evaluates the trade-off between KL loss and the value of perplexity in t-SNE.
