@@ -131,6 +131,24 @@ def get_dataset_display_name(dataset_name):
     }.get(dataset_name, dataset_name)
 
 
+def get_method_display_name(method_name):
+    return {
+        "tsne": "t-SNE",
+        "largevis": "LargeVis",
+        "umap": "UMAP",
+        "umap1": "UMAP\n$_{(min\_dist=0.1)}$",
+    }.get(method_name, method_name)
+
+
+def get_param_display_name(method_name):
+    return {
+        "tsne": "perplexity",
+        "largevis": "perplexity",
+        "umap": "(n_neighbor, perplexity)",
+        "umap1": "n_neighbor",
+    }.get(method_name, method_name)
+
+
 if __name__ == "__main__":
     values = generate_value_range(
         min_val=2, max_val=1796 // 3, num=150, range_type="log", dtype=int
