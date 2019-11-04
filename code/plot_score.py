@@ -5,10 +5,20 @@ import matplotlib.pyplot as plt
 
 import utils
 from common.metric.dr_metrics import DRMetric
+from common.plot.plot_utils import draw_seperator_between_subplots
 
 
-def _plot_line_with_variance(ax, list_params, score_mean, score_sigma=None):
-    ax.plot(list_params, score_mean)
+def _plot_line_with_variance(
+    ax,
+    list_params,
+    score_mean,
+    score_sigma=None,
+    nbins_x=6,
+    nbins_y=3,
+    linewidth=1.5,
+    color="#1f77b4",
+):
+    ax.plot(list_params, score_mean, linewidth=linewidth, color=color)
     if score_sigma is not None:
         # fill the variance (mean +- sigma)
         ax.fill_between(
@@ -25,13 +35,13 @@ def _plot_line_with_variance(ax, list_params, score_mean, score_sigma=None):
 
     # force list params to show on axias
     list_params_to_show = utils.generate_value_range(
-        min_val=1.1, max_val=max(list_params), num=6, range_type="log", dtype=int
+        min_val=1.1, max_val=max(list_params), num=nbins_x, range_type="log", dtype=int
     )
     ax.set_xticks(list_params_to_show)
     ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
 
     # custom yaxis to show only 3 score values
-    ax.locator_params(axis="y", nbins=3)
+    ax.locator_params(axis="y", nbins=nbins_y)
 
 
 def _plot_best_param(ax, best_param_value, text_y_pos=0.0, text_align=None):
@@ -48,9 +58,7 @@ def _plot_best_param(ax, best_param_value, text_y_pos=0.0, text_align=None):
         markevery=100,
     )
     if text_align is not None:
-        ax.text(
-            x=best_param_value, y=text_y_pos, s=str(best_param_value), ha=text_align
-        )
+        ax.text(x=best_param_value, y=text_y_pos, s=str(best_param_value), ha=text_align)
 
 
 def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0, best_param=None):
@@ -93,8 +101,7 @@ def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0, best_param=None):
         transform=ax.transAxes,
         ha="right",
         va="center",
-        s=f"[{param_min}, {param_max}]"
-        + ("" if best_param is None else f", ({best_param})"),
+        s=f"[{param_min}, {param_max}]" + ("" if best_param is None else f", ({best_param})"),
         color="#0047BB",
     )
 
@@ -121,9 +128,7 @@ def _plot_score_with_best_param_and_range(
     if param_best == param_min or param_best == param_max:
         text_align = None
     else:
-        text_align = (
-            "right" if (param_best - param_min) > (param_max - param_best) else "left"
-        )
+        text_align = "right" if (param_best - param_min) > (param_max - param_best) else "left"
     _plot_best_param(ax, param_best, text_y_pos, text_align)
 
     # plot also the best param range (the top 96% scores)
@@ -248,9 +253,7 @@ def plot_scores(
     plt.close()
 
 
-def plot_quality_metrics(
-    dataset_name, method_name, param_name="", score_dir="", plot_dir=""
-):
+def plot_quality_metrics(dataset_name, method_name, param_name="", score_dir="", plot_dir=""):
     with open(f"{score_dir}/metrics.txt", "r") as in_file:
         metrics_data = json.load(in_file)
         list_params = list(map(int, metrics_data["list_params"]))
@@ -278,9 +281,7 @@ def plot_quality_metrics(
         plt.close()
 
 
-def plot_bic_scores(
-    dataset_name, method_name, param_name="", score_dir="", plot_dir=""
-):
+def plot_bic_scores(dataset_name, method_name, param_name="", score_dir="", plot_dir=""):
     with open(f"{score_dir}/BIC.txt", "r") as in_file:
         bic_data = json.load(in_file)
         list_params = list(map(int, bic_data["list_params"]))
@@ -389,3 +390,86 @@ def plot_compare_qij_rnx_bic(
     fig.subplots_adjust(hspace=0.4, top=0.925, bottom=0.125, left=0.125, right=0.95)
     fig.savefig(f"{plot_dir}/plot_compare.png")
     plt.close(fig)
+
+
+def plot_all_score_all_method_all_dataset(
+    list_datasets=[],
+    list_methods=[],
+    score_root_dir="",
+    plot_root_dir="",
+    n_labels_each_class=10,
+):
+    """Plot f_score for 6 datasets and 3 methods.
+    Create a subplots of (3 +1) rows x (6+1) cols
+        | D1 | .... | D6 |
+    tsne| f1 | .....| f6 |
+    umap| ...            |
+    lvis| ...            |
+    """
+    n_rows = len(list_methods) + 1
+    n_cols = len(list_datasets) + 1
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 2.75))
+
+    # deco line color for different methods
+    line_colors = ["#ff7f0e", "#2ca02c", "#1f77b4"]
+
+    # show score name in the first top left cell
+    axes[0, 0].axis("off")
+    axes[0, 0].text(0, 0, "$f_{score}$")
+
+    # show dataset name in the first row
+    for i, dataset_name in enumerate(list_datasets):
+        axes[0, i + 1].axis("off")
+        axes[0, i + 1].text(0, 0, utils.get_dataset_display_name(dataset_name))
+
+    # show method name in the first column
+    for j, method_name in enumerate(list_methods):
+        axes[j + 1, 0].axis("off")
+        axes[j + 1, 0].text(0, 0, method_name, {"color": line_colors[j]})
+
+    # for each dataset and each method, load the corresponding score file
+    for i, dataset_name in enumerate(list_datasets):
+        for j, method_name in enumerate(list_methods):
+            # load the score file
+            score_file_name = f"{score_root_dir}/{dataset_name}/{method_name}/qij/dof1.0_42.txt"
+            try:
+                with open(score_file_name) as in_file:
+                    score_data = json.load(in_file).get(str(n_labels_each_class), None)
+                    if score_data is None:
+                        continue
+                    list_params = list(map(int, score_data.keys()))
+                    score_values = list(map(float, score_data.values()))
+            except FileNotFoundError as fnf_error:
+                print(fnf_error)
+                list_params, score_values = [1], [1]
+
+            # get axis by index
+            ax = axes[j + 1, i + 1]
+
+            # do plot the score values
+            _plot_line_with_variance(
+                ax,
+                list_params,
+                score_mean=score_values,
+                score_sigma=None,
+                nbins_x=4,
+                nbins_y=1,
+                color=line_colors[j],
+                linewidth=3,
+            )
+
+            # show x-axis label in the middle of the plot
+            if i == len(list_datasets) // 2 - 1:
+                ax.set_xlabel("param in log-scale")
+
+    fig.tight_layout()
+    draw_seperator_between_subplots(fig, axes, color="gray", linestyle="--", linewidth=0.5)
+
+    # fig.subplots_adjust(hspace=0.4, top=0.925, bottom=0.125, left=0.125, right=0.95)
+    fig.savefig(f"{plot_root_dir}/all_scores_all_methods.png")
+    plt.close(fig)
+
+    # TODO:
+    # Run score for largevis for NEURON_1K, FASHION_MOBILENET
+    # python run_score.py -d NEURON_1K -m largevis -nr 1 -nl 10 --use_log_scale --run --plot
+    # Run largevis for these two datasets too :D
