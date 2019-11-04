@@ -120,6 +120,17 @@ def get_scores_tsne(score_name, score_dir):
     }[score_name]()
 
 
+def get_dataset_display_name(dataset_name):
+    return {
+        "DIGITS": "DIGITS",
+        "COIL20": "COIL20",
+        "FASHION1000": "FASHION_1K",
+        "FASHION_MOBILENET": "FASH_MOBI",
+        "20NEWS5": "5NEWS",
+        "NEURON_1K": "NEURON_1K",
+    }.get(dataset_name, dataset_name)
+
+
 if __name__ == "__main__":
     values = generate_value_range(
         min_val=2, max_val=1796 // 3, num=150, range_type="log", dtype=int
