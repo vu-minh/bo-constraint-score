@@ -149,6 +149,16 @@ def get_param_display_name(method_name):
     }.get(method_name, method_name)
 
 
+def get_score_display_name(score_name):
+    return {
+        "qij": "$f_{score}$",
+        "qij_score": "$f_{score}$",
+        "f_score": "$f_{score}$",
+        "auc_rnx": "$AUC_{log}RNX$",
+        "bic": "BIC-based score",
+    }.get(score_name, score_name)
+
+
 if __name__ == "__main__":
     values = generate_value_range(
         min_val=2, max_val=1796 // 3, num=150, range_type="log", dtype=int

@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from matplotlib.ticker import FuncFormatter
 
+import utils
 from bayes_opt import UtilityFunction
-from utils import generate_value_range
 
 
 def _plot_acq_func(ax, util_func, list_params, utility_values, next_best_guess_param):
@@ -272,7 +272,7 @@ def plot_bo_one_param_summary(
     # ax.xaxis.grid(linestyle="--", alpha=0.3)
 
     # show param in log scale in xaxis
-    list_params_to_show = generate_value_range(
+    list_params_to_show = utils.generate_value_range(
         min_val=min(list_params), max_val=max(list_params), num=9, range_type="log", dtype=int
     )
     ax.set_xlim(left=min(list_params), right=max(list_params))
@@ -281,9 +281,7 @@ def plot_bo_one_param_summary(
     ax.set_xlabel(f"{param_name} in log-scale")
 
     # plot text for best param
-    ax.text(
-        x=best_param, y=1.1 * ax.get_ylim()[0], ha="center", s=f"{int(np.exp(best_param))}"
-    )
+    ax.text(x=best_param, y=1.1 * ax.get_ylim()[0], ha="center", s=f"{int(np.exp(best_param))}")
 
     # hint text for the top hightest scores horizontal line
     pivot = threshold * max(pred_mu)
@@ -305,28 +303,30 @@ def plot_bo_one_param_summary(
 
 
 def plot_density_2D(
+    dataset_name: str = "",
     input_score_name: str = "umap_scores",
     target_key_name: str = "qij_score",
     title: str = "",
-    log_dir: str = "",
     score_dir: str = "",
-    plot_dir: str = "",
+    plot_dir=None,
     contour_levels=10,
-    contour_cmap="YlGn",
+    contour_cmap="gray",
+    ax=None,
+    fig=None,
 ):
     # plot contour/contourf guide:
     # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
 
     df = pd.read_csv(f"{score_dir}/{input_score_name}.csv")
-    print(df)
+    # print(df)
 
     Z = df.pivot(index="min_dist", columns="n_neighbors", values=target_key_name)
-    print(Z)
+    # print(Z)
 
     min_dist_values = Z.index.to_numpy()
     n_neighbors_values = Z.columns.to_numpy()
     Z = Z.to_numpy()
-    print(Z.shape, min_dist_values.shape, n_neighbors_values.shape)
+    # print(Z.shape, min_dist_values.shape, n_neighbors_values.shape)
 
     # get the row of max value
     best_param = df.loc[df[target_key_name].idxmax()]
@@ -337,10 +337,11 @@ def plot_density_2D(
     print(best_n_neighbors, best_min_dist, best_score)
 
     X, Y = np.meshgrid(n_neighbors_values, min_dist_values)
-    print(X.shape, Y.shape)
+    # print(X.shape, Y.shape)
 
-    fig, ax = plt.subplots(1, 1, figsize=(8, 3))
-    ax.set_title(f"[{dataset_name}] {title} for UMAP embeddings")
+    if ax is None or fig is None:
+        fig, ax = plt.subplots(1, 1, figsize=(8, 3))
+    ax.set_title(f"[{dataset_name}] {title}", fontsize=22)
 
     # contour for score
     ax.contour(X, Y, Z, levels=contour_levels, linewidths=0.5, colors="k")
@@ -360,14 +361,15 @@ def plot_density_2D(
     ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
     ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
     ax.set_yticks([0.001, 0.01, 0.1, 1.0] + [best_min_dist] * 2)
-    ax.set_xticks(np.append(ax.get_xticks(), [best_n_neighbors] * 2))
+    ax.set_xticks(np.append(ax.get_xticks(), [best_n_neighbors] * 4))
 
     # plot best param
     ax.plot(best_n_neighbors, best_min_dist, "s", c="orange")
 
-    plt.tight_layout()
-    plt.savefig(f"{plot_dir}/2D/{target_key_name}.png")
-    plt.close()
+    if plot_dir is not None:
+        plt.tight_layout()
+        plt.savefig(f"{plot_dir}/2D/{target_key_name}.png")
+        plt.close()
 
 
 def plot_prediction_density_2D(
@@ -376,7 +378,6 @@ def plot_prediction_density_2D(
     list_min_dist,
     title: str = "",
     threshold=0.96,
-    log_dir: str = "",
     score_dir: str = "",
     plot_dir: str = "",
     contour_levels=10,
@@ -472,7 +473,7 @@ def plot_prediction_density_2D(
     ax0 = plt.subplot(gs[0, 0], sharex=ax)
     ax0.set_title("Score by n_neighbors")
     score_by_n_neighbors = Z.mean(axis=0)
-    plt_score_by_n_neighbors, = ax0.plot(list_n_neigbors, score_by_n_neighbors)
+    (plt_score_by_n_neighbors,) = ax0.plot(list_n_neigbors, score_by_n_neighbors)
     plt.setp(ax0.get_xticklabels(), visible=False)
 
     # determine best param range and best param value
@@ -487,7 +488,7 @@ def plot_prediction_density_2D(
     ax1 = plt.subplot(gs[1, 1], sharey=ax)
     ax1.set_title("Score by min_dist")
     score_by_min_dist = Z.mean(axis=1)
-    plt_score_by_min_dist, = ax1.plot(score_by_min_dist, list_min_dist)
+    (plt_score_by_min_dist,) = ax1.plot(score_by_min_dist, list_min_dist)
     plt.setp(ax1.get_yticklabels(), visible=False)
 
     # determine best param range and best param value
@@ -514,31 +515,40 @@ def plot_prediction_density_2D(
     plt.close()
 
 
+def plot_density_for_all_datasets(list_datasets=[], list_scores=[]):
+    n_rows = len(list_datasets)
+    n_cols = len(list_scores)
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 6, n_rows * 3))
+
+    for row_idx, dataset_name in enumerate(list_datasets):
+        for col_idx, (input_score_name, target_key_name) in enumerate(list_scores):
+            print(dataset_name, input_score_name, target_key_name)
+            plot_density_2D(
+                dataset_name=utils.get_dataset_display_name(dataset_name),
+                input_score_name=input_score_name,
+                target_key_name=target_key_name,
+                title=utils.get_score_display_name(target_key_name),
+                score_dir=f"./scores/{dataset_name}/umap/qij",
+                plot_dir=f"./plots/{dataset_name}/umap",
+                # ax=axes[row_idx, col_idx],
+                fig=fig,
+            )
+    fig.tight_layout()
+    fig.savefig("./plots/umap2D_compare.png")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     # note to make big font size for plots in the paper
     plt.rcParams.update({"font.size": 10})
 
-    dataset_name = "FASHION1000"
-    method_name = "umap"
-    score_name = "qij"
-    log_dir = f"./logs/{dataset_name}/{method_name}/{score_name}"
-    score_dir = f"./scores/{dataset_name}/{method_name}/{score_name}"
-    plot_dir = f"./plots/{dataset_name}/{method_name}"
-
-    plot_density_2D(
-        input_score_name="umap_scores",
-        target_key_name="qij_score",
-        title="Constraint preserving score",
-        log_dir=log_dir,
-        score_dir=score_dir,
-        plot_dir=plot_dir,
-    )
-
-    plot_density_2D(
-        input_score_name="umap_metrics",
-        target_key_name="auc_rnx",
-        title="$AUC_{log}RNX$ score",
-        log_dir=log_dir,
-        score_dir=score_dir,
-        plot_dir=plot_dir,
-    )
+    list_datasets = [
+        "DIGITS",
+        "COIL20",
+        "FASHION1000",
+        "FASHION_MOBILENET",
+        "20NEWS5",
+        "NEURON_1K",
+    ]
+    list_scores = [("umap_scores", "qij_score"), ("umap_metrics", "auc_rnx")]
+    plot_density_for_all_datasets(list_datasets, list_scores)
