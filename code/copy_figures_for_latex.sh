@@ -74,6 +74,10 @@ cp plots/FASHION_MOBILENET/tsne/score_flexibility.png ../tex/figures/FASHION_MOB
 cp plots/20NEWS5/tsne/score_flexibility.png ../tex/figures/20NEWS5_score_flexibility.png
 cp plots/NEURON_1K/tsne/score_flexibility.png ../tex/figures/NEURON_1K_score_flexibility.png
 
+# # (8) Copy plot for all score
+cp plots/all_scores_all_methods.png ../tex/figures/all_scores_all_methods.png
+
+
 ################################################################################################
 # Command for reproducing figures/data
 
