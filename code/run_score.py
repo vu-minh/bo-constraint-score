@@ -15,6 +15,7 @@ from tqdm import tqdm
 import utils
 from plot_score import plot_scores, plot_quality_metrics, plot_bic_scores
 from plot_score import plot_compare_qij_rnx_bic
+from plot_score import plot_all_score_all_method_all_dataset
 from common.dataset import dataset
 
 
@@ -141,9 +142,7 @@ def run_all_score_umap(
     pd.DataFrame(all_metrics).to_csv(f"{score_dir}/umap_metrics.csv")
 
 
-def run_all_quality_metric(
-    X, list_perps, default_min_dist=0.1, embedding_dir="", score_dir=""
-):
+def run_all_quality_metric(X, list_perps, default_min_dist=0.1, embedding_dir="", score_dir=""):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
 
     # store the list of metric results for each metric name
@@ -214,9 +213,7 @@ def merge_all_score_files(
             all_scores[n_labels_each_class].append(list(scores_i_j.values()))
 
     for n_labels_each_class, scores_i_j in all_scores.items():
-        print(
-            "[Debug]#score values:", n_labels_each_class, len(scores_i_j), len(scores_i_j[0])
-        )
+        print("[Debug]#score values:", n_labels_each_class, len(scores_i_j), len(scores_i_j[0]))
 
     with open(f"{score_dir}/dof{degrees_of_freedom}_all.txt", "w") as out_file:
         json.dump({"list_params": list_params, "all_scores": all_scores}, out_file)
@@ -273,7 +270,9 @@ if __name__ == "__main__":
     ap.add_argument("--run", action="store_true", help="run score function")
     ap.add_argument("--plot", action="store_true", help="plot score function")
     ap.add_argument("--plot_compare", action="store_true", help="plot comparing scores")
-
+    ap.add_argument(
+        "--plot_all_score", action="store_true", help="plot all scores for all methods"
+    )
     ap.add_argument(
         "--use_other_label",
         default=None,
@@ -284,11 +283,33 @@ if __name__ == "__main__":
     )
     args = ap.parse_args()
 
+    # plot all scores for all methods for all datasets
+    # this does not concern any particular dataset or method
+    if args.plot_all_score:
+        all_datasets = [
+            "DIGITS",
+            "COIL20",
+            "FASHION1000",
+            "FASHION_MOBILENET",
+            "20NEWS5",
+            "NEURON_1K",
+        ]
+        all_methods = ["tsne", "largevis", "umap"]
+        plot_all_score_all_method_all_dataset(
+            list_datasets=all_datasets,
+            list_methods=all_methods,
+            score_root_dir="./scores",
+            plot_root_dir="./plots",
+        )
+        sys.exit(0)
+
     dataset.set_data_home("./data")
     dataset_name = args.dataset_name
     method_name = args.method_name
     score_name = args.score_name
-    X_origin, X, default_labels = dataset.load_dataset(dataset_name)
+    X_origin, X, default_labels = (
+        dataset.load_dataset(dataset_name) if dataset_name else ([], [], [])
+    )
 
     target_label_name = args.use_other_label
     if target_label_name is not None:
