@@ -400,36 +400,24 @@ def plot_all_score_all_method_all_dataset(
     n_labels_each_class=10,
 ):
     """Plot f_score for 6 datasets and 3 methods.
-    Create a subplots of (3 +1) rows x (6+1) cols
         | D1 | .... | D6 |
     tsne| f1 | .....| f6 |
     umap| ...            |
     lvis| ...            |
     """
-    n_rows = len(list_methods) + 1
-    n_cols = len(list_datasets) + 1
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 2.75))
+    # re-set small fontsize (for tick labels)
+    plt.rcParams.update({"font.size": 18})
+
+    n_rows = len(list_methods)  # + 1
+    n_cols = len(list_datasets)  # + 1
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 5.5, n_rows * 3.5))
 
     # deco line color for different methods
     line_colors = ["#ff7f0e", "#2ca02c", "#1f77b4"]
 
-    # show score name in the first top left cell
-    axes[0, 0].axis("off")
-    axes[0, 0].text(0, 0, "$f_{score}$")
-
-    # show dataset name in the first row
-    for i, dataset_name in enumerate(list_datasets):
-        axes[0, i + 1].axis("off")
-        axes[0, i + 1].text(0, 0, utils.get_dataset_display_name(dataset_name))
-
-    # show method name in the first column
-    for j, method_name in enumerate(list_methods):
-        axes[j + 1, 0].axis("off")
-        axes[j + 1, 0].text(0, 0, method_name, {"color": line_colors[j]})
-
     # for each dataset and each method, load the corresponding score file
-    for i, dataset_name in enumerate(list_datasets):
-        for j, method_name in enumerate(list_methods):
+    for col_idx, dataset_name in enumerate(list_datasets):
+        for row_idx, method_name in enumerate(list_methods):
             # load the score file
             score_file_name = f"{score_root_dir}/{dataset_name}/{method_name}/qij/dof1.0_42.txt"
             try:
@@ -443,8 +431,13 @@ def plot_all_score_all_method_all_dataset(
                 print(fnf_error)
                 list_params, score_values = [1], [1]
 
+            # hardcoded method_name "umap" to "umap1"
+            if method_name == "umap":
+                method_name = "umap1"
+
             # get axis by index
-            ax = axes[j + 1, i + 1]
+            ax = axes[row_idx, col_idx]
+            ax.grid(axis="x", linestyle=":", linewidth=0.5)
 
             # do plot the score values
             _plot_line_with_variance(
@@ -452,24 +445,33 @@ def plot_all_score_all_method_all_dataset(
                 list_params,
                 score_mean=score_values,
                 score_sigma=None,
-                nbins_x=4,
-                nbins_y=1,
-                color=line_colors[j],
-                linewidth=3,
+                nbins_x=5,
+                nbins_y=2,
+                color=line_colors[row_idx],
+                linewidth=1.5,
             )
 
             # show x-axis label in the middle of the plot
-            if i == len(list_datasets) // 2 - 1:
-                ax.set_xlabel("param in log-scale")
+            if col_idx == len(list_datasets) // 2 - 1:
+                ax.set_xlabel(
+                    f"{utils.get_param_display_name(method_name)} in log-scale", fontsize=28
+                )
+
+            # show dataset name, method name
+            if row_idx == 0:
+                ax.set_title(utils.get_dataset_display_name(dataset_name), fontsize=28)
+            if col_idx == 0:
+                ax.set_ylabel(
+                    utils.get_method_display_name(method_name),
+                    {"color": line_colors[row_idx]},
+                    fontsize=28,
+                    rotation="horizontal",
+                    ha="right",
+                )
+                ax.text(0.05, 0.85, "$f_{score}$", transform=ax.transAxes, fontsize=22)
 
     fig.tight_layout()
-    draw_seperator_between_subplots(fig, axes, color="gray", linestyle="--", linewidth=0.5)
-
-    # fig.subplots_adjust(hspace=0.4, top=0.925, bottom=0.125, left=0.125, right=0.95)
+    draw_seperator_between_subplots(fig, axes, color="gray", linestyle="--", linewidth=1.0)
+    fig.subplots_adjust(hspace=0.6)
     fig.savefig(f"{plot_root_dir}/all_scores_all_methods.png")
     plt.close(fig)
-
-    # TODO:
-    # Run score for largevis for NEURON_1K, FASHION_MOBILENET
-    # python run_score.py -d NEURON_1K -m largevis -nr 1 -nl 10 --use_log_scale --run --plot
-    # Run largevis for these two datasets too :D
