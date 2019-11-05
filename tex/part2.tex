@@ -94,34 +94,38 @@ The number of all possible dissimilar links is therefore given by
 
 % This means that the more labeled instances are considered (i.e., $k$ is larger), the more constraints are generated and the more stable the $f_{score}$ is.
 % For instance, with 10 labeled points for each of the 10 classes of the DIGITS dataset, 450 similar links and 4500 dissimilar links can be generated.
-The labeled points are used to indicate the relationship of belonging in the same of in different groups.
-The points can be freely chosen and grouped by the users to indicate the relationship that they care about.
-The experimental setup for proving empirically the reliability of the proposed score is presented in the next section.
+The labeled points are used to indicate the relationship of belonging to the same or to different groups.
+The points can also be freely chosen and grouped by the users to indicate the relationship that they care about.
+Intuitively, the generated pairwise constraints can express the information encoded in the labeled points.
+$f_{score}$ function which takes the constraints as input will evaluate how well the encoded information is preserved in the embeddings.
+The experimental setup for proving empirically the reliability of $f_{score}$ is presented in the next section.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Use of BayOpt in the Experiments}\label{sec:xp:proof}
+\subsection{Score Preparation and Use of BayOpt in the Experiments}\label{sec:xp:proof}
 
-The experiments are designed to prove that $f_{score}$ provides good visualizations (Section~\ref{sec:result:bo}), as well as to prove its stability (Section~\ref{sec:result:stability}) and its flexibility (Section~\ref{sec:result:flexibility}).
+% The experiments are designed to prove that $f_{score}$ provides good visualizations (Section~\ref{sec:result:bo}), as well as to prove its stability (Section~\ref{sec:result:stability}) and its flexibility (Section~\ref{sec:result:flexibility}).
 
-In order to compute $f_{score}$ for each embedding corresponding to each combination, a grid of hyperparameters for each of the three methods ($t$-SNE, LargeVis and UMAP) is used.
-The hyperparameter values are sampled in natural logarithmic scale (log-scale), since we want to focus on the values that are not too large.
-In the case of $t$-SNE and LargeVis, the grid is an integer vector of perplexity values from 2 to $N/3$ in log-scale, in which $N$ is the number of instances of the dataset.
-In the case of UMAP, the two dimensional grid contains combinations of its two hyperparameters.
-The first dimension is an integer vector of $n\_neighbor$ values from 2 to $N/3$ in log-scale.
-The second dimension is a vector of 10 real values of $min\_dist$ from 0.001 to 1.0 in log-scale.
-The grid is used to evaluate the reliability of the BayOpt approach on the proposed score.
-As shown in the next section, the combination of BayOpt with $f_{score}$ produces good quality visualizations, with only dozens of evaluations required to find the best hyperparameters for all experimented datasets.
+A grid of hyperparameters for each of the three methods ($t$-SNE, LargeVis and UMAP) is created in order to evaluate $f_{score}$ for the embedding corresponding to each combination of their hyperparameters.
+% In order to compute $f_{score}$ for each embedding corresponding to each combination of the hyperparameters, a grid of hyperparameters for each of the three methods ($t$-SNE, LargeVis and UMAP) is used.
+In the case of $t$-SNE and LargeVis, the grid is an integer vector of perplexity values in $[2,N/3]$.
+% , in which $N$ is the number of instances of the dataset.
+% In the case of UMAP, the two dimensional grid contains combinations of its two hyperparameters.
+% The first dimension is an integer vector of {n\_neighbor} values from 2 to $N/3$ in log-scale.
+% The second dimension is a vector of 10 real values of {min\_dist} from 0.001 to 1.0 in log-scale.
+% The grid is used to evaluate the reliability of the BayOpt approach on the proposed score.
+In the case of UMAP, the two dimensional grid is created from an integer vector of {n\_neighbor} values in $[2,N/3]$ and a vector of 10 real values of {min\_dist} in $[0.001, 1.0]$.
+All the hyperparameter values are sampled in natural logarithmic scale (log-scale) in order to focus the computation on the not-so-large hyperparameter values.
+Finding the best hyperparameters by greedily searching through the grid is not practical and scalable.
+BayOpt approach solves this scalability problem efficiently, in which only dozens of evaluations are required to find the best hyperparameters for all experimented datasets.
 
-% For all hyperparameter tuning tasks under BayOpt framework, we prefer the exploration strategy to make sure that we can discover the largest as possible the parameter space.
-% Three technical points that guarantees the accuracy in predicting the best hyperparameters the quick convergence of BayOpt in our experiments are follows.
-% (1) The hyperparameters are sample in natural logarithmic domain to focus the computation on not-so-large values, which are usually used in practice.
-% (2) Expected Improvement (EI) acquisition function is used as a surrogate function in the underlying Gaussian Process (GP) model of BayOpt.
-% The exploration strategy is set using a large value of parameter $\xi$ of EI, which controls the trade-off between global search (exploration) and local optimization (exploitation).
-% All our experiments for all datasets are run with $\xi=0.1$ without any effort to tune this parameter.
-% (3) Since there is always a small variance in the score value, there is some noise in the observations (the $f_{score}$ values) for BayOpt.
-% The underlying kernel of GP model must be aware of this noise.
-% This can be done by adding the small values to the diagonal of the GP's kernel matrix.
-% This reminds us to always take into account not only the noise in the observation but also the uncertainty in the prediction of the GP model.
+For the hyperparameter tuning task under BayOpt framework in this work, the exploration strategy is preferred to ensure to discover the largest as possible the parameter space.
+% Three technical points that guarantees the accuracy in predicting the best hyperparameters and the quick convergence of BayOpt in our experiments are follows.
+Expected Improvement (EI) acquisition function is used as a surrogate function of BayOpt.
+In EI, the parameter $\xi$ controls the trade-off between global search (exploration) and local optimization (exploitation).
+$\xi$ is set to a large value (0.1) to realized the exploration strategy, that works well for all experimented dataset without any effort to tune this parameter.
+Since there is always a small variance in the score value, 
+the input observations (the $f_{score}$ values) for BayOpt can be corrupted by noise.
+Small values are added to the diagonal of the kernel function of the underlying Gaussian Process model in BayOpt to handle this noise.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -243,14 +247,14 @@ can be used to encode the users' desired structure in the data.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Hyperparameter Tuning with $f_{score}$}\label{sec:result:bo}
 BayOpt is widely used for hyperparameter tuning, when the target function is well-defined.
-It is a general framework that can work with any complex target function like the $AUC_{log}RNX$ score or the BIC-based score function.
-In our results (see Fig.~\ref{fig:tsne:compare}), $AUC_{log}RNX$ does not always work well with UMAP's embedding, especially in the case of tuning two UMAP's hyperparameters at the same time.
+$AUC_{log}RNX$ score or the BIC-based score can be used as a target function in BayOpt.
+However, our experiments show that $AUC_{log}RNX$ does not always work well with UMAP's embedding, especially in the case of tuning two UMAP's hyperparameters at the same time.
 The BIC-based score, by definition, is tied to $t$-SNE and does not work for other DR methods.
 $f_{score}$ is designed to be independent to the DR methods and to be flexible to the input constraints.
 In this section, the input constraints are generated from 10 labeled points per class for any given dataset.
 $f_{score}$, $AUC_{log}RNX$ and BIC-based scores are compared in the tasks of tuning one hyperparameter for $t$-SNE (Sec~\ref{sec:result:bo:tsne}) and tuning two hyperparameters for UMAP (Sec~\ref{sec:result:bo:umap}).
-$f_{score}$, which is flexible by design, can find the best visualization w.r.t. any set of input constraints.
-This task can not be achieved neither by $AUC_{log}RNX$ nor by BIC-based score.
+% $f_{score}$, which is flexible by design, can find the best visualization w.r.t. any set of input constraints.
+% This task can not be achieved neither by $AUC_{log}RNX$ nor by BIC-based score.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{BayOpt for Tuning One Parameter of $t$-SNE}\label{sec:result:bo:tsne}
