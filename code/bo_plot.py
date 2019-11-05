@@ -381,7 +381,7 @@ def plot_prediction_density_2D(
     score_dir: str = "",
     plot_dir: str = "",
     contour_levels=10,
-    contour_cmap="YlGn",
+    contour_cmap="gray",
 ):
     # plot contour/contourf guide:
     # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
@@ -415,7 +415,7 @@ def plot_prediction_density_2D(
     Z = predicted.reshape(X.shape)
 
     # plot contour and contourf for the sampled grid
-    fig = plt.figure(figsize=(6 + 3, 2.5 + 1.5))
+    fig = plt.figure(figsize=(5 + 2.5, 2.5 + 1.5))
     gs = gridspec.GridSpec(
         2, 2, height_ratios=[1, 2], width_ratios=[3, 1], wspace=0.22, hspace=0.22
     )
@@ -461,7 +461,8 @@ def plot_prediction_density_2D(
 
     ax.set_ylabel("min_dist in log-scale")
     ax.set_yscale("log", basey=np.e)
-    ax.set_yticks([0.001, 0.01, 0.1, 1.0] + [best_min_dist] * 2)
+    y_ticks = [0.001, 0.01, 0.1, 1.0]
+    ax.set_yticks(y_ticks + ([] if round(best_min_dist, 2) in y_ticks else [best_min_dist] * 2))
     ax.set_ylim(list_min_dist.min(), list_min_dist.max())
     ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
 
@@ -504,9 +505,10 @@ def plot_prediction_density_2D(
 
     ax2 = plt.subplot(gs[0, 1])
     ax2.axis("off")
-    cax2 = inset_axes(ax2, width="100%", height="20%", loc="upper center")
+    cax2 = inset_axes(ax2, width="125%", height="20%", loc="upper center")
     cbar = fig.colorbar(cntr1, cax=cax2, orientation="horizontal")
     cbar.ax.set_title("Score value")
+    cbar.ax.locator_params(nbins=6)
 
     # ax2.legend((plt_score_by_min_dist, plt_score_by_n_neighbors),
     #           ("Score by min_dis", "Score by n_neighbors"), loc="lower center")
@@ -529,8 +531,8 @@ def plot_density_for_all_datasets(list_datasets=[], list_scores=[]):
                 target_key_name=target_key_name,
                 title=utils.get_score_display_name(target_key_name),
                 score_dir=f"./scores/{dataset_name}/umap/qij",
-                plot_dir=f"./plots/{dataset_name}/umap",
-                # ax=axes[row_idx, col_idx],
+                # plot_dir=f"./plots/{dataset_name}/umap",
+                ax=axes[row_idx, col_idx],
                 fig=fig,
             )
     fig.tight_layout()

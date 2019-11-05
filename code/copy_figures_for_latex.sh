@@ -18,21 +18,21 @@ cp plots/DIGITS/tsne/scores.png ../tex/figures/DIGITS_tsne_scores.png
 cp plots/DIGITS/largevis/scores.png ../tex/figures/DIGITS_largevis_scores.png
 
 
-# # (2) figures contour score for UMAP 2D
-cp plots/DIGITS/umap/2D/qij_score.png ../tex/figures/DIGITS_umap_qij_score.png
-cp plots/DIGITS/umap/2D/auc_rnx.png ../tex/figures/DIGITS_umap_auc_rnx.png
+# # # (2) figures contour score for UMAP 2D
+# cp plots/DIGITS/umap/2D/qij_score.png ../tex/figures/DIGITS_umap_qij_score.png
+# cp plots/DIGITS/umap/2D/auc_rnx.png ../tex/figures/DIGITS_umap_auc_rnx.png
 
-cp plots/COIL20/umap/2D/qij_score.png ../tex/figures/COIL20_umap_qij_score.png
-cp plots/COIL20/umap/2D/auc_rnx.png ../tex/figures/COIL20_umap_auc_rnx.png
+# cp plots/COIL20/umap/2D/qij_score.png ../tex/figures/COIL20_umap_qij_score.png
+# cp plots/COIL20/umap/2D/auc_rnx.png ../tex/figures/COIL20_umap_auc_rnx.png
 
-cp plots/FASHION1000/umap/2D/qij_score.png ../tex/figures/FASHION1000_umap_qij_score.png
-cp plots/FASHION1000/umap/2D/auc_rnx.png ../tex/figures/FASHION1000_umap_auc_rnx.png
+# cp plots/FASHION1000/umap/2D/qij_score.png ../tex/figures/FASHION1000_umap_qij_score.png
+# cp plots/FASHION1000/umap/2D/auc_rnx.png ../tex/figures/FASHION1000_umap_auc_rnx.png
 
 
-# # (3) figures contour predicted score from BO
-cp plots/DIGITS/umap/qij/predicted_score.png ../tex/figures/DIGITS_umap_predicted_score.png
-cp plots/COIL20/umap/qij/predicted_score.png ../tex/figures/COIL20_umap_predicted_score.png
-cp plots/FASHION1000/umap/qij/predicted_score.png ../tex/figures/FASHION1000_umap_predicted_score.png
+# # # (3) figures contour predicted score from BO
+# cp plots/DIGITS/umap/qij/predicted_score.png ../tex/figures/DIGITS_umap_predicted_score.png
+# cp plots/COIL20/umap/qij/predicted_score.png ../tex/figures/COIL20_umap_predicted_score.png
+# cp plots/FASHION1000/umap/qij/predicted_score.png ../tex/figures/FASHION1000_umap_predicted_score.png
 
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
@@ -53,6 +53,11 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
             ${TARGET_DIR}/${DATASET_NAME}_${METHOD}_scores.png
 
     done
+
+    # # (3) predicted density 2D for UMAP
+    echo "COPY BO PREDICTED DENSITY 2D: " $DATASET_NAME "umap"
+    cp plots/${DATASET_NAME}/umap/qij/predicted_score.png \
+       ${TARGET_DIR}/${DATASET_NAME}_umap_predicted_score.png
 
     # # (5) figures metamap
     echo "COPY METAMAP: " $DATASET_NAME "tsne"
