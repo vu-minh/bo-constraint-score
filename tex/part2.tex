@@ -78,14 +78,14 @@ Suppose that the number of instances in each class is larger than $k$ ($k$ is us
 a similar link is formed by choosing a random pair of instances of each class.
 This procedure leads to a number of similar links given by
 \begin{equation}\label{eq:|S|}
-    |\mathcal{S}| = C {k \choose 2}.
+    |\mathcal{S}| = C {k \choose 2} = \frac{1}{2} C k (k - 1).
 \end{equation}
 
 The dissimilar links are formed by first choosing two different classes among the $C$ classes (${C \choose 2}$ ways),
 and then choosing a pair of two instances from these classes ($k^2$ pairs).
 The number of all possible dissimilar links is therefore given by
 \begin{equation}\label{eq:|D|}
-    |\mathcal{D}| = {C \choose 2} k^2.
+    |\mathcal{D}| = {C \choose 2} k^2 = \frac{1}{2} C (C - 1) k^2.
 \end{equation}
 
 This means that the more labeled instances are considered (i.e., $k$ is larger), the more constraints are generated and the more stable the $f_{score}$ is.
@@ -122,6 +122,15 @@ As shown in the next section, the combination of BayOpt with $f_{score}$ produce
 \section{Experimental Results}\label{sec:results}
 
 [TODO]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{$f_{score}$}\label{sec:result:fscore}
+\begin{figure*}
+    \centering
+    \includegraphics[width=\linewidth]{all_scores_all_methods}
+    \caption{$f_{score}$ for all datasets/all methods.}
+    \label{fig:fscore:all}
+\end{figure*}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Hyperparameter Tuning with $f_{score}$}\label{sec:result:bo}
