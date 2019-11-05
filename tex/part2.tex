@@ -177,11 +177,14 @@ The proposed constraint preserving score is a function of the pairwise constrain
 % This $k$ is an hyperparameter of $f_{score}$.
 % While it may be argued that the automatic tuning of DR hyperparameters is replaced by the manual tuning of the $f_{score}$ hyperparameter, this section shows that $f_{score}$ values are stable under changes of $k$.
 % Another question that must be answered is whether if $f_{score}$ is stable for a fixed $k$, but with different constraints chosen given this $k$.
-% The more labeled points 
-
-In order to answer these two questions, $f_{score}$ is evaluated for five different numbers of labeled instances (3, 5, 10 and 15 instances per class).
-The labeled instances are independent and not accumulated. This means that, for instance, the set of labeled instances in the second setting does not contain the labeled instances in the first setting.
-In each setting, for a fixed number of labeled instances, 20 different sets of pairwise constraints are generated.
+The more labeled points we have, the more constraints are generated, and as demonstrated as follows, the more stable the $f_{score}$ is.
+The first question is, what is a reasonable small number of labeled points needed for each class to produce a stable $f_{score}$?
+Moreover, with a fixed number of labeled points we can generate different set of pairwise constraints.
+The second question is, with different set of constraints generated from the same fixed number of labeled points, is $f_{score}$ stable?
+In order to answer these two questions, $f_{score}$ is evaluated for five different numbers of labeled points (3, 5, 10 and 15) per class.
+The labeled points are independent and not accumulated.
+This means that, for instance, the set of labeled points in the second setting does not contain the labeled points in the first setting.
+In each setting for a fixed number of labeled points, the average value and the standard deviation of $f_{score}$ are analyzed w.r.t. 20 different sampled sets of pairwise constraints.
 
 \begin{figure}%[pos=h]
 \begin{subfigure}[b]{0.32\linewidth}
@@ -206,13 +209,15 @@ The filled region highlights the best range of hyperparameters which make the sc
 \label{fig:score:stability:COIL20}
 \end{figure}
 
-Fig.~\ref{fig:score:stability:COIL20} shows $f_{score}$ results for $t$-SNE, LargeVis and UMAP (with fixed {min\_dist} of 0.1) embeddings of \emph{COIL20}.
+Fig.~\ref{fig:score:stability:COIL20} shows $f_{score}$ results for $t$-SNE, LargeVis and UMAP (with fixed {min\_dist} of 0.1) embeddings of \emph{COIL20} dataset.
 The results are shown for \emph{COIL20}, but are also true for the other selected datasets.
-When the number of labeled instances increases, $f_{score}$ is more stable since the variance (presented by filled regions in Fig.~\ref{fig:score:stability:COIL20}) decreases.
+When the number of labeled instances increases, $f_{score}$ is more stable since the variance (presented by filled regions around the $f_{score}$ curve in Fig.~\ref{fig:score:stability:COIL20}) decreases.
 
 Selecting the best hyperparameter values corresponding to the maximum score may not be the best choice, since several hyperparameter values can give almost the same $f_{score}$.
-In order to tackle this problem, a range of hyperparameter values that have a $f_{score}$ larger than a threshold is selected. For instance, the threshold can be 96\% of the maximum $f_{score}$ value.
-Fig.~\ref{fig:score:stability:COIL20} demonstrates that the best hyperparameter value ranges are sensibly the same for the different numbers of labeled instances selected per label (3, 5, 10 and 15).
+In order to tackle this problem, a range of hyperparameter values that has $f_{score}$ larger than a threshold is selected.
+For instance, the threshold can be 96\% of the maximum $f_{score}$ value.
+The best hyperparameter ranges highlighted by the vertical regions in Fig.~\ref{fig:score:stability:COIL20} are sensibly the same for the different numbers of labeled instances selected per label (3, 5, 10 and 15).
+% Fig.~\ref{fig:score:stability:COIL20} demonstrates that the best hyperparameter value ranges are sensibly the same for the different numbers of labeled instances selected per label (3, 5, 10 and 15).
 
 % In the case of LargeVis, there are flat regions where $f_{score}$ does not change too much.
 % The reason for this behavior is that LargeVis is designed for large dataset and, thus, when applied to medium-sized datasets, a large set of perplexity values yield the same results.
@@ -227,7 +232,13 @@ Fig.~\ref{fig:score:stability:COIL20} demonstrates that the best hyperparameter 
 % The clearer these groups are highlighted, the more likely the similar constraints of the points within groups and the dissimilar constraints of the points between different groups are preserved.
 % The proposed score has well captured this characteristic, it reaches to the high values only when both the similar and dissimilar constraints are preserved.
 % Thus $f_{score}$ can be used to quantitatively evaluate the quality of the visualization and can be comparable to the state of the art quality metrics.
-In summary, for all selected datasets, the above results indicate that 10 labeled instances per class ($k = 10$) is enough for obtaining a stable score. In the next section, we show that different sets of labeled instances, which does not correspond to class labels, can be used as prior knowledge to generate constraints. This advocate for the flexibility of $f_{score}$, as any form of prior knowledge that can be formulated by pairwise constraints can be used.
+In summary, for all selected datasets, the above results indicate that 10 labeled instances per class is enough for obtaining a stable score.
+The generated constraints from labeled points can capture the class-based relationship (local structure) that is typically well revealed by all three examined DR methods.
+In Sec.~\ref{sec:result:flexibility}, we show that $f_{score}$ with different sets of labeled instances, which does not necessarily correspond to class labels,
+can be used to encode the users' desired structure in the data.
+% can be used as prior knowledge to generate constraints.
+% This advocate for the flexibility of $f_{score}$, as any form of prior knowledge that can be formulated by pairwise constraints can be used.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Hyperparameter Tuning with $f_{score}$}\label{sec:result:bo}
