@@ -287,6 +287,13 @@ The visualizations extracted thanks to the different scores make it easier to di
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{BayOpt for Tuning Two Parameters of UMAP}\label{sec:result:bo:umap}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{umap2D_compare}
+    \caption{Compare $f_{score}$ and $AUC_{log}RNX$ for UMAP embeddings.}
+    \label{fig:score:umap2D:compare}
+\end{figure}
+
 In this section, we show that using BayOpt with an $f_{score}$ evaluating a two-hyperparameters DR also results in picking quality visualizations. In order to show that, UMAP hyperparameters are tuned. The first UMAP hyperparameter, \emph{n\_neighbors}, plays the same role as the perplexity of $t$-SNE and LargeVis, which controls how large structures in the data should be conserved.
 \emph{n\_neighbors} affects the construction of the k-neighbor graph in HD.
 A small value leads to many small connected components in the visualization, while a large value provides a boarder view of the data.
@@ -299,31 +306,77 @@ Finding the best combination of these two hyperparameters for a specified datase
 A naive approach requires thousands of evaluations.
 $f_{score}$ and $AUC_{log}RNX$ are evaluated for all UMAP embeddings, based on a grid of around 150 values for \emph{n\_neighbors} $\in [2, N/3]$ (depending on the size of the dataset), and 10 values for \emph{min\_dist} $\in [0.001, 1]$ in logarithmic scale.
 
-\begin{figure}%[pos=h]
-    \begin{subfigure}[b]{.76\linewidth}
+\begin{figure*}%[pos=h]
+    \begin{subfigure}[b]{.32\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{COIL20_umap_auc_rnx}
-        \caption{$AUC_{log}RNX$ score.}
-        \label{fig:bo:umap:COIL20:rnx}
+        \includegraphics[width=\linewidth]{DIGITS_umap_predicted_score}
+        \caption{\emph{DIGITS}}
+        \label{fig:bo:umap:predict:DIGITS}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.76\linewidth}
+    \begin{subfigure}[b]{.32\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{COIL20_umap_qij_score}
-        \caption{$f_{score}$}
-        \label{fig:bo:umap:COIL20:fscore}
+        \includegraphics[width=\linewidth]{COIL20_umap_predicted_score}
+        \caption{\emph{COIL20}}
+        \label{fig:bo:umap:predict:COIL20}
     \end{subfigure}
     ~
-    \begin{subfigure}[b]{.98\linewidth}
+    \begin{subfigure}[b]{.32\linewidth}
         \centering
-        \includegraphics[width=\textwidth]{COIL20_umap_predicted_score}
-        \caption{BayOpt predicted score}
-        \label{fig:bo:umap:COIL20:prediction}
+        \includegraphics[width=\linewidth]{FASHION1000_umap_predicted_score}
+        \caption{\emph{FASHION\_1K}}
+        \label{fig:bo:umap:predict:FASHION1K}
+    \end{subfigure}
+    \vfill
+    \begin{subfigure}[b]{.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{FASHION_MOBILENET_umap_predicted_score}
+        \caption{\emph{FASH\_MOBI}}
+        \label{fig:bo:umap:predict:FASHMOBI}
     \end{subfigure}
     ~
-    \caption{BayOpt for tuning the two hyperparameters of UMAP for \emph{COIL20}.}
-    \label{fig:bo:umap:COIL20}
-\end{figure}
+    \begin{subfigure}[b]{.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{20NEWS5_umap_predicted_score}
+        \caption{\emph{5NEWS}}
+        \label{fig:bo:umap:predict:5NEWS}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{NEURON_1K_umap_predicted_score}
+        \caption{\emph{NEURON\_1K}}
+        \label{fig:bo:umap:predict:NEURON1K}
+    \end{subfigure}
+    \caption{BayOpt for tuning the two hyperparameters of UMAP for all datasets.}
+    \label{fig:bo:umap:predict}
+\end{figure*}
+
+% \begin{figure}%[pos=h]
+%     \begin{subfigure}[b]{.76\linewidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{COIL20_umap_auc_rnx}
+%         \caption{$AUC_{log}RNX$ score.}
+%         \label{fig:bo:umap:COIL20:rnx}
+%     \end{subfigure}
+%     ~
+%     \begin{subfigure}[b]{.76\linewidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{COIL20_umap_qij_score}
+%         \caption{$f_{score}$}
+%         \label{fig:bo:umap:COIL20:fscore}
+%     \end{subfigure}
+%     ~
+%     \begin{subfigure}[b]{.98\linewidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{COIL20_umap_predicted_score}
+%         \caption{BayOpt predicted score}
+%         \label{fig:bo:umap:COIL20:prediction}
+%     \end{subfigure}
+%     ~
+%     \caption{BayOpt for tuning the two hyperparameters of UMAP for \emph{COIL20}.}
+%     \label{fig:bo:umap:COIL20}
+% \end{figure}
 
 Fig.~\ref{fig:bo:umap:COIL20:rnx} and Fig.~\ref{fig:bo:umap:COIL20:fscore} show $AUC_{log}RNX$ and $f_{score}$ for every combination of hyperparameters for \emph{COIL20}.
 % $AUC_{log}RNX$ cannot investigates the relevant of the two hyperparameters, as indicated by the homogeneous zones on the left and on top of Fig.~\ref{fig:bo:umap:COIL20:rnx}.
