@@ -71,7 +71,11 @@ Dataset name & Samples & Description \\
 \subsection{Constraint Generation}\label{sec:xp:constraint}
 
 The input for our constraint preserving scores is an ensemble of constraints in the form of similar and dissimilar links.
-When labels are provided, they can be used to generate constraints. However, our method does not need many constraints to be stable, which means that we use a small subset of labeled instances to generate the constraints.
+% When labels are provided, they can be used to generate constraints. However, our method does not need many constraints to be stable, which means that we use a small subset of labeled instances to generate the constraints.
+However, it is hard to control the quality of the constraints when they are selected manually.
+For example, a similar link between two different data points is not expected.
+The number of constraints of each type also affects the stability of the score.
+In order to correctly evaluate the score function, we do not use the pairwise constraints directly, but use a small subset of labeled data points to generate the constraints instead.
 
 Given a dataset of $C$ classes, $k$ labeled instances are randomly considered for each class.
 Suppose that the number of instances in each class is larger than $k$ ($k$ is usually very small),
@@ -88,8 +92,10 @@ The number of all possible dissimilar links is therefore given by
     |\mathcal{D}| = {C \choose 2} k^2 = \frac{1}{2} C (C - 1) k^2.
 \end{equation}
 
-This means that the more labeled instances are considered (i.e., $k$ is larger), the more constraints are generated and the more stable the $f_{score}$ is.
-For instance, with 10 labeled points for each of the 10 classes of the DIGITS dataset, 450 similar links and 4500 dissimilar links can be generated.
+% This means that the more labeled instances are considered (i.e., $k$ is larger), the more constraints are generated and the more stable the $f_{score}$ is.
+% For instance, with 10 labeled points for each of the 10 classes of the DIGITS dataset, 450 similar links and 4500 dissimilar links can be generated.
+The labeled points are used to indicate the relationship of belonging in the same of in different groups.
+The points can be freely chosen and grouped by the users to indicate the relationship that they care about.
 The experimental setup for proving empirically the reliability of the proposed score is presented in the next section.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -125,12 +131,103 @@ As shown in the next section, the combination of BayOpt with $f_{score}$ produce
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{$f_{score}$}\label{sec:result:fscore}
+The behaviour of $f_{score}$ for the embeddings of three methods with all six experimented datasets is illustrated in Fig.~\ref{fig:score:all}.
+The hyperparameter values are shown in logarithmic scale.
+The score values for UMAP are shown for {min\_dist= 0.1}.
+The contour plots of $f_{score}$ for all values of {min\_dist} are in Fig.~\ref{fig:score:umap2D:compare}.
+The score values are calculated for a set of pairwise constraints generated from 10 labeled points per class for each dataset.
+The pairwise constraints generated from these labeled points are sufficient to analyse the behaviour of $f_{score}$.   
+For instance, with 10 labeled points for each of the 10 classes of DIGITS dataset, 450 similar links and 4500 dissimilar links can be generated.
+The effect of the number of labeled points on $f_{score}$ will be evaluated in the next section.
+
 \begin{figure*}
     \centering
     \includegraphics[width=\linewidth]{all_scores_all_methods}
-    \caption{$f_{score}$ for all datasets/all methods.}
-    \label{fig:fscore:all}
+    \caption{$f_{score}$ for all three methods for all six datasets.}
+    \label{fig:score:all}
 \end{figure*}
+
+The key finding is that, $f_{score}$ has the form of a convex function: it increases when the number of neighbors (perplexity/{n\_neighbors}) increases, reaches its maximum value, and then decreases when the number of neighbors is too large.
+The function of score values is not smooth as the input constraints vary,
+% but all DR methods share this approximate convex form.
+but it forms suggests that finding its global maximum is feasible.
+In the case of LargeVis, there are flat regions where $f_{score}$ does not change too much.
+The reason is that LargeVis is designed for large dataset and, thus, when applied to medium-sized datasets,
+% a large set of perplexity values yield the same results.
+the impact of perplexity is not important.
+In contrast, $t$-SNE and UMAP are very sensitive to their hyperparameters.
+Intuitively, when the number of neighbors is small, the points are not grouped in the visualization.
+The similar links are unlikely preserved while the dissimilar links have more chance to be preserved as the points stay away from each other.
+% In this case $f_{score}(\mathcal{S})$ is very low and $f_{score}(\mathcal{D})$ is high, that makes $f_{score}$ low.
+Inversely, when the number of neighbors is large, every point is neighbor to each other, which make the visualization a big cluster.
+In this case, the similar constraints are likely preserved while the dissimilar constraints are not.
+% that make $f_{score}(\mathcal{S})$ high and $f_{score}(\mathcal{D})$ very low, and $f_{score}$ is low as a consequence.
+Due to these trade-offs in both cases, $f_{score}$ in overall is always low. 
+
+In summary, the local structures (neighborhood information) of a dataset are presented by the small groups in the visualization.
+The clearer these groups are highlighted, the more likely the similar constraints of the points within groups and the dissimilar constraints of the points between different groups are preserved.
+The proposed score has well captured this characteristic, it reaches to the high values only when both the similar and dissimilar constraints are preserved.
+Thus $f_{score}$ can be used to quantitatively evaluate the quality of the visualization and can be comparable to the state of the art quality metrics.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Stability of $f_{score}$}\label{sec:result:stability}
+
+The proposed constraint preserving score is a function of the pairwise constraints that may be generated automatically from input labels.
+% In Eq.~\ref{eq:|S|} and Eq.~\ref{eq:|D|}, $k$ represents the number of instances that we consider for each given label.
+% This $k$ is an hyperparameter of $f_{score}$.
+% While it may be argued that the automatic tuning of DR hyperparameters is replaced by the manual tuning of the $f_{score}$ hyperparameter, this section shows that $f_{score}$ values are stable under changes of $k$.
+% Another question that must be answered is whether if $f_{score}$ is stable for a fixed $k$, but with different constraints chosen given this $k$.
+% The more labeled points 
+
+In order to answer these two questions, $f_{score}$ is evaluated for five different numbers of labeled instances (3, 5, 10 and 15 instances per class).
+The labeled instances are independent and not accumulated. This means that, for instance, the set of labeled instances in the second setting does not contain the labeled instances in the first setting.
+In each setting, for a fixed number of labeled instances, 20 different sets of pairwise constraints are generated.
+
+\begin{figure}%[pos=h]
+\begin{subfigure}[b]{0.32\linewidth}
+     \centering
+     \includegraphics[width=\linewidth]{COIL20_umap_scores}
+     \caption{UMAP}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\linewidth}
+     \centering
+     \includegraphics[width=\linewidth]{COIL20_tsne_scores}
+     \caption{$t$-SNE}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\linewidth}
+     \centering
+     \includegraphics[width=\linewidth]{COIL20_largevis_scores}
+     \caption{LargeVis}
+\end{subfigure}
+\caption{Stability of the constraint preserving scores with UMAP, $t$-SNE and LargeVis for COIL20 dataset.
+The filled region highlights the best range of hyperparameters which make the score value superior to 96\% of maximum score value.}
+\label{fig:score:stability:COIL20}
+\end{figure}
+
+Fig.~\ref{fig:score:stability:COIL20} shows $f_{score}$ results for $t$-SNE, LargeVis and UMAP (with fixed {min\_dist} of 0.1) embeddings of \emph{COIL20}.
+The results are shown for \emph{COIL20}, but are also true for the other selected datasets.
+When the number of labeled instances increases, $f_{score}$ is more stable since the variance (presented by filled regions in Fig.~\ref{fig:score:stability:COIL20}) decreases.
+
+Selecting the best hyperparameter values corresponding to the maximum score may not be the best choice, since several hyperparameter values can give almost the same $f_{score}$.
+In order to tackle this problem, a range of hyperparameter values that have a $f_{score}$ larger than a threshold is selected. For instance, the threshold can be 96\% of the maximum $f_{score}$ value.
+Fig.~\ref{fig:score:stability:COIL20} demonstrates that the best hyperparameter value ranges are sensibly the same for the different numbers of labeled instances selected per label (3, 5, 10 and 15).
+
+% In the case of LargeVis, there are flat regions where $f_{score}$ does not change too much.
+% The reason for this behavior is that LargeVis is designed for large dataset and, thus, when applied to medium-sized datasets, a large set of perplexity values yield the same results.
+% In contrast, $t$-SNE and UMAP are very sensitive to their hyperparameters.
+% Intuitively, when the number of neighbors is small, the points are not grouped in the visualization.
+% The similar links are unlikely preserved while the dissimilar links have more change to be preserved since the points stay away from each other.
+% In this case $f_{score}(\mathcal{S})$ is very low and $f_{score}(\mathcal{D})$ is high, that makes $f_{score}$ low.
+% Inversely, when the number of neighbors is large, every point is neighbor to each other, which make the visualization a big cluster.
+% In this case, the similar constraints are likely preserved while the dissimilar constraints are not, that make $f_{score}(\mathcal{S})$ high and $f_{score}(\mathcal{D})$ very low, and $f_{score}$ is low as a consequence.
+
+% In summary, the local structures (neighborhood information) of a dataset are presented by the small groups in the visualization.
+% The clearer these groups are highlighted, the more likely the similar constraints of the points within groups and the dissimilar constraints of the points between different groups are preserved.
+% The proposed score has well captured this characteristic, it reaches to the high values only when both the similar and dissimilar constraints are preserved.
+% Thus $f_{score}$ can be used to quantitatively evaluate the quality of the visualization and can be comparable to the state of the art quality metrics.
+In summary, for all selected datasets, the above results indicate that 10 labeled instances per class ($k = 10$) is enough for obtaining a stable score. In the next section, we show that different sets of labeled instances, which does not correspond to class labels, can be used as prior knowledge to generate constraints. This advocate for the flexibility of $f_{score}$, as any form of prior knowledge that can be formulated by pairwise constraints can be used.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{BayOpt for Hyperparameter Tuning with $f_{score}$}\label{sec:result:bo}
@@ -267,8 +364,8 @@ In order to compare thoroughly the best solutions found by these three scores, m
 % See figure above
 Four metamaps for the \emph{NEURON\_1K} dataset are presented in Fig.~\ref{fig:tsne:meta:NEURON1K}. Each metamap is used to visualize the solution space of a DR visualization, i.e., to represent embeddings with different perplexities on a 2D space.
 Each point in this metamap is an embedding corresponding to one perplexity, meaning that two points close together correspond to perplexities that provide similar visualizations.
-The metamaps presented in this section contains points that are $t$-SNE visualizations, and are built by UMAP with \emph{n\_neighbors} = 50 and \emph{min\_dist} = 0.1.
-UMAP is used to build the metamap because of its capacity to consider the overall view, in addition to its focus on neighborhoods. Indeed, the large value of \emph{n\_neighbors} (50) is used to obtain an overall view about the global relation of all embeddings.
+The metamaps presented in this section contains points that are $t$-SNE visualizations, and are built by UMAP with {n\_neighbors} = 50 and {min\_dist} = 0.1.
+UMAP is used to build the metamap because of its capacity to consider the overall view, in addition to its focus on neighborhoods. Indeed, the large value of {n\_neighbors} (50) is used to obtain an overall view about the global relation of all embeddings.
 
 In Fig.~\ref{fig:tsne:meta:NEURON1K}, some selected perplexity values are highlighted in the metamaps, and the corresponding visualizations are shown below them.
 The second, third and fourth metamaps are colored by the values of $f_{score}$, $AUC_{log}RNX$ and the BIC-based score respectively.
@@ -294,17 +391,17 @@ The visualizations extracted thanks to the different scores make it easier to di
     \label{fig:score:umap2D:compare}
 \end{figure}
 
-In this section, we show that using BayOpt with an $f_{score}$ evaluating a two-hyperparameters DR also results in picking quality visualizations. In order to show that, UMAP hyperparameters are tuned. The first UMAP hyperparameter, \emph{n\_neighbors}, plays the same role as the perplexity of $t$-SNE and LargeVis, which controls how large structures in the data should be conserved.
-\emph{n\_neighbors} affects the construction of the k-neighbor graph in HD.
+In this section, we show that using BayOpt with an $f_{score}$ evaluating a two-hyperparameters DR also results in picking quality visualizations. In order to show that, UMAP hyperparameters are tuned. The first UMAP hyperparameter, {n\_neighbors}, plays the same role as the perplexity of $t$-SNE and LargeVis, which controls how large structures in the data should be conserved.
+{n\_neighbors} affects the construction of the k-neighbor graph in HD.
 A small value leads to many small connected components in the visualization, while a large value provides a boarder view of the data.
-A suggested range for \emph{n\_neighbors} is $[5, 50]$.
+A suggested range for {n\_neighbors} is $[5, 50]$.
 
-The second UMAP hyperparameter, \emph{min\_dist}, affects directly the output since it controls how tightly points are packed together. It is considered to be most important hyperparameter for UMAP \cite{mcinnes2018umap}.
-The recommended range for \emph{min\_dist} is $[0.001, 0.5]$.
+The second UMAP hyperparameter, {min\_dist}, affects directly the output since it controls how tightly points are packed together. It is considered to be most important hyperparameter for UMAP \cite{mcinnes2018umap}.
+The recommended range for {min\_dist} is $[0.001, 0.5]$.
 
 Finding the best combination of these two hyperparameters for a specified dataset is hard.
 A naive approach requires thousands of evaluations.
-$f_{score}$ and $AUC_{log}RNX$ are evaluated for all UMAP embeddings, based on a grid of around 150 values for \emph{n\_neighbors} $\in [2, N/3]$ (depending on the size of the dataset), and 10 values for \emph{min\_dist} $\in [0.001, 1]$ in logarithmic scale.
+$f_{score}$ and $AUC_{log}RNX$ are evaluated for all UMAP embeddings, based on a grid of around 150 values for {n\_neighbors} $\in [2, N/3]$ (depending on the size of the dataset), and 10 values for {min\_dist} $\in [0.001, 1]$ in logarithmic scale.
 
 \begin{figure*}%[pos=h]
     \begin{subfigure}[b]{.32\linewidth}
@@ -380,7 +477,7 @@ $f_{score}$ and $AUC_{log}RNX$ are evaluated for all UMAP embeddings, based on a
 
 Fig.~\ref{fig:bo:umap:COIL20:rnx} and Fig.~\ref{fig:bo:umap:COIL20:fscore} show $AUC_{log}RNX$ and $f_{score}$ for every combination of hyperparameters for \emph{COIL20}.
 % $AUC_{log}RNX$ cannot investigates the relevant of the two hyperparameters, as indicated by the homogeneous zones on the left and on top of Fig.~\ref{fig:bo:umap:COIL20:rnx}.
-% Indeed, when \emph{n\_neighbors} is small (between 3 and 8), \emph{min\_dist} does not have strong affect. And when \emph{min\_dist} is large enough (larger than 0.1), \emph{n\_neighbors} does not have strong affect either.
+% Indeed, when {n\_neighbors} is small (between 3 and 8), {min\_dist} does not have strong affect. And when {min\_dist} is large enough (larger than 0.1), {n\_neighbors} does not have strong affect either.
 As it can be observed in Fig.~\ref{fig:bo:umap:COIL20:fscore}, $f_{score}$ can identify a small zone of good combinations, which makes the hyperparameter tuning task easier and more reliable. The prediction of the best visualization by BayOpt based on $f_{score}$ is presented in Fig.~\ref{fig:bo:umap:COIL20:prediction}.
 With BayOpt, only 40 combinations are selected and evaluated to find the best visualization, instead of evaluating thousands of combinations.
 
@@ -403,67 +500,9 @@ The first visualization (bottom left of Fig.~\ref{fig:umap:meta:COIL20}) present
 The next two visualizations are considered good by $AUC_{log}RNX$, but not by $f_{score}$.
 In the second visualization, several groups are overlapping. Since the points in same group are not close together, $f_{score}$ is smaller than for the first visualization.
 The last visualization belongs to a region of points in the metamaps that have low values for both scores.
-These regions are the ones that are never highlighted in the metamaps, which correspond to visualizations that have a too large \emph{n\_neighbors} and/or a too large \emph{min\_dist}. 
+These regions are the ones that are never highlighted in the metamaps, which correspond to visualizations that have a too large {n\_neighbors} and/or a too large {min\_dist}. 
 
 In the next section, we show that $f_{score}$ is stable w.r.t. the number of constraints.
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Stability of $f_{score}$}\label{sec:result:stability}
-
-The proposed constraint preserving score is a function of the pairwise constraints that may be generated automatically from input labels. In Eq.~\ref{eq:|S|} and Eq.~\ref{eq:|D|}, $k$ represents the number of instances that we consider for each given label. This $k$ is an hyperparameter of $f_{score}$. While it may be argued that the automatic tuning of DR hyperparameters is replaced by the manual tuning of the $f_{score}$ hyperparameter, this section shows that $f_{score}$ values are stable under changes of $k$. Another question that must be answered is whether if $f_{score}$ is stable for a fixed $k$, but with different constraints chosen given this $k$.
-
-In order to answer these two questions, $f_{score}$ is evaluated for five different numbers of labeled instances (3, 5, 10 and 15 instances per class).
-The labeled instances are independent and not accumulated. This means that, for instance, the set of labeled instances in the second setting does not contain the labeled instances in the first setting.
-In each setting, for a fixed number of labeled instances, 20 different sets of pairwise constraints are generated.
-
-\begin{figure}%[pos=h]
-\begin{subfigure}[b]{0.32\linewidth}
-     \centering
-     \includegraphics[width=\linewidth]{COIL20_umap_scores}
-     \caption{UMAP}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.32\linewidth}
-     \centering
-     \includegraphics[width=\linewidth]{COIL20_tsne_scores}
-     \caption{$t$-SNE}
-\end{subfigure}
-\hfill
-\begin{subfigure}[b]{0.32\linewidth}
-     \centering
-     \includegraphics[width=\linewidth]{COIL20_largevis_scores}
-     \caption{LargeVis}
-\end{subfigure}
-\caption{Stability of the constraint preserving scores with UMAP, $t$-SNE and LargeVis for COIL20 dataset.
-The filled region highlights the best range of hyperparameters which make the score value superior to 96\% of maximum score value.}
-\label{fig:score:stability:COIL20}
-\end{figure}
-
-Fig.~\ref{fig:score:stability:COIL20} shows $f_{score}$ results for $t$-SNE, LargeVis and UMAP (with fixed \emph{min\_dist} of 0.1) embeddings of \emph{COIL20}.
-The hyperparameter values (perplexity and \emph{n\_neighbor}) are in logarithmic scale.
-The results are shown for \emph{COIL20}, but are also true for the other selected datasets.
-First, the proposed constraint preserving score has the form of a convex function: it increases when the number of neighbors (perplexity/\emph{n\_neighbors}) increases, reaches its maximum value, and then decreases when the number of neighbors is too large.
-The function of score values is not smooth but all DR methods share this approximate convex form.
-Second, when the number of labeled instances increases, $f_{score}$ is more stable since the variance (presented by filled regions in Fig.~\ref{fig:score:stability:COIL20}) decreases.
-
-Selecting the best hyperparameter values corresponding to the maximum score may not be the best choice, since several hyperparameter values can give almost the same $f_{score}$.
-In order to tackle this problem, a range of hyperparameter values that have a $f_{score}$ larger than a threshold is selected. For instance, the threshold can be 96\% of the maximum $f_{score}$ value.
-Fig.~\ref{fig:score:stability:COIL20} demonstrates that the best hyperparameter value ranges are sensibly the same for the different numbers of labeled instances selected per label (3, 5, 10 and 15).
-
-In the case of LargeVis, there are flat regions where $f_{score}$ does not change too much.
-The reason for this behavior is that LargeVis is designed for large dataset and, thus, when applied to medium-sized datasets, a large set of perplexity values yield the same results.
-In contrast, $t$-SNE and UMAP are very sensitive to their hyperparameters.
-% Intuitively, when the number of neighbors is small, the points are not grouped in the visualization.
-% The similar links are unlikely preserved while the dissimilar links have more change to be preserved since the points stay away from each other.
-% In this case $f_{score}(\mathcal{S})$ is very low and $f_{score}(\mathcal{D})$ is high, that makes $f_{score}$ low.
-% Inversely, when the number of neighbors is large, every point is neighbor to each other, which make the visualization a big cluster.
-% In this case, the similar constraints are likely preserved while the dissimilar constraints are not, that make $f_{score}(\mathcal{S})$ high and $f_{score}(\mathcal{D})$ very low, and $f_{score}$ is low as a consequence.
-
-% In summary, the local structures (neighborhood information) of a dataset are presented by the small groups in the visualization.
-% The clearer these groups are highlighted, the more likely the similar constraints of the points within groups and the dissimilar constraints of the points between different groups are preserved.
-% The proposed score has well captured this characteristic, it reaches to the high values only when both the similar and dissimilar constraints are preserved.
-% Thus $f_{score}$ can be used to quantitatively evaluate the quality of the visualization and can be comparable to the state of the art quality metrics.
-In summary, for all selected datasets, the above results indicate that 10 labeled instances per class ($k = 10$) is enough for obtaining a stable score. In the next section, we show that different sets of labeled instances, which does not correspond to class labels, can be used as prior knowledge to generate constraints. This advocate for the flexibility of $f_{score}$, as any form of prior knowledge that can be formulated by pairwise constraints can be used.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
