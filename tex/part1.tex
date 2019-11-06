@@ -218,13 +218,15 @@ Bayesian optimization (BayOpt) is a strategy for finding the extremum (minimum o
 The objective function can be any complex non-convex black-box function that does not have a closed-form expression or its derivative may not be accessible.
 Finding directly the extremum of this kind of function is therefore impossible.
 However, the function values, possibly noisy, can be observed for some sampled input values.
-The goal of BayOpt is not to approximate the unknown objective function $f$ but instead
-estimate its extremum (generally speaking, its maximum) from the ensemble of observations
-in form of pair of input sample $x$ and function values $f({\bf x})$.
-
-Let define $f({\bf x}_i)$ as the observation of the target function value for the $i^{th}$ sample ${\bf x}_i$.
+The goal of BayOpt is not to approximate the unknown objective function $f$ but instead estimate its extremum (generally speaking, its maximum) from the ensemble of observations
+in form of pair of input sample and function values.
+% Let define $f({\bf x}_i)$ as the observation of the target function value for the $i^{th}$ sample ${\bf x}_i$.
 BayOpt constructs a statistical model describing the relationship between
 the tuned hyperparameters and the target function.
+Based on the pass observation, BayOpt predict the most potential hyperparameters to evaluate which should make the target function value towards its extremum.
+There is a trade-off between exploration (discover the parameter space where the target function is very uncertainty) and exploitation (trying the parameter where the objective function is expected to be high).
+Several strategies exist to guide the optimization process to discover the parameter space: \emph{Maximum Probability of Improvement (MPI)}~\cite{}, \emph{Expected Improvement (EI)}~\cite{}, \emph{lower or upper confidence bound (UCB, LCB)}~\cite{}.
+
 Bayesian model-based optimization is intuitive: it chooses the next input values to evaluate, based on past results, in order to concentrate the search on more promising values. BayOpt has been applied successfully to the problem of hyperparameters tuning \cite{snoek2012practical} or experimental design / randomized experiments \cite{letham2019constrained}.
 In supervised setting or in clustering problem where we can access the class labels, the target function is simply a metric that measures the quality of the prediction or the clustering.
 However in a visualization problem, the target function for measuring the quality of the visualization is more difficult to define.
