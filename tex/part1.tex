@@ -3,7 +3,7 @@
 %\par
 %(1) Keep the section 1 (context, problematic).
 
-In many contexts (e.g. industry, academic research, etc.), users want to get insights about their data. In such cases, the number of features characterizing each instance in their dataset is often too large to understand their data. The problem of {\it dimensionality reduction} (DR) is to reduce a dataset containing $D$ features for $N$ instances (providing an $N \times D$ matrix) to a new dataset of $M$ dimensions, such that $M \ll D$. When this new number of dimensions $m$ equals two, the dimensionality reduction result allows users to see their data in a two-dimensional space by plotting the remaining two dimensions in a scatter plot. This problem is called {\it visualization}: from provided data with too many features, visualization algorithms provide a projection of these data in a two-dimensional space in such a way that the information loss is minimized. The resulting $N \times 2$ matrix, often called {\it embedding}, can then be visualized.
+In many contexts (e.g. industry, academic research, etc.), users want to get insights about their data. In such cases, the number of features characterizing each instance in their dataset is often too large to understand their data. The problem of {\it dimensionality reduction} (DR) is to reduce a dataset containing $D$ features for $N$ instances (providing an $N \times D$ matrix) to a new dataset of $M$ dimensions, such that $M \ll D$. When this new number of dimensions $M$ equals two, the dimensionality reduction result allows users to see their data in a two-dimensional space by plotting the remaining two dimensions in a scatter plot. This problem is called {\it visualization}: from provided data with too many features, visualization algorithms provide a projection of these data in a two-dimensional space in such a way that the information loss is minimized. The resulting $N \times 2$ matrix, often called {\it embedding}, can then be visualized.
 % For instance, Fig.~\ref{subfig:digit_viz_example} represents a visualization of 200 hand-written digits images from the well-known MNIST dataset and Fig.~\ref{subfig:digit_example} shows some examples of the raw image data.
 
 % \begin{figure}[!htb]
@@ -27,13 +27,13 @@ Some DR visualization algorithms require to tune one or more hyperparameters (e.
 \begin{figure*}[!ht]
   \centering
   \includegraphics[width=\linewidth]{figures/MNIST-SMALL_examples}
-  \caption{Visualization of the \emph{MNIST-SMALL} dataset by $t$-SNE with five different perplexity values preserving the local (left) to global (right) topology of the dataset. The dataset contains 1797 gray-scale 8x8 images of ten handwritten digits. The colors correspond to the digit labels. Obtaining compact clusters (perplexities of 20 and 50) is usually considered better.}
+  \caption{Visualization of the \emph{DIGITS} dataset by $t$-SNE with five different perplexity values preserving the local (left) to global (right) topology of the dataset. The dataset contains 1797 gray-scale 8x8 images of ten handwritten digits. The colors correspond to the digit labels. Obtaining compact clusters (perplexities of 20 and 50) is usually considered better.}
   \label{fig:mnist_perps}
 \end{figure*}
 
-In this paper, we show how to automatically choose the hyperparameters of DR techniques, such as the {\it perplexity} of $t$-SNE, by considering pariwise constraints.
+In this paper, we show how to automatically choose the hyperparameters of DR techniques, such as the {\it perplexity} of $t$-SNE, by considering pairwise constraints.
 % We propose to consider user constraints on the dataset of interest to maximize the chance for the most suitable visualization to be presented to the user.
-The constraints are in form of relationships between object pairs, which are easier to express and understand for users. These user pairwise constraints are first transformed into a quantitative measure called \emph{constraint-preserving score} and then used to find a range of hyperparameter values corresponding to the best visualizations that respect the user needs. A Bayesian optimization approach~\cite{mockus1978application, brochu2010tutorial} is used to find this range.
+The constraints are in form of relationships between object pairs, which are easier to express and understand for users. These user pairwise constraints are first transformed into a quantitative measure called \emph{constraint-preserving score} and then used to find a range of hyperparameter values corresponding to the best visualizations that respect the user needs. A Bayesian optimization approach~\cite{mockus1974BO, mockus1978application} is used to find this range.
 
 This approach of finding the best hyperparameter values with an external score, instead of modifying the chosen DR methods, allows us to apply the technique to all kind of DR methods. In that sense, the approach is DR-method agnostic. Furthermore, our approach is a step towards the automatization of the ML pipeline (AutoML) in the context of DR, while preserving explainability. Indeed, when using the constraint for choosing the best hyperparameter values, visualizing these constraints makes it possible to explain the choice of visualization. This may ease the use of DR methods by end users who want to apply the visualization methods to their own data without caring about the complex algorithms and hyperparameters. Indeed, end users can use our method as a black-box hyperparameter tuning toolbox. Furthermore, the approach can also be used in the context of DR experts who want to analyze the impact of hyperparameters in order to evaluate the quality of visualizations.
 
@@ -44,7 +44,7 @@ This paper is organized as follows. Section~\ref{sec:background} presents the ba
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background and Related Work}\label{sec:background}
 
-This section presents the background related to our work. Dimensionality reduction and techniques that are used in our evaluation (i.e $t$-SNE, UMAP and LargeVis) are presented in Section~\ref{subsec:background_DR}. Quality measures that are used in the literature to characterize the quality of DR embeddings are presented in Section~\ref{subsec:qual_metrics_background}. The use of user constraints in clustering and in DR is presented in Section~\ref{subsec:user_constraints_clustering_DR}. Finally, the ways to choose hyperparameters for DR techniques are reviewed in Section~\ref{subsec:tune_HP}, and the way to tune it with Bayesian optimization is presented in Section~\ref{subsec:tune_with_BayOpt}.
+This section presents the background related to our work. Dimensionality reduction techniques that are used in our evaluation (i.e $t$-SNE, UMAP and LargeVis) are presented in Section~\ref{subsec:background_DR}. Quality measures that are used in the literature to characterize the quality of DR embeddings are presented in Section~\ref{subsec:qual_metrics_background}. The use of user constraints in clustering and in DR is presented in Section~\ref{subsec:user_constraints_clustering_DR}. Finally, the ways to choose hyperparameters for DR techniques are reviewed in Section~\ref{subsec:tune_HP}, and the way to tune it with Bayesian optimization is presented in Section~\ref{subsec:tune_with_BayOpt}.
 
 \subsection{Dimensionality Reduction for Visualization}\label{subsec:background_DR}
 
@@ -116,7 +116,7 @@ Now that the state-of-the-art DR visualization methods that contain hyperparamet
 \subsection{Visualization Quality Metrics}\label{subsec:qual_metrics_background}
 
 There exist several metrics to evaluate the quality of an embedding. This section presents five of these metrics that are used in this paper for evaluating the embedding. 
-In this paper, among the possible quality measures, clustering quality measures are not considered because cluster metrics need labeled data for measurement (e.g. the image-related number in the dataset MNIST), which would restrict the datasets on which we can evaluate the user constraints approach.
+In this paper, among the possible quality measures, clustering quality measures are not considered because clustering metrics need labeled data for measurement (e.g. the image-related number in the dataset DIGITS), which would restrict the datasets on which we can evaluate the user constraints approach.
 For these reasons, we only use cluster-label agnostic metrics.
 We also avoid quality measures that are linked to the objective function of SNE, e.g. Neighborhood Retrieval Visualizer (NeRV) \cite{venna2010}, (i) because they need the evaluation of their own perplexity parameter and (ii) because of the bias of measuring the quality of $t$-SNE and LargeVis with a quality metric too closely related to SNE.
 
@@ -160,7 +160,7 @@ The objective of this paper is to show that user-constraints can be used for aut
 \subsection{Choosing Hyperparameter Values of DR Methods}\label{subsec:tune_HP}
 
 The right hyperparameter value to choose depends on the characteristics of the dataset such as the number of instances (size), the topology (structure) or the density (distribution) of instances, which makes it hard to select the best one.
-Concerning $t$-SNE, the original paper of van der Maaten et al. \cite{maaten2008tsne} suggests typical values between 5 and 50.
+Concerning $t$-SNE for instance, the original paper of van der Maaten et al. \cite{maaten2008tsne} suggests typical values between 5 and 50.
 However, in practice, the embedding can change drastically between two different perplexity values. Therefore, there is no evidence to ensure that the suggested perplexities are good for all datasets.
 The original paper also proposes a simple method to select a good perplexity by looking at the KL loss produced by several perplexities and choose the lowest one, since it corresponds to a well-preserved neighborhood.
 However, the KL loss tends to naturally decrease when the perplexity increases \cite{cao2017automatic}, which  is confirmed by our experiments, as shown in Fig.~\ref{fig:klloss}. For this reason, it is unsuitable to use the KL loss for evaluating the embedding quality since a very high perplexity would be chosen.
@@ -194,9 +194,7 @@ Bayesian methods have often been used to select hyperparameter values in supervi
 % \end{itemize}
 
 Machine learning methods, in general, are controlled by one or more hyperparameters.
-The efficiency of a particular method is usually evaluated by a score,
-e.g., the F1-score for classification, V-Measure score for clustering or
-a visualization quality metric for DR.
+The efficiency of a particular method is usually evaluated by a score, e.g., the F1-score for classification, V-Measure score for clustering or a visualization quality metric for DR problems.
 The goal is to tune hyperparameters to
 maximize the model score.
 Trial-and-error is typically used to test several common combinations of hyperparameters,
@@ -210,31 +208,30 @@ and the number of values to test for each one.
 A better approach is random search \cite{bergstra2011algorithms}, in which the combinations are randomly sampled.
 In this strategy, one value for each hyperparameter is picked randomly to create a combination.
 However, the issue is that there are some hyperparameters that have a large effect, while some others have none.
-This means that checking the values for the hyperparameter that has no effect is a loss of resources.
-Thus, the question is how to jointly tune many hyperparameters at the same time
-with as few evaluations as possible.
+That means checking the values for the hyperparameter that has no effect is a loss of resources.
+Thus, the question is how to jointly tune many hyperparameters at the same time with as few evaluations as possible.
 
-Bayesian optimization (BayOpt) is a strategy for finding the extremum (minimum or maximum) of an objective function $f$~\cite{mockus1975on}.
+Bayesian optimization (BayOpt) is a strategy for finding the extremum (minimum or maximum) of an objective function $f$~\cite{mockus1974BO}.
 The objective function can be any complex non-convex black-box function that does not have a closed-form expression or its derivative may not be accessible.
 Finding directly the extremum of this kind of function is therefore impossible.
 However, the function values, possibly noisy, can be observed for some sampled input values.
 The goal of BayOpt is not to approximate the unknown objective function $f$ but instead estimate its extremum (generally speaking, its maximum) from the ensemble of observations
-in form of pair of input sample and function values.
+in form of pair of input samples and function values.
 % Let define $f({\bf x}_i)$ as the observation of the target function value for the $i^{th}$ sample ${\bf x}_i$.
 BayOpt constructs a statistical model describing the relationship between
 the tuned hyperparameters and the target function.
 Based on the pass observation, BayOpt predict the most potential hyperparameters to evaluate which should make the target function value towards its extremum.
 There is a trade-off between exploration (discover the parameter space where the target function is very uncertainty) and exploitation (trying the parameter where the objective function is expected to be high).
-Several strategies exist to guide the optimization process to discover the parameter space: \emph{Maximum Probability of Improvement (MPI)}~\cite{}, \emph{Expected Improvement (EI)}~\cite{}, \emph{lower or upper confidence bound (UCB, LCB)}~\cite{}.
+Several strategies exist to guide the optimization process to discover the parameter space: \emph{Maximum Probability of Improvement (MPI)}, \emph{Expected Improvement (EI)}, \emph{Lower or Upper Confidence Bound (UCB, LCB)}~\cite{brochu2010tutorial}.
 
-Bayesian model-based optimization is intuitive: it chooses the next input values to evaluate, based on past results, in order to concentrate the search on more promising values. BayOpt has been applied successfully to the problem of hyperparameters tuning \cite{snoek2012practical} or experimental design / randomized experiments \cite{letham2019constrained}.
+Moreover, Bayesian model-based optimization is intuitive: it chooses the next input values to evaluate, based on past results, in order to concentrate the search on more promising values. BayOpt has been applied successfully to the problem of hyperparameters tuning \cite{snoek2012practical} or experimental design / randomized experiments \cite{letham2019constrained}.
 In supervised setting or in clustering problem where we can access the class labels, the target function is simply a metric that measures the quality of the prediction or the clustering.
 However in a visualization problem, the target function for measuring the quality of the visualization is more difficult to define.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Constraint Preserving Score}\label{sec:proposed_method}
 
-In this section, the constraint preserving score that we propose is presented. A first visual definition is proposed in Section~\ref{subsec:visual_def}. Then, a definition for the quantification of the score is provided in Section~\ref{subsec:s_score}.
+In this section, the proposed constraint preserving score is presented. A first visual definition is illustrated in Section~\ref{subsec:visual_def}. Then, a definition for the quantification of the score is provided in Section~\ref{subsec:s_score}.
 
 \subsection{Visual Definition of User Pairwise Constraints}\label{subsec:visual_def}
 
@@ -255,7 +252,11 @@ In Fig.~\ref{fig:ml_cl_examples}, some examples are provided of similar-links th
     \label{fig:ml_cl_examples}
 \end{figure}
 
-Our method is based on the following hypothesis: an embedding is said to be good if it accurately represents the high-dimensional data and satisfies some given label or user constraints. If labels are known to be related to the dataset but have not been used during the NLDR process, a portion of these labels can be used to compute the constraint score. This is a way to select the visualization that best fit the prior knowledge represented by the labels. If the dataset does not contain any label, or if some particular knowledge have to be considered by users, the constraint score can be computed on constraints that are provided by users. The pairwise constraints are then used as a criterion to evaluate the fit between visualizations and user requirements.
+Our method is based on the following hypothesis: an embedding is said to be good if it accurately represents the high-dimensional data and satisfies some given constraints.
+If labels are known to be related to the dataset but have not been used during the NLDR process, a portion of these labels can be used to generate the constraints for computing the score.
+This is a way to select the visualization that best fit the prior knowledge represented by the labels.
+If the dataset does not contain any label, or if some particular knowledge have to be considered by users, the constraint score can be computed on constraints that are provided by users.
+The pairwise constraints are then used as a criterion to evaluate the fit between visualizations and user requirements.
 By computing this constraint score, our method makes it easier to select the NLDR hyperparameters by providing good quality embeddings that preserves the predefined constraints.
 
 To prove the reliability of the quantitative score that is derived from the pairwise constraints (defined in Section~\ref{subsec:s_score}), the score is compared with several embedding quality metrics (presented in Section~\ref{sec:result:compare}).
