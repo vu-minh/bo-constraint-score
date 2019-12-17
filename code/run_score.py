@@ -340,7 +340,7 @@ if __name__ == "__main__":
         "largevis": "perplexity",
         "umap": "n_neighbors",
     }[method_name]
-    list_n_labels_values = [3, 5, 10, 15, 20] if args.debug else range(2, 16)
+    list_n_labels_values = [3, 5, 10, 15] if args.debug else range(2, 16)
     list_perp_in_log_scale = utils.generate_value_range(
         min_val=2, max_val=X.shape[0] // 3, range_type="log", num=200, dtype=int
     ).tolist()
