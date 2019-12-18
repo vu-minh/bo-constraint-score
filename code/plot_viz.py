@@ -33,17 +33,9 @@ def plot_2_labels(Z, labels, other_labels, out_name, title1="", title2=""):
 
 
 def plot_test_vis(
-    X,
-    dataset_name,
-    plot_dir="",
-    embedding_dir="",
-    labels=None,
-    other_labels=None,
-    debug=False,
+    X, dataset_name, plot_dir="", embedding_dir="", labels=None, other_labels=None, debug=False,
 ):
-    other_labels, des = dataset.load_additional_labels(
-        dataset_name, label_name="class_matcat"
-    )
+    other_labels, des = dataset.load_additional_labels(dataset_name, label_name="class_matcat")
     print(des)
 
     list_min_dist = [0.001, 0.01, 0.1, 0.5, 1.0]
@@ -76,13 +68,7 @@ def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=False):
     ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap="Spectral", s=6)
     ax.set_title(title, loc="center")
     ax.text(
-        x=1.0,
-        y=0.0,
-        s=comment,
-        transform=ax.transAxes,
-        ha="right",
-        va="bottom",
-        fontsize=14,
+        x=1.0, y=0.0, s=comment, transform=ax.transAxes, ha="right", va="bottom", fontsize=14,
     )
     if axis_off:
         ax.axis("off")
@@ -140,13 +126,7 @@ def _simple_scatter_with_colorbar(
         norm=norm,
     )
     ax.text(
-        x=0.5,
-        y=-0.2,
-        s=title,
-        transform=ax.transAxes,
-        va="bottom",
-        ha="center",
-        fontsize=18,
+        x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18,
     )
 
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
@@ -211,13 +191,7 @@ def _scatter_with_colorbar_and_legend_size(
         edgecolor="black",
     )
     ax.text(
-        x=0.5,
-        y=-0.2,
-        s=title,
-        transform=ax.transAxes,
-        va="bottom",
-        ha="center",
-        fontsize=18,
+        x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18,
     )
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
 
@@ -229,9 +203,7 @@ def _scatter_with_colorbar_and_legend_size(
         )
 
         for min_dist_val, min_dist_show in zip(min_dist_vals, min_dist_shows.ravel()):
-            ax.scatter(
-                [], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val)
-            )
+            ax.scatter([], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val))
         ax.legend(
             scatterpoints=1,
             frameon=False,
@@ -262,12 +234,7 @@ def _scatter_with_colorbar_and_legend_size(
 
 
 def show_viz_grid(
-    dataset_name,
-    method_name,
-    labels=None,
-    plot_dir="",
-    embedding_dir="",
-    list_params=[],
+    dataset_name, method_name, labels=None, plot_dir="", embedding_dir="", list_params=[],
 ):
     n_viz = len(list_params)
     n_rows, n_cols = math.ceil(n_viz / 4), 4
@@ -311,9 +278,7 @@ def meta_umap(X, meta_n_neighbors=15, cache=False, embedding_dir=""):
     if cache:
         Z = joblib.load(f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     else:
-        Z = UMAP(
-            n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=30
-        ).fit_transform(X)
+        Z = UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=30).fit_transform(X)
         joblib.dump(Z, f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     return Z
 
@@ -490,9 +455,7 @@ def annotate_selected_params_tsne(ax, list_annotations):
     print(list_annotations)
     offset = 1.0 / len(list_annotations)
     # sort by x coordinate
-    for i, (perp_val, pos_x, pos_y) in enumerate(
-        sorted(list_annotations, key=lambda p: p[1])
-    ):
+    for i, (perp_val, pos_x, pos_y) in enumerate(sorted(list_annotations, key=lambda p: p[1])):
         ax.scatter(pos_x, pos_y, marker="X", color="orange", s=80)
         # ax.annotate(str(perp_val), (pos_x, pos_y), fontsize=10)
         ax.annotate(
@@ -688,12 +651,7 @@ def plot_samples(dataset_name, data, plot_dir="", n_samples=4, transpose=False):
 
 
 def plot_viz_with_score_flexibility(
-    dataset_name,
-    method_name,
-    config_label1,
-    config_label2,
-    plot_dir="",
-    embedding_dir="",
+    dataset_name, method_name, config_label1, config_label2, plot_dir="", embedding_dir="",
 ):
     label_name1, title1, best_param1, labels1, label_names1 = config_label1
     label_name2, title2, best_param2, labels2, label_names2 = config_label2
@@ -712,7 +670,7 @@ def plot_viz_with_score_flexibility(
         # ax_lbl1.set_title(title1)
         s1 = ax_lbl1.scatter(Z[:, 0], Z[:, 1], s=6, c=labels1, alpha=0.7, cmap="Spectral")
         ax_lbl1.text(0.98, 0.02, t1, transform=ax_lbl1.transAxes, fontsize=16, ha="right")
-        
+
         # ax_lbl2.set_title(title2)
         s2 = ax_lbl2.scatter(Z[:, 0], Z[:, 1], s=6, c=labels2, alpha=0.7, cmap="Paired")
         ax_lbl2.text(0.98, 0.02, t2, transform=ax_lbl2.transAxes, fontsize=16, ha="right")
@@ -728,27 +686,31 @@ def plot_viz_with_score_flexibility(
     if label_names1 is None:
         label_names1 = range(len(np.unique(labels1)))
     handles1, _ = s1.legend_elements()
-    legend1 = ax0.legend(handles1, label_names1, 
+    legend1 = ax0.legend(
+        handles1,
+        label_names1,
         fancybox=True,
-        loc='upper left',
-        bbox_to_anchor=(0., 1.25),
+        loc="upper left",
+        bbox_to_anchor=(0.0, 1.25),
         borderaxespad=0.1,
-        ncol=min(4, len(label_names1)), # note to change according to dataset
+        ncol=min(4, len(label_names1)),  # note to change according to dataset
         title=title1,
-        fontsize="small"
+        fontsize="small",
     )
 
     if label_names2 is None:
         label_names2 = range(len(np.unique(labels2)))
     handles2, _ = s2.legend_elements()
-    legend1 = ax2.legend(handles2, label_names2, 
+    legend1 = ax2.legend(
+        handles2,
+        label_names2,
         fancybox=True,
-        loc='lower left',
-        bbox_to_anchor=(0,-0.2),
+        loc="lower left",
+        bbox_to_anchor=(0, -0.2),
         borderaxespad=0.1,
         ncol=min(4, len(label_names2)),
         title=title2,
-        fontsize="small"
+        fontsize="small",
     )
 
     plt.tight_layout()
@@ -765,9 +727,7 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dataset_name", default="")
-    ap.add_argument(
-        "-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']"
-    )
+    ap.add_argument("-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']")
     # ap.add_argument("-s", "--seed", default=42, type=int)
     ap.add_argument("--use_other_label", default=None)
     ap.add_argument("--plot_test_vis", action="store_true")
@@ -785,15 +745,11 @@ if __name__ == "__main__":
     # print(get_params_to_show(dataset_name, method_name))
     # sys.exit(0)
 
-    X_origin, X, labels = dataset.load_dataset(
-        dataset_name, preprocessing_method="auto"
-    )
+    X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method="auto")
 
     other_label_name = args.use_other_label
     if other_label_name is not None:
-        other_labels, des = dataset.load_additional_labels(
-            dataset_name, other_label_name
-        )
+        other_labels, des = dataset.load_additional_labels(dataset_name, other_label_name)
         if labels is None:
             raise ValueError("Fail to load additional labels: " + des)
         print("Using additional labels: ", other_label_name)
@@ -812,15 +768,14 @@ if __name__ == "__main__":
 
     if args.show_viz_grid:
         list_params = get_params_to_show(dataset_name, method_name)
-        show_viz_grid(
-            dataset_name, method_name, labels, plot_dir, embedding_dir, list_params
-        )
+        show_viz_grid(dataset_name, method_name, labels, plot_dir, embedding_dir, list_params)
 
     if args.plot_metamap:
         # plot_metamap(dataset_name, method_name, plot_dir, embedding_dir)
         plot_metamap_func = {
             "tsne": plot_metamap_with_scores_tsne,
             "umap": plot_metamap_with_scores_umap,
+            "largevis": lambda a, b, c, d: None,
         }[method_name]
         plot_metamap_func(
             dataset_name, plot_dir, embedding_dir, score_dir, use_cache=args.debug
@@ -844,24 +799,24 @@ if __name__ == "__main__":
             "NEURON_1K": {
                 "tsne": {
                     "label1": [
-                        "graph_based_cluster", # label name
-                        "Points colored by graph-based cluster indices", # title/description
-                        68, # best param
+                        "graph_based_cluster",  # label name
+                        "Points colored by graph-based cluster indices",  # title/description
+                        68,  # best param
                         # list labels of each point will be added
                         # list names for each label will be added
                     ],
                     "label2": ["umi", "Points colored by UMI count", 144],
-                    "label2_correct": ["less than 6.5K", "from 6.5K to 12.5K", "more than 12.5K"]
+                    "label2_correct": [
+                        "less than 6.5K",
+                        "from 6.5K to 12.5K",
+                        "more than 12.5K",
+                    ],
                 }
             },
             "20NEWS5": {
                 "tsne": {
                     "label1": ["cat", "Group sub-categories", 130],
-                    "label2": [
-                        "matcat",
-                        "Semantic master-categories",
-                        44,
-                    ],
+                    "label2": ["matcat", "Semantic master-categories", 44,],
                 }
             },
             "FASHION_MOBILENET": {
