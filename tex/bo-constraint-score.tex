@@ -17,6 +17,7 @@
 
 \usepackage{amsmath, amssymb}
 \usepackage{tabulary,booktabs}
+\usepackage{todonotes} % for clear todo notes
 
 \graphicspath{{figures/}}
 
@@ -30,19 +31,23 @@
 
 \title{Constraint Scores for Automatic Hyperparameter Tuning of \\ Dimensionality Reduction Methods for Visualization}
 
-\author[]{Viet~Minh Vu}
-\author{Adrien Bibal}
-\author{Beno\^it Fr\'enay}
+\author{Viet~Minh Vu\corref{cor1}}
+\cortext[cor1]{Corresponding author.}
+\ead{vuvietminh@unamur.be}
 
-\address[]{NADI Institute - PReCISE Research Center, Faculty of Computer Science, University of Namur, Rue Grandgagnage 21, 5000 Namur, Belgium}
+\author{Adrien Bibal\corref{cor2}}
+\ead{adrien.bibal@unamur.be}
 
-\cortext[cor1]{Corresponding author}
+\author{Beno\^it Fr\'enay\corref{cor3}}
+\ead{benoit.frenay@unamur.be}
+
+\address{NADI Institute - PReCISE Research Center, Faculty of Computer Science, University of Namur, Rue Grandgagnage 21, 5000 Namur, Belgium}
 
 \input{abstract}
 
 \maketitle
-\input{part1}
-\input{part2}
+% \input{v1}
+\input{v2}
 
 \appendix
 \input{appendix}
