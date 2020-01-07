@@ -3,14 +3,15 @@
 \section{Experimental Setup}\label{sec:xp:setup}
 
 The proposed $f_{score}$ is used to find the best hyperparameters of three DR methods ($t$-SNE, LargeVis and UMAP).
-This section prepares the experimental setup for evaluating $f_{score}$ with six selected datasets, which are presented in Sec.\ref{sec:xp:data}.
-The preparation of input pairwise constraints for $f_{score}$ is presented in Sec.~\ref{sec:xp:constraint}.
-In order to compare the proposed $f_{score}$ with other quality metrics and to evaluate the performance of BayOpt approach, the grid of hyperparameters of all three DR methods are prepared and the optimization strategy for BayOpt is chosen, that are detailed in Sec.~\ref{sec:xp:bo}
+This section describes the experimental setup for evaluating $f_{score}$ with six selected datasets, which are presented in Section~\ref{sec:xp:data}.
+The input pairwise constraints for $f_{score}$ are presented in Section~\ref{sec:xp:constraint}.
+In order to compare the proposed $f_{score}$ with other quality metrics and to evaluate the performance of the BayOpt approach, the grid of hyperparameters used and the optimization strategy for BayOpt are presented in Section~\ref{sec:xp:bo}.
+%In order to compare the proposed $f_{score}$ with other quality metrics and to evaluate the performance of BayOpt approach, the grid of hyperparameters of all three DR methods are prepared and the optimization strategy for BayOpt is chosen, that are detailed in Section~\ref{sec:xp:bo}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Experimental Datasets}\label{sec:xp:data}
 
-\begin{table*}[ht!]
+\begin{table*}%[ht!]
 \caption{Description of our six experimental datasets.}\label{tbl:dataset}
 \begin{tabular}{m{2.2cm} m{5.4cm} m{7.4cm}}
 \toprule
@@ -51,22 +52,22 @@ DIGITS
 \end{tabular}
 \end{table*}
 
-Six datasets of gray-scale and color images, text and gene expressions are used to demonstrate the application of our method (see Table~\ref{tbl:dataset} for examples of instances for each dataset).
+Six datasets of gray-scale and color images, text and gene expressions are used to evaluate our method. Table~\ref{tbl:dataset} shows a few instances for each dataset.
 
 A first baseline dataset, DIGITS, is a subset of the optical recognition of handwritten digits dataset of 8x8 gray-scale images \cite{kaynak1995methods}.
 The second baseline dataset, COIL20, is a dataset of 32x32 gray-scale images of 20 rotated objects  \cite{nene1996}.
-The third baseline dataset, {FASHION\_1K}, contains 1000 gray-scale images of size 28x28, sampled from Fashion-MNIST clothing dataset~\cite{xiao2017/online}.
+The third baseline dataset, {FASHION\_1K}, contains 1000 28x28 gray-scale images, sampled from Fashion-MNIST clothing dataset~\cite{xiao2017/online}.
 The gray-scale images from the three above datasets are normalized and used directly in the DR methods.
 
 The first real-world image dataset, \emph{FASHION\_MOBILENET} dataset ({FASH\_MOBI} for short), contains samples of the seven most numerous classes from the fashion product images dataset~\cite{fashionproduct}.
-The MobileNet\cite{howard2017mobilenets} with pre-trained weights from ImageNet is used for feature extraction, a transfer learning technique that uses the representation of the learned network (trained on a large-scale image classification task) to extract meaningful features for new samples.
+MobileNet\cite{howard2017mobilenets} with pre-trained weights from ImageNet is used for feature extraction.
 The last fully connected layer of the network is replaced by a global average pooling layer \cite{lin2013network} to obtain the flattened output vector of 1280 dimensions.
 To speed up DR methods for visualization task, PCA is then applied to take only 75 features.
 
 The second real-word dataset is a textual dataset. The 5NEWS dataset contains the text of 5 groups selected from the 20 Newsgroups dataset, which are converted to a matrix of token counts via Term Frequency Inverse Document Frequency (TF-IDF) method.
 The count vectors are then fed into a Latent Dirichlet Allocation (LDA)~\cite{blei2003latent} model to extract 15 hidden topics, which are the 15 features used by the DR methods.
 
-Our last real-world dataset is the open {NEURON\_1K} dataset~\cite{neuron1k}, which contains 1301 brain cells from an E18 mouse. These cells have been processed and provided by 10X Genomics, a company who provides chromium single cell gene expression solution and releases several public genetic datasets.\footnote{https://www.10xgenomics.com/resources/datasets/, the datasets are licensed under the Creative Commons Attribution license.}
+Our last real-world dataset is the open {NEURON\_1K} dataset~\cite{neuron1k}, which contains 1301 brain cells from an E18 mouse. These cells have been processed and provided by 10X Genomics, a company who provides chromium single cell gene expression solution and released several public genetic datasets\footnote{https://www.10xgenomics.com/resources/datasets/, the datasets are licensed under the Creative Commons Attribution license.}.
 The processed data have 10 PCA features and 6 labels found by a graph-based clustering method.
 
 
@@ -76,16 +77,16 @@ The processed data have 10 PCA features and 6 labels found by a graph-based clus
 The input for our constraint preserving scores is an ensemble of constraints in the form of similar and dissimilar links.
 % When labels are provided, they can be used to generate constraints. However, our method does not need many constraints to be stable, which means that we use a small subset of labeled instances to generate the constraints.
 However, it is hard to control the quality of the constraints when they are selected manually.
-For example, a similar link between two different data points is not expected.
+For example, defining a similar link between two instances that are really different in HD may provide constraint of lower quality.
 The number of constraints of each type also affects the stability of the score.
-In order to correctly evaluate the score function, we do not use the pairwise constraints directly, but use a small subset of labeled data points to generate the constraints instead.
+In order to correctly evaluate the score function, we use a small subset of labeled instances to generate the constraints.
 
 Given a dataset of $C$ classes, $k$ labeled instances are randomly considered for each class.
 Suppose that the number of instances in each class is larger than $k$ ($k$ is usually very small),
 a similar link is formed by choosing a random pair of instances of each class.
 This procedure leads to a number of similar links given by
 \begin{equation}\label{eq:|S|}
-    |\mathcal{S}| = C {k \choose 2} = \frac{1}{2} C k (k - 1).
+    |\mathcal{S}| = {k \choose 2} C = \frac{1}{2} C k (k - 1).
 \end{equation}
 
 The dissimilar links are formed by first choosing two different classes among the $C$ classes (${C \choose 2}$ ways),
@@ -96,12 +97,8 @@ The number of all possible dissimilar links is therefore given by
 \end{equation}
 
 % This means that the more labeled instances are considered (i.e., $k$ is larger), the more constraints are generated and the more stable the $f_{score}$ is.
-% For instance, with 10 labeled points for each of the 10 classes of the DIGITS dataset, 450 similar links and 2250 dissimilar links can be generated.
-The labeled points are used to indicate the relationship of belonging to the same or to different groups.
-The points can also be freely chosen and grouped by the users to indicate the relationship they care about.
-The generated pairwise constraints can express the information encoded in these labeled points.
-$f_{score}$ function takes the constraints as input and evaluates how well the encoded information is preserved in the embeddings.
-The experimental setup for proving empirically the reliability of $f_{score}$ is presented in the next section.
+% For instance, with 10 labeled instances for each of the 10 classes of the DIGITS dataset, 450 similar links and 2250 dissimilar links can be generated.
+%The labeled instances are used to indicate the relationship of belonging to the same or to different groups. The points can also be freely chosen and grouped by the users to indicate the relationship they care about. The generated pairwise constraints can express the information encoded in these labeled instances. $f_{score}$ function takes the constraints as input and evaluates how well the encoded information is preserved in the embeddings. The experimental setup for proving empirically the reliability of $f_{score}$ is presented in the next section.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Hyperparameters Preparation and Use of BayOpt}\label{sec:xp:bo}
@@ -117,9 +114,9 @@ In the case of $t$-SNE and LargeVis, the grid is an integer vector of perplexity
 % The second dimension is a vector of 10 real values of {min\_dist} from 0.001 to 1.0 in log-scale.
 % The grid is used to evaluate the reliability of the BayOpt approach on the proposed score.
 In the case of UMAP, the two dimensional grid is created from an integer vector of {n\_neighbor} values in $[2,N/3]$ and a vector of 10 real values of {min\_dist} in $[0.001, 1.0]$.
-All the hyperparameter values are sampled in natural logarithmic scale (log-scale) in order to focus the computation on the not-so-large hyperparameter values.
-Finding the best hyperparameters by greedily searching through the grid is not practical and scalable.
-BayOpt approach solves this scalability problem efficiently, in which only dozens of evaluations are required to find the best hyperparameters for all experimented datasets.
+All hyperparameter values are sampled in natural logarithmic scale.
+Finding the best hyperparameters by greedily searching through the grid is not practical and scalable, but it is used in the experiment to compare with the BayOpt approach.
+The BayOpt approach solves this scalability problem efficiently, in which only dozens of evaluations are required to find the best hyperparameters for all experimented datasets.
 
 For the hyperparameter tuning task under BayOpt framework in this work, the exploration strategy is preferred to ensure to discover the largest as possible the parameter space.
 % Three technical points that guarantees the accuracy in predicting the best hyperparameters and the quick convergence of BayOpt in our experiments are follows.
@@ -137,66 +134,61 @@ Small values are added to the diagonal of the kernel function of the underlying 
 \section{Experimental Results}\label{sec:results}
 
 The constraint preserving $f_{score}$ is proposed to measure the quality of the visualization and is used to tuning the hyperparameters of the DR methods.
-Through the obtained experimental results, we demonstrate firstly the behaviour of $f_{score}$ (Sec.~\ref{sec:result:fscore}) and explain how this score captures the characteristic of different embeddings.
-$f_{score}$ is empirically proved to be stable (Sec.~\ref{sec:result:stability}) and comparable to $AUC_{log}RNX$ and BIC-based score for evaluating the quality of the embeddings (Sec.~\ref{sec:result:compare}).
-After proving that $f_{score}$ is reliable, we can use this score under BayOpt framework to perform the task of tuning hyperparameters for the examined DR methods (Sec~\ref{sec:result:bo}).
-Finally in Sec.~\ref{sec:result:flexibility}, the proposed score is shown to be flexible, that can help us to discover the users' desired structure encoded in the input constraints.
+Through the obtained experimental results, we demonstrate firstly the behavior of $f_{score}$ (Section~\ref{sec:result:fscore}) and explain how this score captures the characteristic of different embeddings.
+$f_{score}$ is empirically proved to be stable (Section~\ref{sec:result:stability}) and comparable to $AUC_{log}RNX$ and BIC-based score for evaluating the quality of the embeddings (Section~\ref{sec:result:compare}).
+After showing that $f_{score}$ is reliable, we can use this score under BayOpt framework to perform the task of tuning hyperparameters for the examined DR methods (Section~\ref{sec:result:bo}).
+Finally, the flexibility of the proposed score is presented in Section~\ref{sec:result:flexibility}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{The Behaviour of $f_{score}$}\label{sec:result:fscore}
+\subsection{Behavior of $f_{score}$}\label{sec:result:fscore}
 
-The behaviour of $f_{score}$ for the embeddings of three methods with all six experimented datasets is illustrated in Fig.~\ref{fig:score:all}.
-The hyperparameter values are shown in logarithmic scale.
-The score values for UMAP are shown for {min\_dist= 0.1}.
-The contour plots of $f_{score}$ for all values of {min\_dist} are in Fig.~\ref{fig:score:umap2D:compare}.
-The score values are calculated for a set of pairwise constraints generated from 10 labeled points per class for each dataset.
-The pairwise constraints generated from these labeled points are sufficient to analyse the behaviour of $f_{score}$.   
-For instance, with 10 labeled points for each of the 10 classes of DIGITS dataset, 450 similar links and 2250 dissimilar links can be generated.
-The effect of the number of labeled points on $f_{score}$ will be evaluated in the next section.
+Fig.~\ref{fig:score:all} illustrates the behavior of $f_{score}$ for the three DR techniques ($t$-SNE, UMAP and LargeVis) on the six experimental datasets.
+The hyperparameter values are shown in logarithmic scale and the score values for UMAP are shown for {min\_dist= 0.1}.
+%The contour plots of $f_{score}$ for all values of {min\_dist} are in Fig.~\ref{fig:score:umap2D:compare}.
+The score values are calculated for a set of pairwise constraints generated from 10 labeled instances per class for each dataset.
+The pairwise constraints generated from these labeled instances are sufficient to analyse the behavior of $f_{score}$.   
+For instance, with 10 labeled instances for each of the 10 classes of DIGITS dataset, 450 similar links and 2250 dissimilar links can be generated.
+The effect of the number of labeled instances on $f_{score}$ will be evaluated in the next section.
 
 %% FIGURE f_scores all datasets / all methods
-\begin{figure*}[ht!]
+\begin{figure*}%[ht!]
     \centering
     \includegraphics[width=\linewidth]{all_scores_all_methods}
     \caption{$f_{score}$ for all three methods for all six datasets.}
     \label{fig:score:all}
 \end{figure*}
 
-The key finding is that, $f_{score}$ has the form of a convex function: it increases when the number of neighbors (perplexity/{n\_neighbors}) increases, reaches its maximum value, and then decreases when the number of neighbors is too large.
-The function of score values is not smooth as the input constraints vary, but its form suggests that finding its global maximum is feasible.
+The key finding is that $f_{score}$ has a convex shape: it increases when the number of neighbors (perplexity/{n\_neighbors}) increases, reaches its maximum value, and then decreases when the number of neighbors is too large.
+$f_{score}$ is not smooth as the input constraints vary, but it is feasible to find a global maximum.
 In the case of LargeVis, there are flat regions where $f_{score}$ does not change too much.
-The reason is that LargeVis is designed for large dataset and, thus, when applied to medium-sized datasets,
+The reason is that LargeVis is designed for large datasets and, thus, when applied to medium-sized datasets,
 % a large set of perplexity values yield the same results.
-the impact of perplexity is not important.
+the impact of the perplexity is not important.
 In contrast, $t$-SNE and UMAP are very sensitive to their hyperparameters.
-Intuitively, when the number of neighbors is small, the points are not grouped in the visualization.
-The similar links are unlikely preserved while the dissimilar links have more chance to be preserved as the points stay away from each other.
+If the the number of neighbors per instance is small, the points will stay away from each other in 2D and, therefore, the similar links will not likely be preserved, as opposed to the dissimilar links.
 % In this case $f_{score}(\mathcal{S})$ is very low and $f_{score}(\mathcal{D})$ is high, that makes $f_{score}$ low.
-Inversely, when the number of neighbors is large, every point is neighbor to each other, which make the visualization a big cluster.
-In this case, the similar constraints are likely preserved while the dissimilar constraints are not.
+Inversely, when the number of neighbors is large, every instance is neighbor to all others, which makes the visualization a big cluster.
+In this case, the similar constraints will likely be preserved, while the dissimilar constraints will not.
 % that make $f_{score}(\mathcal{S})$ high and $f_{score}(\mathcal{D})$ very low, and $f_{score}$ is low as a consequence.
-Due to these trade-offs in both cases, $f_{score}$ in overall is always low. 
+Due to these trade-offs in both cases, $f_{score}$ in overall is always low.
 
-In summary, the local structures (neighborhood information) of a dataset are presented by the small groups in the visualization.
-The clearer these groups are highlighted, the more likely the similar constraints of the points within groups and the dissimilar constraints of the points between different groups are preserved.
-The proposed score has well captured this characteristic, it reaches to the high values only when both the similar and dissimilar constraints are preserved.
-Thus $f_{score}$ can be used to quantitatively evaluate the quality of the visualization and can be comparable to the state of the art quality metrics.
+%In summary, the local structures (neighborhood information) of a dataset are presented by the small groups in the visualization. The clearer these groups are highlighted, the more likely the similar constraints of the points within groups and the dissimilar constraints of the points between different groups are preserved. The proposed score has well captured this characteristic, it reaches to the high values only when both the similar and dissimilar constraints are preserved. Thus $f_{score}$ can be used to quantitatively evaluate the quality of the visualization and can be comparable to the state of the art quality metrics.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Stability of $f_{score}$}\label{sec:result:stability}
 
 The proposed constraint preserving score is a function of the pairwise constraints that may be generated automatically from input labels.
-The more labeled points we have, the more constraints are generated, and as demonstrated as follows, the more stable the $f_{score}$ is.
-The first question is, what is a reasonable small number of labeled points needed for each class to produce a stable $f_{score}$?
-Given that first question, it should be noted that with a fixed number of labeled points we can generate different sets of pairwise constraints.
-The second question is therefore: with different sets of constraints generated from the same fixed number of labeled points, is $f_{score}$ stable?
-In order to answer these two questions, $f_{score}$ is evaluated for five different numbers of labeled points (3, 5, 10 and 15) per class.
-The labeled points are independent and not accumulated.
-This means that, for instance, the set of labeled points in the next setting does not contain the labeled points in the previous setting.
-In each setting for a fixed number of labeled points, the average value and the standard deviation of $f_{score}$ are analyzed w.r.t. 20 different sampled sets of pairwise constraints.
+The more labeled instances we have, the more constraints are generated, and the more stable the $f_{score}$ is.
+One first question w.r.t. the number of labeled instances is: what is the minimal number of labeled instances needed for each class to produce a stable $f_{score}$?
+Furthermore, it should be noted that for a fixed number of labeled instances, different sets of pairwise constraints can be generated.
+A second question is therefore: is $f_{score}$ stable for different sets of constraints generated from the same fixed number of labeled instances?
+
+In order to answer these two questions, $f_{score}$ is evaluated for five different numbers of labeled instances (3, 5, 10 and 15) per class.
+The labeled instances are independent and not accumulated, which means that the set of labeled instances in a setting does not contain the labeled instances of the previous setting.
+In each setting, for a fixed number of labeled instances, the average value and the standard deviation of $f_{score}$ are analyzed w.r.t. 20 different sampled sets of pairwise constraints.
 
 %% FIGURE score stability
-\begin{figure}[ht!]
+\begin{figure}%[ht!]
     \begin{subfigure}[b]{0.32\linewidth}
          \centering
          \includegraphics[width=\linewidth]{COIL20_umap_scores}
@@ -243,19 +235,19 @@ The best hyperparameter ranges highlighted by the vertical regions in Fig.~\ref{
 % The proposed score has well captured this characteristic, it reaches to the high values only when both the similar and dissimilar constraints are preserved.
 % Thus $f_{score}$ can be used to quantitatively evaluate the quality of the visualization and can be comparable to the state of the art quality metrics.
 In summary, for all selected datasets, the above results indicate that 10 labeled instances per class is enough for obtaining a stable score.
-The generated constraints from labeled points can capture the class-based relationship (local structure) that is typically well revealed by all three examined DR methods.
-In Sec.~\ref{sec:result:flexibility}, we show that $f_{score}$ with different sets of labeled instances, which does not necessarily correspond to class labels,
+The generated constraints from labeled instances can capture the class-based relationship (local structure) that is typically well revealed by all three examined DR methods.
+Section~\ref{sec:result:flexibility} shows that $f_{score}$ with different sets of labeled instances, which does not necessarily correspond to class labels,
 can be used to encode the users' desired structure in the data.
 % This advocate for the flexibility of $f_{score}$, as any form of prior knowledge that can be formulated by pairwise constraints can be used.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Comparison between $f_{score}$, $AUC_{log}RNX$ and BIC-based score}\label{sec:result:compare}
 
-The proposed $f_{score}$ is compared with $AUC_{log}RNX$ and BIC-based score for evaluating $t$-SNE embeddings in Sec.~\ref{sec:compare:tnse}.
-It is compared with $AUC_{log}RNX$ for evaluating UMAP embeddings in Sec.~\ref{sec:compare:umap}.
-In all comparison, $f_{score}$ is calculated from the constraints generated by 10 labeled points per class on each dataset.
+The proposed $f_{score}$ is compared with $AUC_{log}RNX$ and BIC-based score for evaluating $t$-SNE embeddings in Section~\ref{sec:compare:tnse}.
+It is compared with $AUC_{log}RNX$ for evaluating UMAP embeddings in Section~\ref{sec:compare:umap}.
+In all comparison, $f_{score}$ is calculated from the constraints generated by 10 labeled instances per class on each dataset.
 
-\subsubsection{Compare $f_{score}$, $AUC_{log}RNX$ and BIC-based score for $t$-SNE embeddings}\label{sec:compare:tnse}
+\subsubsection{Compare $f_{score}$, $AUC_{log}RNX$ and BIC-based score for $t$-SNE}\label{sec:compare:tnse}
 
 %% FIGURE compare 3 scores tSNE
 \begin{figure}
@@ -295,14 +287,14 @@ In all comparison, $f_{score}$ is calculated from the constraints generated by 1
     \label{fig:tsne:compare}
 \end{figure}
 
-Fig.~\ref{fig:tsne:compare} illustrates the best perplexity range found by $f_{score}$, $AUC_{log}RNX$ and the BIC-based score for the six selected datasets.
+Fig.~\ref{fig:tsne:compare} illustrates the best perplexity ranges found by $f_{score}$, $AUC_{log}RNX$ and the BIC-based score for the six selected datasets.
 $f_{score}$ agrees with both $AUC_{log}RNX$ and the BIC-based score for COIL20 and {FASH\_MOBI} datasets.
 $f_{score}$ agrees only with $AUC_{log}RNX$, but not the BIC-based score for {FASHION\_1K} dataset.
 Moreover, $f_{score}$ agrees only with the BIC-based score, but not $AUC_{log}RNX$, for {NEURON\_1K}, 5NEWS and DIGITS datasets.
 In order to compare thoroughly the best solutions found by these three scores, metamaps can be used.
 
 %% FIGURE metamap tSNE example
-\begin{figure*}[ht!]
+\begin{figure*}%[ht!]
     \centering
     \begin{subfigure}[b]{\linewidth}
         \includegraphics[width=\linewidth]{NEURON_1K_tsne_metamap}
@@ -333,10 +325,10 @@ The visualization that is best predicted by BayOpt is denoted by a star symbol (
 As indicated by Wattenberg et. al.~\cite{wattenberg2016use}, more than one visualization may be needed to understand the high-dimensional patterns in the data.
 The visualizations extracted thanks to the different scores make it easier to discover different regions in the solution space, and thus to discover different structures in the data, while one score could not reveal them all.
 
-\subsubsection{Compare $f_{score}$ and $AUC_{log}RNX$ for UMAP embeddings}\label{sec:compare:umap}
+\subsubsection{Compare $f_{score}$ and $AUC_{log}RNX$ for UMAP}\label{sec:compare:umap}
 
 %% FIGURE compare 2 scores UMAP
-\begin{figure}[ht!]
+\begin{figure}%[ht!]
     \centering
     \includegraphics[width=\linewidth]{umap2D_compare}
     \caption{Compare $f_{score}$ and $AUC_{log}RNX$ for UMAP embeddings.}
@@ -359,7 +351,7 @@ Indeed, with a fixed value of {n\_neighbor}, it is likely that $AUC_{log}RNX$ gi
 In contrast, $f_{score}$ can discover the influence of {min\_dist} in conjunction with {n\_neighbor} and reveal a reasonable small zone for the best combination of these two hyperparameters.
 
 %% FIGURE metamap UMAP example
-\begin{figure*}[ht!]
+\begin{figure*}%[ht!]
     \centering
     \begin{subfigure}[b]{\linewidth}
         \centering
@@ -384,7 +376,7 @@ These regions are the ones that are never highlighted in the metamaps, which cor
 \subsection{BayOpt for Hyperparameter Tuning with $f_{score}$}\label{sec:result:bo}
 As empirically proved in the previous sections, $f_{score}$ is a reliable score to evaluate the quality of the embeddings.
 BayOpt is widely used for hyperparameter tuning, when the target function is well-defined and assures to find global maximum of a well-formed function like $f_{score}$.
-In Sec~\ref{sec:result:bo:tsne} and Sec~\ref{sec:result:bo:umap}, $f_{score}$ is evaluated for the tasks of tuning one hyperparameter under BayOpt framework for $t$-SNE two hyperparameters for UMAP, respectively.
+In Section~\ref{sec:result:bo:tsne} and Section~\ref{sec:result:bo:umap}, $f_{score}$ is evaluated for the tasks of tuning one hyperparameter under BayOpt framework for $t$-SNE two hyperparameters for UMAP, respectively.
 % However naive search through the grid of hyperparameters is exponentially expensive when the number of hyperparameters increases.
 % BayOpt helps to explore the parameter spaces efficiently and focus the computation only on the zones of potential parameters which give high values for the target function.
 % It is widely used for hyperparameter tuning, when the target function is well-defined and assures to find global maximum of a well-formed function like $f_{score}$.
@@ -392,14 +384,14 @@ In Sec~\ref{sec:result:bo:tsne} and Sec~\ref{sec:result:bo:umap}, $f_{score}$ is
 % However, our experiments show that $AUC_{log}RNX$ does not always work well with UMAP's embedding, especially in the case of tuning two UMAP's hyperparameters at the same time.
 % The BIC-based score, by definition, is tied to $t$-SNE and does not work for other DR methods.
 % $f_{score}$ is designed to be independent to the DR methods and to be flexible to the input constraints.
-% In this section, the input constraints are generated from 10 labeled points per class for any given dataset.
+% In this section, the input constraints are generated from 10 labeled instances per class for any given dataset.
 % $f_{score}$, which is flexible by design, can find the best visualization w.r.t. any set of input constraints.
 % This task can not be achieved neither by $AUC_{log}RNX$ nor by BIC-based score.
 
 \subsubsection{BayOpt for Tuning One Parameter of $t$-SNE}\label{sec:result:bo:tsne}
 
 %% FIGURE BO tSNE
-\begin{figure}[ht!]
+\begin{figure}%[ht!]
     \begin{subfigure}[b]{.46\linewidth}
         \centering
         \includegraphics[width=\linewidth]{DIGITS_tsne_bo.png}
@@ -458,7 +450,7 @@ This is usually the region of high perplexity values, where the $f_{score}$ has 
 \subsubsection{BayOpt for Tuning Two Parameters of UMAP}\label{sec:result:bo:umap}
 
 %% FIGURE BO UMAP
-\begin{figure}[ht!]
+\begin{figure}%[ht!]
     \begin{subfigure}[b]{.48\linewidth}
         \centering
         \includegraphics[width=\linewidth]{DIGITS_umap_predicted_score}
@@ -569,7 +561,7 @@ Without spending much resource to obtain a full grid, the estimated score given 
 \subsection{Flexibility of $f_{score}$}\label{sec:result:flexibility}
 
 %% FIGURE Score flexibility
-\begin{figure*}[ht!]
+\begin{figure*}%[ht!]
     \centering
     \begin{subfigure}[b]{.32\linewidth}
         \includegraphics[width=\linewidth]{FASHION_MOBILENET_score_flexibility}
@@ -603,7 +595,7 @@ However, if the users want to see different pattern in the data, they can specif
 
 Concrete examples with $t$-SNE embeddings for three real world datasets are presented in this section.
 The first example is provided for {FASH\_MOBI} with seven sub-groups: \emph{'Bags', 'Bottomwear', 'Jewellery', 'Sandal', 'Shoes', 'Topwear'} and \emph{'Watches'}.
-On one hand, given 10 labeled points for each sub-groups, BayOpt finds 82 as the perplexity for $t$-SNE embedding that best respect the constraints.
+On one hand, given 10 labeled instances for each sub-groups, BayOpt finds 82 as the perplexity for $t$-SNE embedding that best respect the constraints.
 As shown in the top-left plot of Fig~\ref{fig:flexibility:FASHMOBI}, the chosen visualization presents the seven detached sub-groups.
 On the other hand, a hierarchical grouping can also be used.
 This means that \emph{'Bag', 'Jewellery', 'Watches'} are grouped as \emph{'Accessories'}.
@@ -643,7 +635,7 @@ In this section, we discuss the specific use of BayOpt for optimizing $f_{score}
 % However $t$-SNE does not guarantee to preserve the overall distance and much global structure in the data.
 % UMAP is presented to preserve more global structure with the cost of tuning more hyperparameter.
 % The users can look for a global structure (a hierarchical or semantic grouping) or another view to discover different structures.
-% This goal can be easily encoded in term of labeled points and transformed into pairwise constraints for the proposed $f_{score}$.
+% This goal can be easily encoded in term of labeled instances and transformed into pairwise constraints for the proposed $f_{score}$.
 % It has been shown in our experiments that such a specific, desired structure may exist in the solution space of $t$-SNE embeddings, but $AUC_{log}RNX$ or the BIC-based score could not reveal.
 % % would only reveal one of the global structure view, which may not be the desired one.
 % $f_{score}$, in addition to be a reliable method to tune DR hyperparameters, is also a flexible score that can reveal a specific, desired desired global structure by users.
@@ -669,13 +661,13 @@ All three examined DR methods preserve well the neighborhood information.
 However $t$-SNE does not guarantee to preserve the overall distance and much global structure in the data.
 UMAP is presented to preserve more global structure with the cost of tuning more hyperparameter.
 The users can look for a global structure (a hierarchical or semantic grouping) or another view to discover different structures.
-This goal can be easily encoded in term of labeled points and transformed into pairwise constraints for the proposed $f_{score}$.
+This goal can be easily encoded in term of labeled instances and transformed into pairwise constraints for the proposed $f_{score}$.
 It has been shown in our experiments that such a specific, desired structure may exist in the solution space of $t$-SNE embeddings, but $AUC_{log}RNX$ or the BIC-based score could not reveal.
 $f_{score}$, in addition to be a reliable method to tune DR hyperparameters, is also a flexible score that can reveal a specific, desired desired global structure by users.
 
 Unlike $AUC_{log}RNX$ or the BIC-based score, which do not depend on external input data, $f_{score}$ is a function of a given ensemble of similar-link constraints $\mathcal{S}$ and dissimilar-link constraints $\mathcal{D}$.
 $AUC_{log}RNX$ objectively measures how neighborhoods are preserved without taking into account the interest of users.
-As demonstrated in Sec.~\ref{sec:result:flexibility} with three real world datasets, $f_{score}$ can discover solutions satisfying users' constraints that are never selected by $AUC_{log}RNX$ nor the BIC-based score.
+As demonstrated in Section~\ref{sec:result:flexibility} with three real world datasets, $f_{score}$ can discover solutions satisfying users' constraints that are never selected by $AUC_{log}RNX$ nor the BIC-based score.
 
 Moreover, the constraint score function can be easily modified to adapt to different criteria, such as the contrastive measure or the triplet measure.
 These are adapted version based on the idea of contrastive loss~\cite{logeswaran2018efficient} and triplet loss~\cite{schroff2015facenet}, which use several selected anchor points, their positive examples (connected by similar-links) and their negative examples (connected by dissimilar-links).
@@ -717,9 +709,9 @@ The state of the art $AUC_{log}RNX$ metric or the BIC-based score has no flexibi
 
 Future work: User experiment:
 The constraint generation can be guided by the users and the visualization quality can be evaluated by them.
-Since the proposed constraint score proved to be stable w.r.t the number of labeled points,
-we can use the user-defined labeled points to generate the pairwise constraints.
-As demonstrated with the labeled points of three different groups characterized by UMI count in \emph{NEURAL\_1K} dataset, the users can define their need about the structure they look for.
+Since the proposed constraint score proved to be stable w.r.t the number of labeled instances,
+we can use the user-defined labeled instances to generate the pairwise constraints.
+As demonstrated with the labeled instances of three different groups characterized by UMI count in \emph{NEURAL\_1K} dataset, the users can define their need about the structure they look for.
 A potential future work is to let the users evaluate qualitatively the quality of the visualization and their satisfaction.
 Integrate the user's feedback in two stages of our workflow.
 The users can select the pairwise constraints or label some points (used to generate the constraints) to build the score.

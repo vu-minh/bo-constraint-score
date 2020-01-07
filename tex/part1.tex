@@ -3,7 +3,7 @@
 %\par
 %(1) Keep the section 1 (context, problematic).
 
-In many contexts (e.g. industry, academic research, etc.), users want to get insights about their data. In such cases, the number of features characterizing each instance in their dataset is often too large to understand their data. The problem of {\it dimensionality reduction} (DR) is to reduce a dataset containing $D$ features for $N$ instances (providing an $N \times D$ matrix) to a new dataset of $M$ dimensions, such that $M \ll D$. When this new number of dimensions $M$ equals two, the dimensionality reduction result allows users to see their data in a two-dimensional space by plotting the remaining two dimensions in a scatter plot. This problem is called {\it visualization}: from provided data with too many features, visualization algorithms provide a projection of these data in a two-dimensional space in such a way that the information loss is minimized. The resulting $N \times 2$ matrix, often called {\it embedding}, can then be visualized.
+In many contexts (e.g. industry, academic research, etc.), users want to get insights about their data. In such cases, the number of features characterizing each instance in their dataset is often too large to understand their data. The problem of {\it dimensionality reduction} (DR) is to reduce a dataset containing $D$ features for $N$ instances (providing an $N \times D$ matrix) to a new dataset of $Z$ dimensions, such that $Z \ll D$. When this new number of dimensions $Z$ equals two, the dimensionality reduction result allows users to see their data in a two-dimensional space by plotting the remaining two dimensions in a scatter plot. This problem is called {\it visualization}: from provided data with too many features, visualization algorithms provide a projection of these data in a two-dimensional space in such a way that the information loss is minimized. The resulting $N \times 2$ matrix, often called {\it embedding}, can then be visualized.
 % For instance, Fig.~\ref{subfig:digit_viz_example} represents a visualization of 200 hand-written digits images from the well-known MNIST dataset and Fig.~\ref{subfig:digit_example} shows some examples of the raw image data.
 
 % \begin{figure}[!htb]
@@ -24,10 +24,10 @@ In many contexts (e.g. industry, academic research, etc.), users want to get ins
 
 Some DR visualization algorithms require to tune one or more hyperparameters (e.g. $t$-SNE~\cite{maaten2008tsne}, LargeVis~\cite{tang2016visualizing} and UMAP~\cite{mcinnes2018umap}). This step is crucial, since it predetermines the quality and usefulness of the obtained visualization. Typically, the desired visualization result has to be chosen through trial and error by the user among all generated results using different hyperparameter values. This process is tedious, which makes it difficult for the user to find the best suiting visualization.
 
-\begin{figure*}[!ht]
+\begin{figure*}%[h]
   \centering
   \includegraphics[width=\linewidth]{figures/MNIST-SMALL_examples}
-  \caption{Visualization of the \emph{DIGITS} dataset by $t$-SNE with five different perplexity values preserving the local (left) to global (right) topology of the dataset. The dataset contains 1797 gray-scale 8x8 images of ten handwritten digits. The colors correspond to the digit labels. Obtaining compact clusters (perplexities of 20 and 50) is usually considered better.}
+  \caption{Visualization of the \emph{DIGITS} dataset by $t$-SNE with five different perplexity values preserving the local (left) to global (right) topology of the dataset. The dataset contains 1797 gray-scale 8x8 images representing ten different handwritten digits. The colors correspond to these different digits. Perplexities of 1 and 1500 are extreme results showing that points have one or a couple of neighbors (perplexity = 1) or they have nearly all instances in the dataset as neighbors (perplexity = 1500). Obtaining compact clusters (perplexities of 20 and 50) is usually considered better.}
   \label{fig:mnist_perps}
 \end{figure*}
 
@@ -35,7 +35,7 @@ In this paper, we show how to automatically choose the hyperparameters of DR tec
 % We propose to consider user constraints on the dataset of interest to maximize the chance for the most suitable visualization to be presented to the user.
 The constraints are in form of relationships between object pairs, which are easier to express and understand for users. These user pairwise constraints are first transformed into a quantitative measure called \emph{constraint-preserving score} and then used to find a range of hyperparameter values corresponding to the best visualizations that respect the user needs. A Bayesian optimization approach~\cite{mockus1974BO, mockus1978application} is used to find this range.
 
-This approach of finding the best hyperparameter values with an external score, instead of modifying the chosen DR methods, allows us to apply the technique to all kind of DR methods. In that sense, the approach is DR-method agnostic. Furthermore, our approach is a step towards the automatization of the ML pipeline (AutoML) in the context of DR, while preserving explainability. Indeed, when using the constraint for choosing the best hyperparameter values, visualizing these constraints makes it possible to explain the choice of visualization. This may ease the use of DR methods by end users who want to apply the visualization methods to their own data without caring about the complex algorithms and hyperparameters. Indeed, end users can use our method as a black-box hyperparameter tuning toolbox. Furthermore, the approach can also be used in the context of DR experts who want to analyze the impact of hyperparameters in order to evaluate the quality of visualizations.
+The approach of finding the best hyperparameter values with an external score, instead of modifying the chosen DR methods, allows us to apply the technique to any kind of DR methods. In that sense, the approach is DR-method-agnostic. Furthermore, our approach is a step towards the automatization of the ML pipeline (AutoML) in the context of DR, while preserving explainability. Indeed, when using the constraint for choosing the best hyperparameter values, visualizing these constraints makes it possible to explain the choice of visualization. This may ease the use of DR methods by end-users to visualizes their own data without caring about the complex algorithms and hyperparameters. Indeed, end users can use our method as a black-box hyperparameter tuning toolbox. Furthermore, the approach can also be used by DR experts to analyze the impact of hyperparameters on the quality of visualizations.
 
 %%%%%%%% Outline of the paper
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -44,7 +44,7 @@ This paper is organized as follows. Section~\ref{sec:background} presents the ba
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background and Related Work}\label{sec:background}
 
-This section presents the background related to our work. Dimensionality reduction techniques that are used in our evaluation (i.e $t$-SNE, UMAP and LargeVis) are presented in Section~\ref{subsec:background_DR}. Quality measures that are used in the literature to characterize the quality of DR embeddings are presented in Section~\ref{subsec:qual_metrics_background}. The use of user constraints in clustering and in DR is presented in Section~\ref{subsec:user_constraints_clustering_DR}. Finally, the ways to choose hyperparameters for DR techniques are reviewed in Section~\ref{subsec:tune_HP}, and the way to tune it with Bayesian optimization is presented in Section~\ref{subsec:tune_with_BayOpt}.
+This section presents the background and methods related to our work. Dimensionality reduction techniques that are used in our evaluation (i.e $t$-SNE, UMAP and LargeVis) are presented in Section~\ref{subsec:background_DR}. Quality measures that are used in the literature to characterize the quality of DR embeddings are presented in Section~\ref{subsec:qual_metrics_background}. The use of user constraints in clustering and in DR is presented in Section~\ref{subsec:user_constraints_clustering_DR}. Finally, the techniques to choose hyperparameters for DR algorithms are reviewed in Section~\ref{subsec:tune_HP}.%, and the way to tune it with Bayesian optimization is presented in Section~\ref{subsec:tune_with_BayOpt}.
 
 \subsection{Dimensionality Reduction for Visualization}\label{subsec:background_DR}
 
@@ -111,13 +111,13 @@ where $f$ is a probabilistic function \cite{tang2016visualizing}. With the gener
 \end{equation}
 where $\gamma$ is a weight given to non-existing edges. As LargeVis is based on the $p_{j|i}$ of $t$-SNE, the perplexity is also a hyperparameter of LargeVis.
 
-Now that the state-of-the-art DR visualization methods that contain hyperparameters are presented, metrics that can assess the quality of DR produced visualizations are reviewed and discussed in the next section.
+%Now that the state-of-the-art DR visualization methods that contain hyperparameters are presented, metrics that can assess the quality of DR produced visualizations are reviewed and discussed in the next section.
 
 \subsection{Visualization Quality Metrics}\label{subsec:qual_metrics_background}
 
-There exist several metrics to evaluate the quality of an embedding. This section presents five of these metrics that are used in this paper for evaluating the embedding. 
-In this paper, among the possible quality measures, clustering quality measures are not considered because clustering metrics need labeled data for measurement (e.g. the image-related number in the dataset DIGITS), which would restrict the datasets on which we can evaluate the user constraints approach.
-For these reasons, we only use cluster-label agnostic metrics.
+There exist several metrics to evaluate the quality of an embedding.  
+In this paper, clustering-based quality measures are not considered because they need labeled data for measurement (e.g. the digits in the dataset DIGITS).
+%For these reasons, we only use cluster-label agnostic metrics.
 We also avoid quality measures that are linked to the objective function of SNE, e.g. Neighborhood Retrieval Visualizer (NeRV) \cite{venna2010}, (i) because they need the evaluation of their own perplexity parameter and (ii) because of the bias of measuring the quality of $t$-SNE and LargeVis with a quality metric too closely related to SNE.
 
 \begin{table}%[width=\textwidth,cols=6,pos=h]
@@ -127,9 +127,9 @@ We also avoid quality measures that are linked to the objective function of SNE,
 Metric name &  Range value & Description\\
 \midrule
 CC & $[0, 1]$ & Pearson correlation coefficient between pairwise distance vectors\\
-NMS & $[0, +\infty)$ & Stress based on comparison of pairwise distance orders\\
-CCA & $[0, +\infty)$ & Stress with accent put on LD\\
-NLM & $[0, +\infty)$ & Stress with accent put on HD\\
+NMS & $[0, +\infty[$ & Stress based on comparison of pairwise distance orders\\
+CCA & $[0, +\infty[$ & Stress with emphasis put on LD\\
+NLM & $[0, +\infty[$ & Stress with emphasis put on HD\\
 AUC$_{log}$RNX & $[0, 1]$ & How neighbors in HD are preserved in LD\\
 \bottomrule
 \end{tabular}
@@ -142,10 +142,10 @@ The first considered metric, the \emph{correlation coefficient} (CC)~\cite{geng2
 
 Clustering is a machine learning problem in which the goal is to find groups (called \emph{clusters}) of instances in the data. The constraints used in clustering methods have been well studied for a long time. User constraints can incorporate domain expertise with the goal of explicitly defining the property of the expected clusters.
 The popular survey by Davidson et al.~\cite{Davidson2007surveyClt} focuses on \emph{constraint-based} and \emph{distance-based} clustering methods with instance-level constraints.
-In constraint-based methods, the clusters are formed in such a way that the given constraints are preserved as much as possible, e.g. PCKMeans \cite{basu2004active} and a modified version of K-Means with feasibility under different types of constraints \cite{davidson2005clustering}. %$\delta-$, $\epsilon-$ and pairwise constraints
-In distance-based methods, the constraints are first used to train a distance function that is later used by a clustering algorithm, e.g. relation component analysis as distance measure \cite{bar2003learning} and constraint metric K-Means \cite{xing2003distance}.
-The pairwise constraints are first introduced in constrained K-Means by Wagstaff et al. \cite{wagstaff2001constrained} for clustering GPS data. Must-link and cannot-link constraints indicate that two instances must be in the same cluster or cannot be in the same cluster, respectively.
-A similar-link constraint suggests that two points should be close, or similar, and a dissimilar-link constraint means that two points should be far apart or dissimilar.
+In constraint-based methods, the clusters are formed in such a way that the given constraints are preserved as much as possible, e.g. PCKMeans \cite{basu2004active} and another modified version of K-Means \cite{davidson2005clustering}. % with feasibility under different types of constraints \cite{davidson2005clustering}. %$\delta-$, $\epsilon-$ and pairwise constraints
+In distance-based methods, the constraints are first used to train a distance function that is later used by a clustering algorithm (e.g. \cite{bar2003learning,xing2003distance}). %, e.g. relation component analysis as distance measure \cite{bar2003learning} and constraint metric K-Means \cite{xing2003distance}.
+The pairwise constraints are first introduced in constrained K-Means by Wagstaff et al. \cite{wagstaff2001constrained}. Must-link and cannot-link constraints indicate that two instances must be in the same cluster or cannot be in the same cluster, respectively.
+%A similar-link constraint suggests that two points should be close, or similar, and a dissimilar-link constraint means that two points should be far apart or dissimilar.
 
 %\subsubsection{User Constraints for Dimensionality Reduction}\label{subsec:constraints_dr}
 % TODO: link to user constraints for DR
@@ -155,11 +155,11 @@ If users can interact with the visualization result, they can give their feedbac
 Integrating user interaction into DR methods is reviewed by Sacha et al.~\cite{Sacha2017Interaction}, and Endert et al.~\cite{Endert2017SOTA} proposes a wider survey on integrating machine learning into visual analysis.
 Pairwise constraints in DR are used to attract points connected by similar-links and repulse dissimilar-link constrained points. Such constraints are used in, e.g., pairwise constraints-guided feature projection~\cite{tang2007pairwise}, semi-supervised DR~\cite{zhang2007ssdr}, graph-driven constrained DR via linear projection~\cite{davidson2009gcdr} and constrained locality preserving projections~\cite{cevikalp2008CLPP}.
 
-The objective of this paper is to show that user-constraints can be used for automatically tuning hyperparameters of DR methods. The next section reviews how the literature handles the choice of hyperparameter values in the context of DR methods.
+The objective of this paper is to show that user-constraints can also be used for automatically tuning hyperparameters of DR methods. The next section reviews how the literature handles the choice of hyperparameter values in the context of DR methods.
 
 \subsection{Choosing Hyperparameter Values of DR Methods}\label{subsec:tune_HP}
 
-The right hyperparameter value to choose depends on the characteristics of the dataset such as the number of instances (size), the topology (structure) or the density (distribution) of instances, which makes it hard to select the best one.
+The value of the hyperparameter depends on the characteristics of the dataset such as the number of instances (size), the topology (structure) or the density (distribution) of instances, which makes it hard to select the best one.
 Concerning $t$-SNE for instance, the original paper of van der Maaten et al. \cite{maaten2008tsne} suggests typical values between 5 and 50.
 However, in practice, the embedding can change drastically between two different perplexity values. Therefore, there is no evidence to ensure that the suggested perplexities are good for all datasets.
 The original paper also proposes a simple method to select a good perplexity by looking at the KL loss produced by several perplexities and choose the lowest one, since it corresponds to a well-preserved neighborhood.
@@ -175,17 +175,17 @@ In addition to require an expertise in machine learning, this process is often t
 \end{figure}
 
 Few papers in the literature attempt to derive the best hyperparameter values automatically.
-With regards to the perplexity, Strickert~\cite{strickert2012} avoids the burden of choosing it by evaluating the degree of neighborhood P*, instead of P, using a given pairwise score matrix S. For each instance $i$ in ${\bf S}$, all other instances $j$ are ranked and ${P}^*_{ij}$ is computed with respect to the ranking position of each instance $j$ in ${\bf S}_i$. However, this solution is not suitable when the matrix ${\bf S}$ is not provided.
+Strickert~\cite{strickert2012} avoids the burden of choosing the perplexity of $t$-SNE by evaluating the degree of neighborhood P*, instead of P, using a given pairwise score matrix S. For each instance $i$ in ${\bf S}$, all other instances $j$ are ranked and ${P}^*_{ij}$ is computed with respect to the ranking position of each instance $j$ in ${\bf S}_i$. However, this solution is not suitable when the matrix ${\bf S}$ is not provided.
 Lee et al.~\cite{lee2014} use a multi-scale approach by considering, and averaging, all neighborhood sizes. Despite providing visualizations by bypassing the perplexity selection problem, these two solutions do not solve the selection problem itself.
 
 On the contrary, Cao and Wang~\cite{cao2017automatic} try to tackle the problem by selecting the perplexity that minimizes the modified \emph{Bayesian information criteria} (BIC):
 \begin{equation}
-S(\textit{perplexity}) = 2KL(P||Q) + \log(n)\frac{\textit{perplexity}}{n},
+S(\textit{perplexity}) = 2KL(P||Q) + \frac{\textit{perplexity}}{n}\log(n),
 \end{equation}
 where $KL(P||Q)$ is the same KL loss as Eq.~\ref{eq:KL} and $n$ is the number of instances.
-Their approach is validated with user-based experiments by comparing the automatically selected visualization to the ones selected by users. They obtain perplexities very close to the user consensus on three datasets.
+Their approach is validated with user-based experiments by comparing the automatically selected visualization to the ones selected by users. They obtain perplexities very close to the user consensus on three datasets. However, this method is designed only for $t$-SNE and does not make it possible to inject user knowledge through constraints.
 
-Bayesian methods have often been used to select hyperparameter values in supervised learning settings. Hameling~\cite{harmeling2007exploring} shows that selecting the DR visualization based on a Bayesian method can lead to good results. The next section proposes an introduction to the use of Bayesian optimization to tune DR hyperparameters.
+%Bayesian methods have often been used to select hyperparameter values in supervised learning settings. Hameling~\cite{harmeling2007exploring} shows that selecting the DR visualization based on a Bayesian method can lead to good results. The next section proposes an introduction to the use of Bayesian optimization to tune DR hyperparameters.
 
 \subsection{Hyperparameter Tuning with Bayesian Optimization}\label{subsec:tune_with_BayOpt}
 
@@ -233,9 +233,9 @@ However in a visualization problem, the target function for measuring the qualit
 
 In this section, the proposed constraint preserving score is presented. A first visual definition is illustrated in Section~\ref{subsec:visual_def}. Then, a definition for the quantification of the score is provided in Section~\ref{subsec:s_score}.
 
-\subsection{Visual Definition of User Pairwise Constraints}\label{subsec:visual_def}
+\subsection{Visual Definition of the User Pairwise Constraints}\label{subsec:visual_def}
 
-Since humans are capable of well distinguishing some similar and dissimilar high-dimensional objects with prior knowledge (e.g. comparing countries only by their name, comparing images by the visual features such as the shape, color, objects in the image, etc.), they can naturally express their knowledge by defining several links between instances.
+Since humans distinguish similar and dissimilar high-dimensional objects (e.g. comparing countries only by their name, comparing images by visual features such as the shape, color, objects in the image, etc.), they can naturally express their knowledge with pairs of instances.
 In Fig.~\ref{fig:ml_cl_examples}, some examples are provided of similar-links that can be formed between objects that are very similar and only differ based on the point of view, while dissimilar-links can be formed between objects of different shapes.
 
 \begin{figure}
@@ -252,31 +252,31 @@ In Fig.~\ref{fig:ml_cl_examples}, some examples are provided of similar-links th
     \label{fig:ml_cl_examples}
 \end{figure}
 
-Our method is based on the following hypothesis: an embedding is said to be good if it accurately represents the high-dimensional data and satisfies some given constraints.
-If labels are known to be related to the dataset but have not been used during the NLDR process, a portion of these labels can be used to generate the constraints for computing the score.
-This is a way to select the visualization that best fit the prior knowledge represented by the labels.
-If the dataset does not contain any label, or if some particular knowledge have to be considered by users, the constraint score can be computed on constraints that are provided by users.
-The pairwise constraints are then used as a criterion to evaluate the fit between visualizations and user requirements.
-By computing this constraint score, our method makes it easier to select the NLDR hyperparameters by providing good quality embeddings that preserves the predefined constraints.
+Our method is based on the hypothesis that an embedding is said to be good if it accurately represents the high-dimensional data and satisfies some given constraints.
+If labels related to the dataset, which have not been used during the NLDR process, are provided, a portion of these labels can be used to generate the constraints for computing a quality score.
+%This is a way to select the visualization that best fit the prior knowledge represented by the labels.
+If the dataset does not contain any label, or if some particular knowledge have to be considered, constraints can directly be provided by users.
+%The pairwise constraints are then used as a criterion to evaluate the fit between visualizations and user requirements. By computing this constraint score, our method makes it easier to select the NLDR hyperparameters by providing good quality embeddings that preserves the predefined constraints.
 
-To prove the reliability of the quantitative score that is derived from the pairwise constraints (defined in Section~\ref{subsec:s_score}), the score is compared with several embedding quality metrics (presented in Section~\ref{sec:result:compare}).
+%To evaluate the reliability of the quantitative score that is derived from the pairwise constraints (defined in Section~\ref{subsec:s_score}), the score is compared with several embedding quality metrics (presented in Section~\ref{sec:result:compare}).
 
-\subsection{Quantifying the Pairwise Constraints}\label{subsec:s_score}
+\subsection{Defining the Pairwise Constraints}\label{subsec:s_score}
 
-Given a set of labeled points or user pairwise constraints, our method computes a score, called the \emph{constraint-preserving score} $f_{score}$, measuring how well the pairwise constraints are preserved in a certain embedding.
+Given a set of labeled points or user pairwise constraints, the \emph{constraint-preserving score} $f_{score}$ measures how well the pairwise constraints are preserved in a certain embedding.
 
 \subsubsection*{Constraint Measurement}
-$t$-SNE uses the Student's $t$ distribution to encode the neighborhood information of the instances in the low dimensional space (see Eq.~\ref{eq:q_ij}).
+As $t$-SNE efficiently defines links between neighboring instances, we base our constraint measurement on it. $t$-SNE uses the Student's $t$ distribution to encode the neighborhood information of the instances in the low dimensional space (see Eq.~\ref{eq:q_ij}).
 The constraint-preserving score $f_{score}$ also uses a $t$ distribution in the embedded space to quantify the constraints preservation.
-Let us denote the NLDR embedding result ${Y} = \{{{\bf y}_i}\}$, the set of similar-links $\mathcal{S}$ and the set of dissimilar-links $\mathcal{D}$. The number of similar-link and dissimilar-link constraints are denoted by $|\mathcal{S}|$ and $|\mathcal{D}|$, respectively.
+Let us denote the NLDR embedding result ${Y} = \{{{\bf y}_i}\}$, the set of similar-links $\mathcal{S}$ and the set of dissimilar-links $\mathcal{D}$. 
+%The number of similar-link and dissimilar-link constraints are denoted by $|\mathcal{S}|$ and $|\mathcal{D}|$, respectively.
 For a constrained pair of instances $({\bf y}_i, {\bf y}_j)$, the probability of ${\bf y}_i$ and ${\bf y}_j$ being neighbors is defined as
 \begin{equation}\label{equ:q_link}
     q_{ij} = \frac
     { ( 1 + || {\bf y}_i - {\bf y}_j ||^2 )^{-1} }
     { \sum_{k \neq l} { ( 1 + ||{\bf y}_k - {\bf y}_l||^2 )^{-1} } }.
 \end{equation}
-The instances connected by a similar-link constraint are considered as neighbors and should be close together in the embedding.
-The instances constrained by a dissimilar-link should stay apart in the visualization, since the constraint states that they cannot be neighbors.
+The instances connected by a similar-link constraint are considered as neighbors and should be close in the embedding.
+The instances constrained by a dissimilar-link should stay apart in the visualization, i.e. they cannot be neighbors.
 Therefore, for each similar-link $({\bf y}_i, {\bf y}_j) \in \mathcal{S}$, $q_{ij}$ should be high and, inversely, $q_{ij}$ is expected to be low for each dissimilar-link $({\bf y}_i, {\bf y}_j) \in \mathcal{D}$.
 
 \subsubsection*{Constraint-Preserving Score for Similar-Links}
@@ -285,7 +285,7 @@ The amount of similar-link information preserved in a given embedding is measure
 f_{score}(\mathcal{S}) = \frac{1}{|\mathcal{S}|} \log \prod_{({\bf y}_i, {\bf y}_j) \in \mathcal{S}} q_{ij}
                 = \frac{1}{|\mathcal{S}|} \sum_{({\bf y}_i, {\bf y}_j) \in \mathcal{S}} \log q_{ij}.
 \end{equation}
-If all pairs connected by similar-links are positioned close together, the log-likelihood is high and $f_{score}(\mathcal{S})$ is maximized.
+If all pairs connected by similar-links are close, the log-likelihood is high and so is the $f_{score}(\mathcal{S})$.
 
 \subsubsection*{Constraint-Preserving Score for Dissimilar-Links}
 In contrast to similar-links, the probability $q_{ij}$ for each dissimilar-link $({\bf y}_i, {\bf y}_j) \in \mathcal{D}$ should be low, i.e. the log-likelihood over all dissimilar-link pairs ($\log \prod_{\mathcal{D}} q_{ij}$) must be minimized. In other words, the negative log-likelihood over all dissimilar-link constraints should be maximized. The constraint-preserving score for a set of dissimilar-links $\mathcal{D}$ is defined as
@@ -293,7 +293,7 @@ In contrast to similar-links, the probability $q_{ij}$ for each dissimilar-link 
 f_{score}(\mathcal{D}) = -\frac{1}{|\mathcal{D}|} \log \prod_{({\bf y}_i, {\bf y}_j) \in \mathcal{D}} q_{ij}
                 = -\frac{1}{|\mathcal{D}|} \sum_{({\bf y}_i, {\bf y}_j) \in \mathcal{D}} \log q_{ij}.
 \end{equation}
-By maximizing $f_{score}(\mathcal{D})$, the embedding that best respects the dissimilar-link constraints is found.
+By maximizing $f_{score}(\mathcal{D})$, the embedding will respect the dissimilar-link constraints.
 Another way to measure how well a dissimilar-link $({\bf y}_i, {\bf y}_j)$ is preserved is to use $1 - q_{ij}$. However, in practice, the value of $q_{ij}$ is very small, meaning that $1 - q_{ij}$ is close to one, which makes the log-likelihood of all dissimilar-links vanish.
 
 \subsubsection*{Constraint-Preserving Score}
@@ -305,12 +305,12 @@ Another way to measure how well a dissimilar-link $({\bf y}_i, {\bf y}_j)$ is pr
 %     \label{fig:s_scores_mnist}
 % \end{figure}
 
-The score over all similar-constraint and dissimilar-constraint links can be maximized at the same time by defining the constraint-preserving score as a combination with equal contribution of the score of both similar-links and dissimilar-links 
+The score over all similar-constraint and dissimilar-constraint links can be defined as a combination with equal contribution of the score of both similar-links and dissimilar-links 
 \begin{equation}
 f_{score}(\mathcal{S},\mathcal{D}) = \frac{1}{2}f_{score}(\mathcal{S}) + \frac{1}{2}f_{score}(\mathcal{D}).
 \end{equation}
 $f_{score}(\mathcal{S},\mathcal{D})$ is written as $f_{score}$ for short.
 An embedding that retains as much as possible the constraint information $f_{score}$ is considered to have a good quality with respect to the labels or user needs.
-Based on these definitions, our method takes a set of label- or user-defined pairwise constraints and searches, with BayOpt, among all embeddings, created by different hyperparameter values, for ones with a maximal $f_{score}$.
+%Based on these definitions, our method takes a set of label- or user-defined pairwise constraints and searches, with BayOpt, among all embeddings, created by different hyperparameter values, for ones with a maximal $f_{score}$.
 % Fig.~\ref{fig:s_scores_mnist} illustrates the contribution of $S_{\mathcal{S}}$ and $S_{\mathcal{D}}$ to the overall $S_{\mathcal{S}+\mathcal{D}}$ score for $t$-SNE embeddings of the \emph{DIGITS} dataset with 50 label-generated constraints (see Section~\ref{subsec:constraint_generation} for details about the generation process).
 
