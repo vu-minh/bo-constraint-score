@@ -5,3 +5,13 @@ annoy_index_file
 temp*
 log*
 run_score.py.lprof
+data
+embeddings
+embeddings_old
+logs
+logs_old
+mlruns
+plots
+plots_old
+scores
+scores_old
