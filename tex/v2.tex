@@ -1,6 +1,6 @@
 \section{Introduction}
 
-\todo[inline]{Reread and propose a new Intro}
+\todo[inline]{Discuss to rewrite}
 
 In many contexts (e.g. industry, academic research, etc.), users want to get insights about their data. In such cases, the number of features characterizing each instance in their dataset is often too large to understand their data. The problem of {\it dimensionality reduction} (DR) is to reduce a dataset containing $D$ features for $N$ instances (providing an $N \times D$ matrix) to a new dataset of $Z$ dimensions, such that $Z \ll D$. When this new number of dimensions $Z$ equals two, the dimensionality reduction result allows users to see their data in a two-dimensional space by plotting the remaining two dimensions in a scatter plot. This problem is called {\it visualization}: from provided data with too many features, visualization algorithms provide a projection of these data in a two-dimensional space in such a way that the information loss is minimized. The resulting $N \times 2$ matrix, often called {\it embedding}, can then be visualized.
 % For instance, Fig.~\ref{subfig:digit_viz_example} represents a visualization of 200 hand-written digits images from the well-known MNIST dataset and Fig.~\ref{subfig:digit_example} shows some examples of the raw image data.
@@ -447,7 +447,6 @@ Small values are added to the diagonal of the kernel function of the underlying 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experimental Results}\label{sec:results}
 
-\todo[inline]{max 4 pages}
 The constraint preserving $f_{score}$ is proposed to measure the quality of the visualization and is used to tuning the hyperparameters of the DR methods.
 Through the obtained experimental results, we demonstrate firstly the behavior of $f_{score}$ (Section~\ref{sec:result:fscore}) and explain how this score captures the characteristic of different embeddings.
 $f_{score}$ is empirically proved to be stable (Section~\ref{sec:result:stability}) and comparable to $AUC_{log}RNX$ and BIC-based score for evaluating the quality of the embeddings (Section~\ref{sec:result:compare}).
