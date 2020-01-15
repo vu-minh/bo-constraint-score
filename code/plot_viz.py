@@ -578,11 +578,14 @@ def get_params_to_show(dataset_name, method_name):
                 (247, "--all"),
             ],
             "umap": [
-                (8, 0.01, "~prediction, ++qij, =rnx"),
-                # bo_constraint.py  --seed 2019 -d COIL20 -m umap -u ei -x 0.1 -nr 40 --run
-                # (5, 0.01, "+qij, +rnx"),
-                (4, 0.4642, "--qij, ++rnx"),
-                (56, 0.1, "--qij, +rnx"),
+                (11, 0.01, "++qij, -rnx"),
+                (5, 0.4642, "-qij, ++rnx"),
+                (102, 0.1, "--qij, +rnx"),
+                # (8, 0.01, "~prediction, ++qij, =rnx"),
+                # # bo_constraint.py  --seed 2019 -d COIL20 -m umap -u ei -x 0.1 -nr 40 --run
+                # # (5, 0.01, "+qij, +rnx"),
+                # (4, 0.4642, "--qij, ++rnx"),
+                # (56, 0.1, "--qij, +rnx"),
                 (300, 0.4642, "--all"),
             ],
         },
@@ -821,7 +824,7 @@ if __name__ == "__main__":
             },
             "FASHION_MOBILENET": {
                 "tsne": {
-                    "label1": ["class_subcat", "Group sub-categories", 82],
+                    "label1": ["class_subcat", "Group sub-categories", 77],
                     "label2": ["class_matcat", "Hierarchical master-categories", 113],
                 }
             },
