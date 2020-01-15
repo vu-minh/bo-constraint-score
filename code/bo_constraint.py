@@ -246,9 +246,7 @@ if __name__ == "__main__":
         "--xi",
         default=0.025,
         type=float,
-        help=(
-            "For EI/POI, small(1e-4)->exploitation, large(1e-1)->exploration, default 0.025"
-        ),
+        help=("For EI/POI, small(1e-4)->exploitation, large(1e-1)->exploration, default 0.025"),
     )
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--plot", action="store_true")
@@ -277,7 +275,10 @@ if __name__ == "__main__":
     dataset.set_data_home("./data")
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
 
-    _, X, default_labels = dataset.load_dataset(dataset_name, preprocessing_method="auto")
+    _, X, default_labels = dataset.load_dataset(
+        dataset_name, preprocessing_method="auto", pca=0.9
+    )
+    # note: only with COIL dataset, use `pca=None`
 
     target_label_name = args.use_other_label
     if target_label_name is not None:
@@ -398,3 +399,7 @@ if __name__ == "__main__":
 # DEMO Flexible score:
 # python bo_constraint.py --seed 42 -d NEURON_1K -m tsne -u ei -x 0.1 --plot --run -nr 15 --use_other_label umi
 # get perp=257 vs perp=68 (normal case)
+# python bo_constraint.py --seed 42 -d FASHION_MOBILENET -m tsne -u ei -x 0.1 --plot --run -nr 15 --use_other_label class_matcat
+# new perp 113 vs normal perp 77
+# Generate figure for score flexibility
+# python plot_viz.py -d FASHION_MOBILENET -m tsne --plot_score_flexibility
