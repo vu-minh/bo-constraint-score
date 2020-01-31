@@ -394,6 +394,7 @@ def plot_prediction_density_2D(
     print(
         f"Input params: list_n_neigbors {len(list_n_neigbors)},"
         f" list_min_dist {len(list_min_dist)}"
+        f"\n plot_dir: {plot_dir}"
     )
     X, Y = np.meshgrid(list_n_neigbors, list_min_dist)
     print("Grid size: ", X.shape, Y.shape)
