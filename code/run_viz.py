@@ -20,9 +20,7 @@ def run_viz(
 
     if method_name == "tsne":
         for perp in perplexity_range:
-            run_tsne(
-                X, perplexity=perp, seed=seed, check_log=True, embedding_dir=embedding_dir
-            )
+            run_tsne(X, perplexity=perp, seed=seed, check_log=True, embedding_dir=embedding_dir)
 
     if method_name == "largevis":
         for perp in perplexity_range:
