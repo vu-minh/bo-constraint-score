@@ -137,24 +137,24 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("FASHION_MOBILENET")
-    declare -a LIST_METHODS=("tsne" "umap" "largevis")
+    declare -a LIST_DATASETS=("COIL20")
+    declare -a LIST_METHODS=("umap")
 fi
 
 for DATASET_NAME in "${LIST_DATASETS[@]}"; do
     for METHOD in "${LIST_METHODS[@]}"; do
-	echo $DATASET_NAME $METHOD
+	   echo $DATASET_NAME $METHOD
 
         if [ $METHOD == "tsne" ]; then
             run_bic $DATASET_NAME # run BIC first to generate tsne embeddings
         fi
         
-	run_viz $DATASET_NAME $METHOD
-	run_score $DATASET_NAME $METHOD
-        run_metric $DATASET_NAME $METHOD
+    	# run_viz $DATASET_NAME $METHOD
+    	# run_score $DATASET_NAME $METHOD
+        # run_metric $DATASET_NAME $METHOD
 
         if [ $METHOD == "umap" ]; then
-	       run_score_umap_2D $DATASET_NAME
+           run_score_umap_2D $DATASET_NAME
         fi
 
         plot_compare_scores $DATASET_NAME $METHOD
