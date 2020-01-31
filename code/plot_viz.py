@@ -668,7 +668,7 @@ def plot_viz_with_score_flexibility(
     for [ax_lbl1, ax_lbl2], best_param, [t1, t2] in zip(
         [[ax0, ax2], [ax1, ax3]], [best_param1, best_param2], sub_text
     ):
-        Z = joblib.load(f"{embedding_dir}/{int(best_param)}.z")
+        Z = joblib.load(f"{embedding_dir}/{best_param}.z")
 
         # ax_lbl1.set_title(title1)
         s1 = ax_lbl1.scatter(Z[:, 0], Z[:, 1], s=6, c=labels1, alpha=0.7, cmap="Spectral")
@@ -814,19 +814,40 @@ if __name__ == "__main__":
                         "from 6.5K to 12.5K",
                         "more than 12.5K",
                     ],
-                }
+                },
+                "umap": {
+                    "label1": [
+                        "graph_based_cluster",  # label name
+                        "Points colored by graph-based cluster indices",  # title/description
+                        "10_0.0038",  # best param
+                    ],
+                    "label2": ["umi", "Points colored by UMI count", "8_0.0185"],
+                    "label2_correct": [
+                        "less than 6.5K",
+                        "from 6.5K to 12.5K",
+                        "more than 12.5K",
+                    ],
+                },
             },
             "20NEWS5": {
                 "tsne": {
                     "label1": ["cat", "Group sub-categories", 130],
                     "label2": ["matcat", "Semantic master-categories", 44,],
-                }
+                },
+                "umap": {
+                    "label1": ["cat", "Group sub-categories", "169_0.0010"],
+                    "label2": ["matcat", "Semantic master-categories", "161_0.0636",],
+                },
             },
             "FASHION_MOBILENET": {
                 "tsne": {
                     "label1": ["class_subcat", "Group sub-categories", 77],
                     "label2": ["class_matcat", "Hierarchical master-categories", 113],
-                }
+                },
+                "umap": {
+                    "label1": ["class_subcat", "Group sub-categories", "20_0.0046"],
+                    "label2": ["class_matcat", "Hierarchical master-categories", "20_0.0255"],
+                },
             },
         }
         config = config_labels[dataset_name][method_name]
