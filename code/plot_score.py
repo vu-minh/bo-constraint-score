@@ -151,7 +151,10 @@ def plot_scores(
     score_dir="",
     plot_dir="",
     compare_with_rnx=False,
+    show_best_range=False,
 ):
+    plt.rcParams.update({"font.size": 26})
+
     # prepare qij score data
     with open(f"{score_dir}/dof1.0_all.txt", "r") as in_file:
         qij_score_data = json.load(in_file)
@@ -170,7 +173,7 @@ def plot_scores(
 
     # prepare subplots
     n_rows = len(list_n_labels_values) + (1 if compare_with_rnx else 0)
-    _, axes = plt.subplots(n_rows, 1, figsize=(8.5, 4.25 * n_rows))
+    fig, axes = plt.subplots(n_rows, 1, figsize=(8, 4.5 * n_rows))
 
     for ax, n_labels_each_class in zip(
         np.array(axes).ravel(), sorted(list_n_labels_values) + [99]
@@ -193,27 +196,31 @@ def plot_scores(
             text_y_pos = min(score_mean - score_sigma)
 
         ax.set_title(title, loc="left")
-        ax.set_ylabel(ylabel)
+        # ax.set_ylabel(ylabel) # e.g. ylabel = "constraint score"
         # ax.set_ylim(top=1.15*max(score_mean), bottom=0.8*min(score_mean))
 
-        # determine best param range and best param value
-        pivot = threshold * max(score_mean)
-        (best_indices,) = np.where(score_mean > pivot)
-        param_min = list_params[best_indices.min()]
-        param_max = list_params[best_indices.max()]
-        param_best = list_params[np.argmax(score_mean)]
+        if show_best_range:
+            # determine best param range and best param value
+            pivot = threshold * max(score_mean)
+            (best_indices,) = np.where(score_mean > pivot)
+            param_min = list_params[best_indices.min()]
+            param_max = list_params[best_indices.max()]
+            param_best = list_params[np.argmax(score_mean)]
 
-        _plot_score_with_best_param_and_range(
-            ax,
-            list_params,
-            pivot,
-            param_best,
-            param_min,
-            param_max,
-            score_mean=score_mean,
-            score_sigma=score_sigma,
-            text_y_pos=text_y_pos,
-        )
+            _plot_score_with_best_param_and_range(
+                ax,
+                list_params,
+                pivot,
+                param_best,
+                param_min,
+                param_max,
+                score_mean=score_mean,
+                score_sigma=score_sigma,
+                text_y_pos=text_y_pos,
+            )
+        else:
+            # main line of mean_score with variance
+            _plot_line_with_variance(ax, list_params, score_mean, score_sigma)
 
         # additional annotation for the first plot and the last plot
         if first_plot:
@@ -226,31 +233,33 @@ def plot_scores(
                 ha="right",
                 bbox=dict(edgecolor="b", facecolor="w"),
             )
-            # hint text for the top hightest scores horizontal line
-            ax.text(
-                x=min(list_params),
-                y=pivot * 1.01,
-                ha="left",
-                va="bottom",
-                s="\u2199" + f"{threshold} max(score)",
-                color="#0047BB",
-            )
+            if show_best_range:
+                # hint text for the top hightest scores horizontal line
+                ax.text(
+                    x=min(list_params),
+                    y=pivot * 1.01,
+                    ha="left",
+                    va="bottom",
+                    s="\u2199" + f"{threshold} max(score)",
+                    color="#0047BB",
+                )
         if last_plot:
             # hint xlabel param in log-scale
             ax.set_xlabel(f"{param_name} in log-scale")
-            # hint text for the top hightest scores horizontal line
-            ax.text(
-                x=max(list_params),
-                y=pivot * 1.01,
-                ha="right",
-                va="bottom",
-                s=f"{threshold} max(score)" + "\u2198",
-                color="#0047BB",
-            )
+            if show_best_range:
+                # hint text for the top hightest scores horizontal line
+                ax.text(
+                    x=max(list_params),
+                    y=pivot * 1.01,
+                    ha="right",
+                    va="bottom",
+                    s=f"{threshold} max(score)" + "\u2198",
+                    color="#0047BB",
+                )
 
-    plt.tight_layout()
-    plt.savefig(f"{plot_dir}/scores.png")
-    plt.close()
+    fig.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
+    fig.savefig(f"{plot_dir}/scores.png", dpi=300)
+    plt.close(fig)
 
 
 def plot_quality_metrics(dataset_name, method_name, param_name="", score_dir="", plot_dir=""):
@@ -470,8 +479,8 @@ def plot_all_score_all_method_all_dataset(
                 )
                 ax.text(0.05, 0.85, "$f_{score}$", transform=ax.transAxes, fontsize=22)
 
-    fig.tight_layout()
+    fig.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     draw_seperator_between_subplots(fig, axes, color="gray", linestyle="--", linewidth=1.0)
     fig.subplots_adjust(hspace=0.6)
-    fig.savefig(f"{plot_root_dir}/all_scores_all_methods.png")
+    fig.savefig(f"{plot_root_dir}/all_scores_all_methods.png", dpi=300)
     plt.close(fig)

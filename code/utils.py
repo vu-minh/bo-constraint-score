@@ -136,7 +136,7 @@ def get_method_display_name(method_name):
         "tsne": "t-SNE",
         "largevis": "LargeVis",
         "umap": "UMAP",
-        "umap1": "UMAP\n$_{(min\_dist=0.1)}$",
+        "umap1": "UMAP\n$_{(min\_dist\!=\!0.1)}$",
     }.get(method_name, method_name)
 
 
@@ -144,8 +144,8 @@ def get_param_display_name(method_name):
     return {
         "tsne": "perplexity",
         "largevis": "perplexity",
-        "umap": "(n_neighbor, perplexity)",
-        "umap1": "n_neighbor",
+        "umap": "(n_neighbors, perplexity)",
+        "umap1": "n_neighbors",
     }.get(method_name, method_name)
 
 
@@ -157,6 +157,61 @@ def get_score_display_name(score_name):
         "auc_rnx": "$AUC_{log}RNX$",
         "bic": "BIC-based score",
     }.get(score_name, score_name)
+
+
+def get_config_labels_for_score_flexibility():
+    return {
+        "NEURON_1K": {
+            "tsne": {
+                "label1": [
+                    "graph_based_cluster",  # label name
+                    "Points colored by graph-based cluster indices",  # title/description
+                    68,  # best param
+                    # list labels of each point will be added
+                    # list names for each label will be added
+                ],
+                "label2": ["umi", "Points colored by UMI count", 144],
+                "label2_correct": ["less than 6.5K", "from 6.5K to 12.5K", "more than 12.5K",],
+            },
+            "umap": {
+                "label1": [
+                    "graph_based_cluster",  # label name
+                    "Points colored by graph-based cluster indices",  # title/description
+                    "10_0.0038",  # best param
+                ],
+                "label2": ["umi", "Points colored by UMI count", "8_0.0185"],
+                "label2_correct": ["less than 6.5K", "from 6.5K to 12.5K", "more than 12.5K",],
+            },
+        },
+        "20NEWS5": {
+            "tsne": {
+                "label1": ["cat", "Group sub-categories", 130],
+                "label2": ["matcat", "Semantic master-categories", 44,],
+            },
+            "umap": {
+                "label1": ["cat", "Group sub-categories", "169_0.0010"],
+                "label2": ["matcat", "Semantic master-categories", "161_0.0636",],
+            },
+        },
+        "FASHION_MOBILENET": {
+            "tsne": {
+                "label1": ["class_subcat", "Group sub-categories", 77],
+                "label2": ["class_matcat", "Hierarchical master-categories", 113],
+            },
+            "umap": {
+                "label1": ["class_subcat", "Group sub-categories", "20_0.0046"],
+                "label2": ["class_matcat", "Hierarchical master-categories", "20_0.0255"],
+            },
+        },
+    }
+
+
+def change_border(ax, width=0.25, color="black"):
+    ax.axes.get_yaxis().set_visible(False)
+    ax.axes.get_xaxis().set_visible(False)
+    for axis in ["top", "bottom", "left", "right"]:
+        ax.spines[axis].set_linewidth(width)
+        ax.spines[axis].set_edgecolor(color)
 
 
 if __name__ == "__main__":

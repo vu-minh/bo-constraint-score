@@ -19,7 +19,8 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from MulticoreTSNE import MulticoreTSNE
 from umap import UMAP
 
-from utils import get_scores_tsne
+from utils import change_border
+from utils import get_scores_tsne, get_config_labels_for_score_flexibility
 
 
 def plot_2_labels(Z, labels, other_labels, out_name, title1="", title2=""):
@@ -73,10 +74,7 @@ def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=False):
     if axis_off:
         ax.axis("off")
     else:
-        ax.axes.get_yaxis().set_visible(False)
-        ax.axes.get_xaxis().set_visible(False)
-        for axis in ["top", "bottom", "left", "right"]:
-            ax.spines[axis].set_linewidth(0.25)
+        change_border(ax, width=0.25, color="black")
 
 
 def _simple_scatter_with_colorbar(
@@ -359,7 +357,7 @@ def plot_metamap_with_scores_tsne(
 
     fig.tight_layout()
     plt.subplots_adjust(wspace=0.075, bottom=-0.05, top=1.0, left=0.01)
-    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
+    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png", dpi=300)
 
 
 def plot_metamap_with_scores_umap(
@@ -447,8 +445,8 @@ def plot_metamap_with_scores_umap(
 
     fig.tight_layout()
     plt.subplots_adjust(bottom=-0.075, top=1.0, left=0.01, right=0.99, wspace=0.05)
-    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png")
-    plt.close()
+    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png", dpi=300)
+    plt.close(fig)
 
 
 def annotate_selected_params_tsne(ax, list_annotations):
@@ -659,7 +657,7 @@ def plot_viz_with_score_flexibility(
     label_name1, title1, best_param1, labels1, label_names1 = config_label1
     label_name2, title2, best_param2, labels2, label_names2 = config_label2
 
-    fig, [[ax0, ax1], [ax2, ax3]] = plt.subplots(2, 2, figsize=(8, 9))
+    fig, [[ax0, ax1], [ax2, ax3]] = plt.subplots(2, 2, figsize=(8, 9.5))
     sub_text = [
         [f"Best perplexity {best_param1}", f"Best perplexity {best_param1}"],
         [f"Best perplexity {best_param2}", f"Best perplexity {best_param2}"],
@@ -679,11 +677,8 @@ def plot_viz_with_score_flexibility(
         ax_lbl2.text(0.98, 0.02, t2, transform=ax_lbl2.transAxes, fontsize=16, ha="right")
 
     for ax in [ax0, ax1, ax2, ax3]:
-        ax.axes.get_yaxis().set_visible(False)
-        ax.axes.get_xaxis().set_visible(False)
-        for axis in ["top", "bottom", "left", "right"]:
-            ax.spines[axis].set_linewidth(0.5)
-        # ax.axes.set_aspect("equal")
+        change_border(ax, width=0.25, color="black")
+        ax.set_aspect("equal")
 
     # legend
     if label_names1 is None:
@@ -694,9 +689,9 @@ def plot_viz_with_score_flexibility(
         label_names1,
         fancybox=True,
         loc="upper left",
-        bbox_to_anchor=(0.0, 1.25),
+        bbox_to_anchor=(0.0, 1.18),
         borderaxespad=0.1,
-        ncol=min(4, len(label_names1)),  # note to change according to dataset
+        ncol=min(3, len(label_names1)),  # note to change according to dataset
         title=title1,
         fontsize="small",
     )
@@ -709,18 +704,19 @@ def plot_viz_with_score_flexibility(
         label_names2,
         fancybox=True,
         loc="lower left",
-        bbox_to_anchor=(0, -0.2),
+        bbox_to_anchor=(0, -0.18),
         borderaxespad=0.1,
         ncol=min(4, len(label_names2)),
         title=title2,
         fontsize="small",
     )
 
-    plt.tight_layout()
-    plt.subplots_adjust(wspace=0.175, hspace=0.02)
-    # plt.subplots_adjust(wspace=0.1)  # , bottom=0.1, top=0.9, left=0.05, right=0.95)
-    fig.savefig(f"{plot_dir}/score_flexibility.png")
-    plt.close()
+    fig.tight_layout()  # (pad=0.4, w_pad=0.2, h_pad=1.0)
+    # This works for NEURON_1K
+    # plt.subplots_adjust(wspace=0.02, hspace=0.02, left=0.01, right=0.99)
+    plt.subplots_adjust(wspace=0.02, hspace=0.02, left=0.01, right=0.99)
+    fig.savefig(f"{plot_dir}/score_flexibility.png", dpi=300)
+    plt.close(fig)
 
 
 if __name__ == "__main__":
@@ -798,58 +794,7 @@ if __name__ == "__main__":
         )
 
     if args.plot_score_flexibility:
-        config_labels = {
-            "NEURON_1K": {
-                "tsne": {
-                    "label1": [
-                        "graph_based_cluster",  # label name
-                        "Points colored by graph-based cluster indices",  # title/description
-                        68,  # best param
-                        # list labels of each point will be added
-                        # list names for each label will be added
-                    ],
-                    "label2": ["umi", "Points colored by UMI count", 144],
-                    "label2_correct": [
-                        "less than 6.5K",
-                        "from 6.5K to 12.5K",
-                        "more than 12.5K",
-                    ],
-                },
-                "umap": {
-                    "label1": [
-                        "graph_based_cluster",  # label name
-                        "Points colored by graph-based cluster indices",  # title/description
-                        "10_0.0038",  # best param
-                    ],
-                    "label2": ["umi", "Points colored by UMI count", "8_0.0185"],
-                    "label2_correct": [
-                        "less than 6.5K",
-                        "from 6.5K to 12.5K",
-                        "more than 12.5K",
-                    ],
-                },
-            },
-            "20NEWS5": {
-                "tsne": {
-                    "label1": ["cat", "Group sub-categories", 130],
-                    "label2": ["matcat", "Semantic master-categories", 44,],
-                },
-                "umap": {
-                    "label1": ["cat", "Group sub-categories", "169_0.0010"],
-                    "label2": ["matcat", "Semantic master-categories", "161_0.0636",],
-                },
-            },
-            "FASHION_MOBILENET": {
-                "tsne": {
-                    "label1": ["class_subcat", "Group sub-categories", 77],
-                    "label2": ["class_matcat", "Hierarchical master-categories", 113],
-                },
-                "umap": {
-                    "label1": ["class_subcat", "Group sub-categories", "20_0.0046"],
-                    "label2": ["class_matcat", "Hierarchical master-categories", "20_0.0255"],
-                },
-            },
-        }
+        config_labels = get_config_labels_for_score_flexibility()
         config = config_labels[dataset_name][method_name]
         config_label1 = config["label1"]
         config_label2 = config["label2"]
@@ -867,7 +812,7 @@ if __name__ == "__main__":
         config_label1 += [labels1, label_names1]
         config_label2 += [labels2, label_names2]
 
-        plt.rcParams.update({"font.size": 14})
+        plt.rcParams.update({"font.size": 16})
         plot_viz_with_score_flexibility(
             dataset_name,
             method_name,
