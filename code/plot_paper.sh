@@ -33,9 +33,11 @@
 
 # Run BayOpt to find best params
 # python bo_constraint.py --seed 42 -d FASHION_MOBILENET --use_other_label class_matcat -m tsne -u ei -x 0.1 --plot --run -nr 15
-python plot_viz.py -d FASHION_MOBILENET -m tsne --plot_score_flexibility
+# note to `change ncol=min(3, len(label_names1))`
+# python plot_viz.py -d FASHION_MOBILENET -m tsne --plot_score_flexibility
 
 # python bo_constraint.py --seed 42 -d 20NEWS5 --use_other_label matcat -m tsne -u ei -x 0.1 --plot --run -nr 15
+# note to `change ncol=min(4, len(label_names1))`
 # python plot_viz.py -d 20NEWS5 -m tsne --plot_score_flexibility
 
 # python bo_constraint.py --seed 42 -d NEURON_1K --use_other_label umi -m tsne -u ei -x 0.1 --plot --run -nr 15

@@ -678,7 +678,7 @@ def plot_viz_with_score_flexibility(
 
     for ax in [ax0, ax1, ax2, ax3]:
         change_border(ax, width=0.25, color="black")
-        ax.set_aspect("equal")
+        # ax.set_aspect("equal")
 
     # legend
     if label_names1 is None:
@@ -689,9 +689,9 @@ def plot_viz_with_score_flexibility(
         label_names1,
         fancybox=True,
         loc="upper left",
-        bbox_to_anchor=(0.0, 1.18),
+        bbox_to_anchor=(0.0, 1.3),
         borderaxespad=0.1,
-        ncol=min(3, len(label_names1)),  # note to change according to dataset
+        ncol=min(6, len(label_names1)),  # note to change according to dataset
         title=title1,
         fontsize="small",
     )
@@ -704,7 +704,7 @@ def plot_viz_with_score_flexibility(
         label_names2,
         fancybox=True,
         loc="lower left",
-        bbox_to_anchor=(0, -0.18),
+        bbox_to_anchor=(0, -0.2),
         borderaxespad=0.1,
         ncol=min(4, len(label_names2)),
         title=title2,
@@ -714,7 +714,7 @@ def plot_viz_with_score_flexibility(
     fig.tight_layout()  # (pad=0.4, w_pad=0.2, h_pad=1.0)
     # This works for NEURON_1K
     # plt.subplots_adjust(wspace=0.02, hspace=0.02, left=0.01, right=0.99)
-    plt.subplots_adjust(wspace=0.02, hspace=0.02, left=0.01, right=0.99)
+    plt.subplots_adjust(wspace=0.05, hspace=0.02, left=0.02, right=0.98)
     fig.savefig(f"{plot_dir}/score_flexibility.png", dpi=300)
     plt.close(fig)
 
