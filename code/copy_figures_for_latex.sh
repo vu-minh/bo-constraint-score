@@ -82,6 +82,7 @@ cp plots/NEURON_1K/tsne/score_flexibility.png ../tex/figures/NEURON_1K_score_fle
 # # (8) Copy plots for all score (1D) and for comparing scores 2D with AUC_RNX
 cp plots/all_scores_all_methods.png ../tex/figures/all_scores_all_methods.png
 cp plots/umap2D_compare.png ../tex/figures/umap2D_compare.png
+# umap2D_compare reproduced by in bo_plot.py
 
 ################################################################################################
 # Command for reproducing figures/data
