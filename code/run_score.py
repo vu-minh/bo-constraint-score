@@ -15,7 +15,7 @@ from tqdm import tqdm
 import utils
 from plot_score import plot_scores, plot_quality_metrics, plot_bic_scores
 from plot_score import plot_compare_qij_rnx_bic
-from plot_score import plot_all_score_all_method_all_dataset
+from plot_score import plot_all_score_all_method_all_dataset, plot_kl_loss
 from common.dataset import dataset
 
 
@@ -301,6 +301,8 @@ if __name__ == "__main__":
             score_root_dir="./scores",
             plot_root_dir="./plots",
         )
+        # plot kl loss for all datasets
+        plot_kl_loss(all_datasets, "./scores", "./plots")
         sys.exit(0)
 
     dataset.set_data_home("./data")

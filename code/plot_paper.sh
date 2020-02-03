@@ -5,9 +5,10 @@
 ################################################################################
 # Show all scores for all dataset (tsne, largevis, umap with mind_dist 0.1)
 # See: plot_score::plot_all_score_all_method_all_dataset
-# V2-Fig4
+# V2-Fig4 : all f_score
+# V2-Fig2 : all kl loss
 
-# python run_score.py --plot_all_score
+python run_score.py --plot_all_score
 
 
 ################################################################################

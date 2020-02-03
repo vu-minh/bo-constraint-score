@@ -484,3 +484,44 @@ def plot_all_score_all_method_all_dataset(
     fig.subplots_adjust(hspace=0.6)
     fig.savefig(f"{plot_root_dir}/all_scores_all_methods.png", dpi=300)
     plt.close(fig)
+
+
+def plot_kl_loss(list_datasets=[], score_root_dir="", plot_root_dir=""):
+    from matplotlib.ticker import FuncFormatter
+
+    def log_e_format(x, pos):
+        """The two args are the value and tick position.
+        Label ticks with the product of the exponentiation"""
+        return int(x) + 1
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    markers = ["*", "s", "o", "p", "d", "^"]
+    linestyles = ["-", "--", "-.", "--", "-.", "-"]
+
+    for i, dataset_name in enumerate(list_datasets):
+        score_dir = f"{score_root_dir}/{dataset_name}/tsne/bic"
+        with open(f"{score_dir}/BIC.txt", "r") as in_file:
+            raw_data = json.load(in_file)
+            list_params = list(map(int, raw_data.get("list_params")))
+            losses = raw_data.get("tsne_loss")
+
+        ax.semilogx(
+            list_params,
+            losses,
+            label=utils.get_dataset_display_name(dataset_name),
+            basex=np.e,
+            marker=markers[i],
+            linestyle=linestyles[i],
+            markevery=[2],
+            markersize=8,
+        )
+        ax.xaxis.set_major_formatter(FuncFormatter(log_e_format))
+        ax.set_xlabel("perplexity in log-scale")
+        ax.set_ylabel("KL loss")
+
+    ax.set_xlim(left=2, right=1100)  # [2, N//3]
+    ax.yaxis.grid(linestyle="--")
+    plt.legend(loc="upper right")
+    plt.rcParams.update({"font.size": 16})
+    fig.tight_layout()
+    fig.savefig(f"{plot_root_dir}/all_kl_loss.png", dpi=300)
