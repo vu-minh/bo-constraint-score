@@ -1,6 +1,5 @@
 # plot metamap (meta tsne) for all vizs of a dataset
 
-import re
 import math
 import joblib
 from itertools import product
@@ -21,6 +20,7 @@ from umap import UMAP
 
 from utils import change_border
 from utils import get_scores_tsne, get_config_labels_for_score_flexibility
+from utils import get_hyperparams_to_show
 
 
 def plot_2_labels(Z, labels, other_labels, out_name, title1="", title2=""):
@@ -86,10 +86,15 @@ def _simple_scatter_with_colorbar(
     best_indices=None,
     best_idx=None,
     debug_label=False,
+    axis_off=False,
 ):
-    ax.axis("off")
+    if axis_off:
+        ax.axis("off")
+    else:
+        change_border(ax, width=0.25, color="black")
+
     plot_for_score_values = best_indices is not None
-    marker_size = 80
+    marker_size = 60
     c_min, c_max = labels.min(), labels.max()
     norm = plt.Normalize(c_min, c_max)
     cmap = cm.get_cmap(cmap_name, 20)
@@ -102,12 +107,13 @@ def _simple_scatter_with_colorbar(
             cmap=cmap,
             edgecolor="orange",
             marker="s",
-            s=marker_size + 30,
+            s=marker_size + 20,
             linewidths=2,
             zorder=99,
-            alpha=0.8,
+            alpha=0.5,
             norm=norm,
         )
+        print("[DEBUG] Best points: ", len(best_indices) / len(Z) * 100)
 
     if best_idx is not None:
         ax.scatter(*Z[best_idx], c="red", marker="X", s=2 * marker_size, zorder=100)
@@ -136,12 +142,6 @@ def _simple_scatter_with_colorbar(
         cb.update_ticks()
         cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(nbins + 1)])
 
-    if debug_label and not plot_for_score_values:
-        # debug show param in the metmap
-        for s, (x, y) in zip(labels, Z):
-            # ax.text(x=x, y=y, s=str(int(math.exp(s))), fontsize=10)
-            pass
-
 
 def _scatter_with_colorbar_and_legend_size(
     ax,
@@ -154,47 +154,71 @@ def _scatter_with_colorbar_and_legend_size(
     best_idx=None,
     show_legend=True,
     debug_label=False,
+    axis_off=False,
 ):
-    ax.axis("off")
-    plot_for_score_values = best_indices is not None
+    if axis_off:
+        ax.axis("off")
+    else:
+        change_border(ax, width=0.25, color="black")
+
     c_min, c_max = labels.min(), labels.max()
     norm = plt.Normalize(c_min, c_max)
     cmap = cm.get_cmap(cmap_name, 20)
 
     if best_indices is not None:
-        Z_highlight = Z[best_indices]
+        # color metamap by score values
+        if best_idx is not None:
+            ax.scatter(*Z[best_idx], c="red", marker="X", s=2 * sizes[best_idx], zorder=100)
+
+        print("Z: ", Z.shape)
+        highlight_mask = np.isin(np.arange(len(Z)), best_indices)
+
+        # plot the highlighted points with square marker and border
+        print(
+            "[DEBUG]Best points: ",
+            Z[highlight_mask].shape,
+            len(Z[highlight_mask]) / len(Z) * 100,
+        )
         ax.scatter(
-            Z_highlight[:, 0],
-            Z_highlight[:, 1],
-            s=sizes[best_indices],
-            c=labels[best_indices],
+            Z[highlight_mask][:, 0],
+            Z[highlight_mask][:, 1],
+            s=sizes[highlight_mask],
+            c=labels[highlight_mask],
             cmap=cmap,
             edgecolor="orange",
             marker="s",
             zorder=99,
             norm=norm,
-            alpha=0.9,
+            alpha=0.85,
         )
-    if best_idx is not None:
-        ax.scatter(*Z[best_idx], c="red", marker="X", s=2 * sizes[best_idx], zorder=100)
 
-    scatter = ax.scatter(
-        Z[:, 0],
-        Z[:, 1],
-        c=labels,
-        s=sizes,
-        alpha=0.35 if plot_for_score_values else 0.8,
-        cmap=cmap,
-        norm=norm,
-        edgecolor="black",
-    )
-    ax.text(
-        x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18,
-    )
-    cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
+        # plot the remaining points with small alpha
+        print("[DEBUG]Other points: ", Z[~highlight_mask].shape)
+        scatter = ax.scatter(
+            Z[~highlight_mask][:, 0],
+            Z[~highlight_mask][:, 1],
+            c=labels[~highlight_mask],
+            s=sizes[~highlight_mask],
+            alpha=0.3,
+            cmap=cmap,
+            norm=norm,
+            edgecolor="black",
+        )
+    else:
+        # color metamap by perplexity/n_neighbors values
+        scatter = ax.scatter(
+            Z[:, 0],
+            Z[:, 1],
+            c=labels,
+            s=sizes,
+            alpha=0.9,
+            cmap=cmap,
+            norm=norm,
+            edgecolor="black",
+        )
 
-    if not plot_for_score_values:  # plot metamap by n_neighbors and min_dist values
-        # create "free" legend showing size of points by min_dist values
+        # create "free" legend showing size of points by min_dist values for the first plot
+        # (plot metamap by n_neighbors and min_dist values)
         min_dist_vals = [1e-3, 0.1, 0.5, 1.0]
         min_dist_shows = MinMaxScaler((30, 90)).fit_transform(
             np.array(min_dist_vals).reshape(-1, 1)
@@ -204,16 +228,23 @@ def _scatter_with_colorbar_and_legend_size(
             ax.scatter([], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val))
         ax.legend(
             scatterpoints=1,
-            frameon=False,
+            frameon=True,
             labelspacing=0.25,
             title="min_dist",
             loc="lower center",
-            bbox_to_anchor=(0.5, -0.15),
-            ncol=len(min_dist_vals),
-            fontsize=18,
-            title_fontsize=18,
+            bbox_to_anchor=(0.825, 0.125),  # (0.5, -0.15),
+            ncol=1,  # len(min_dist_vals),
+            fontsize=16,
+            title_fontsize=16,
         )
 
+    # plot title of colorbar
+    ax.text(
+        x=0.5, y=-0.085, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18,
+    )
+    cb = plt.colorbar(scatter, ax=ax, orientation="horizontal", pad=0.075)
+
+    if best_indices is None:
         # should custom colorbar to show n_neighbors in log scale
         nbins = math.floor(max(labels))
         tick_locator = ticker.MaxNLocator(nbins=nbins)
@@ -221,38 +252,37 @@ def _scatter_with_colorbar_and_legend_size(
         cb.update_ticks()
         cb.ax.set_xticklabels([math.ceil(math.exp(i)) for i in range(nbins + 1)])
 
-    if debug_label and not plot_for_score_values:
-        # debug show param in the metmap
-        for i, (p1, p2, (x, y)) in enumerate(zip(labels, sizes, Z)):
-            if i % 72 == 0:
-                # ax.text(x=x, y=y, s=str(i), fontsize=15, color="blue")
-                pass
-        # test_idx = [170]
-        # print(labels[test_idx], sizes[test_idx])
-
 
 def show_viz_grid(
-    dataset_name, method_name, labels=None, plot_dir="", embedding_dir="", list_params=[],
+    dataset_name,
+    method_name,
+    labels=None,
+    plot_dir="",
+    embedding_dir="",
+    list_params=[],
+    show_comment=True,
 ):
     n_viz = len(list_params)
     n_rows, n_cols = math.ceil(n_viz / 4), 4
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 4, n_rows * 4.75))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 2.5, n_rows * 2.75))
 
     for i, (params, ax) in enumerate(zip(list_params, axes.ravel())):
         if method_name == "umap":
             param_key = f"{params[0]}_{params[1]:.4f}"
-            param_explanation = f"n_neighbors={params[0]}, min_dist={params[1]}"
+            # param_explanation = f"n_neighbors={params[0]}, min_dist={params[1]}"
+            param_explanation = f"({params[0]}, {params[1]})"
         else:
             param_key = str(params[0])
             param_explanation = f"perplexity={params[0]}"
-        comment = f"{params[-1]}"
-        print(i, "\n", comment, "\n", param_explanation)
+        param_explanation = f"({chr(97+i)}) {param_explanation}"
+        comment = f"{params[-1]}" if show_comment else ""
+        # print(i, "\n", comment, "\n", param_explanation)
         Z = joblib.load(f"{embedding_dir}/{param_key}.z")
         _simple_scatter(ax, Z, labels, title=param_explanation, comment=comment)
 
     fig.tight_layout()
-    fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99)
-    fig.savefig(f"{plot_dir}/show.png")
+    fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.01, top=0.9)
+    fig.savefig(f"{plot_dir}/show.png", dpi=300)
     plt.close()
 
 
@@ -276,7 +306,9 @@ def meta_umap(X, meta_n_neighbors=15, cache=False, embedding_dir=""):
     if cache:
         Z = joblib.load(f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     else:
-        Z = UMAP(n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=30).fit_transform(X)
+        Z = UMAP(
+            n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=1234, verbose=1
+        ).fit_transform(X)
         joblib.dump(Z, f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     return Z
 
@@ -293,8 +325,8 @@ def plot_metamap_with_scores_tsne(
 ):
     ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
     score_config = [
-        ScoreConfig("qij", "Constraint score", "Greens"),
-        ScoreConfig("bic", "BIC score", "Purples_r"),
+        ScoreConfig("qij", "$f_{score}$", "Greens"),
+        ScoreConfig("bic", "BIC-based score", "Purples_r"),
         ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
         ScoreConfig("perplexity", "Perplexity in log-scale", "bone"),
     ]  # perplexity should be in the last of this list, since we have to get list_params first
@@ -316,7 +348,7 @@ def plot_metamap_with_scores_tsne(
     X = StandardScaler().fit_transform(X)
     Z = meta_umap(X, meta_n_neighbors, cache=use_cache, embedding_dir=embedding_dir)
 
-    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(20, 6))
+    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(18, 5))
     # note: roll axes to make subfigure for perplexity being moved from last to first
     for config, scores, ax in zip(score_config, all_scores, [ax1, ax2, ax3, ax0]):
         score_name, score_title, score_cmap = config
@@ -324,14 +356,19 @@ def plot_metamap_with_scores_tsne(
         if score_name == "perplexity":
             best_indices, best_idx = None, None
         else:
+            # UPDATE 03/02: Get top 10$ highest scores
             if score_name == "bic":
-                pivot = (1.0 + (1.0 - threshold)) * min(scores)
-                (best_indices,) = np.where(scores < pivot)
-                best_idx = np.argmin(scores)
+                # pivot = (1.0 + (1.0 - threshold)) * min(scores)
+                # (best_indices,) = np.where(scores < pivot)
+                best_idx = int(np.argmin(scores))
+                best_indices = np.argsort(scores)[: int(0.1 * len(scores))]
             else:
-                pivot = threshold * scores.max()
-                (best_indices,) = np.where(scores > pivot)
-                best_idx = np.argmax(scores)
+                # pivot = threshold * scores.max()
+                # (best_indices,) = np.where(scores > pivot)
+                best_idx = int(np.argmax(scores))
+                best_indices = np.argsort(scores)[::-1][: int(0.1 * len(scores))]
+            print("\n[DEBUG]", len(scores), len(best_indices))
+            print("[DEBUG] best perplexity: ", score_name, perp_values[best_idx])
 
         _simple_scatter_with_colorbar(
             ax,
@@ -343,20 +380,23 @@ def plot_metamap_with_scores_tsne(
             best_idx=best_idx,
             debug_label=use_cache,
         )
+        # make the border lighter
+        change_border(ax)
 
     # ax0 show metamap colored by perplexity values.
     # now show a list of selected perplexities.
-    list_selected_params = get_params_to_show(dataset_name, method_name="tsne")
+    list_selected_params = get_hyperparams_to_show(dataset_name, method_name="tsne")
     list_annotations = []
-    for param in list_selected_params:
+    for i, param in enumerate(list_selected_params):
         perplexity = param[0]
         if perplexity in perp_values:
             pos = Z[np.where(perp_values == perplexity)]
-            list_annotations.append((perplexity, *pos[0]))
+            # an anotation is formated as "(a) perplexity, pos[0], pos[1]"
+            list_annotations.append((f"({chr(97+i)}) {perplexity}", *pos[0]))
     annotate_selected_params_tsne(ax0, list_annotations)
 
     fig.tight_layout()
-    plt.subplots_adjust(wspace=0.075, bottom=-0.05, top=1.0, left=0.01)
+    plt.subplots_adjust(wspace=0.05, bottom=-0.05, top=0.98, left=0.01, right=0.98)
     fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png", dpi=300)
 
 
@@ -398,11 +438,11 @@ def plot_metamap_with_scores_umap(
         ScoreConfig(
             "n_neighbors", "n_neighbors in log-scale", "bone", np.log(list_n_neighbors)
         ),
-        ScoreConfig("qij", "Constraint score in log-scale", "Greens", qij_scores),
-        ScoreConfig("rnx", "$AUC_{log}RNX$ in log-scale", "Blues", rnx_scores),
+        ScoreConfig("qij", "$f_{score}$ values in log-scale", "Greens", qij_scores),
+        ScoreConfig("rnx", "$AUC_{log}RNX$ values in log-scale", "Blues", rnx_scores),
     ]
 
-    fig, axes = plt.subplots(1, 3, figsize=(21, 9))
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     for config, ax in zip(score_config, axes.ravel()):
         score_name, score_title, score_cmap, score_values = config
 
@@ -430,32 +470,33 @@ def plot_metamap_with_scores_umap(
 
     # ax0 show metamap colored by perplexity values.
     # now show a list of selected perplexities.
-    list_selected_params = get_params_to_show(dataset_name, method_name="umap")
+    list_selected_params = get_hyperparams_to_show(dataset_name, method_name="umap")
     list_annotations = []
     all_keys = list(all_embeddings.keys())
-    for param in list_selected_params:
+    for i, param in enumerate(list_selected_params):
         n_neighbors, min_dist = param[0], param[1]
         key = f"{n_neighbors}_{min_dist:.4f}"
         if key in all_keys:
             pos = Z[all_keys.index(key)]
-            list_annotations.append((n_neighbors, min_dist, *pos))
+            # an anotation is formated as "(a), n_neighbors, min_dist, pos[0], pos[1]"
+            list_annotations.append((f"({chr(97 + i)})", n_neighbors, min_dist, *pos))
         else:
             print("Debug: params to show but not found: ", key)
     annotate_selected_params_umap(axes[0], list_annotations)
 
     fig.tight_layout()
-    plt.subplots_adjust(bottom=-0.075, top=1.0, left=0.01, right=0.99, wspace=0.05)
-    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png", dpi=300)
+    plt.subplots_adjust(bottom=-0.05, top=0.98, left=0.01, right=0.99, wspace=0.05)
+    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png", dpi=200)
     plt.close(fig)
 
 
 def annotate_selected_params_tsne(ax, list_annotations):
     print(list_annotations)
     offset = 1.0 / len(list_annotations)
+    # an anotation is formated as "(a) perplexity, x=pos[0], y=pos[1]"
     # sort by x coordinate
     for i, (perp_val, pos_x, pos_y) in enumerate(sorted(list_annotations, key=lambda p: p[1])):
-        ax.scatter(pos_x, pos_y, marker="X", color="orange", s=80)
-        # ax.annotate(str(perp_val), (pos_x, pos_y), fontsize=10)
+        ax.scatter(pos_x, pos_y, marker="X", color="orange", s=60)
         ax.annotate(
             str(perp_val),
             xy=(pos_x, pos_y),
@@ -468,25 +509,25 @@ def annotate_selected_params_tsne(ax, list_annotations):
                 color="#0047BB",
                 connectionstyle="angle,angleA=0,angleB=90,rad=10",
             ),
-            fontsize=18,
+            fontsize=16,
         )
 
 
 def annotate_selected_params_umap(ax, list_annotations):
     print(list_annotations)
+    # an anotation is formated as "(a), n_neighbors, min_dist, pos[0], pos[1]"
     # sort by y coordinate
-    offset = 1.0 / len(list_annotations)
-    for i, (n_neighbors, min_dist, pos_x, pos_y) in enumerate(
-        sorted(list_annotations, key=lambda p: p[2])
+    offset = 1.0 / len(list_annotations) + 0.1
+    for i, (idx, n_neighbors, min_dist, pos_x, pos_y) in enumerate(
+        sorted(list_annotations, key=lambda p: p[4])
     ):
         ax.scatter(pos_x, pos_y, marker="X", color="orange")
-        txt = f"{n_neighbors:>6},\n{min_dist:>5}"
-        # ax.annotate(txt, (pos_x, pos_y), fontsize=12)
+        txt = f"{idx} ({n_neighbors},\n{min_dist:>6})"
         ax.annotate(
             txt,
             xy=(pos_x, pos_y),
             xycoords="data",
-            xytext=(i * offset, 0),
+            xytext=(0, min(i * offset, 0.9)),
             textcoords="axes fraction",
             arrowprops=dict(
                 arrowstyle="->",
@@ -494,145 +535,8 @@ def annotate_selected_params_umap(ax, list_annotations):
                 color="#0047BB",
                 connectionstyle="angle,angleA=0,angleB=90,rad=10",
             ),
-            fontsize=14,
+            fontsize=12,
         )
-
-
-def get_params_to_show(dataset_name, method_name):
-    symbol_map = {
-        "++": " ⇧⇧",
-        "+": "   ⇧",
-        "=": "   ▯",
-        "-": "   ⇩",
-        "--": " ⇩⇩",
-        "~": "   ☆",
-        "": "     ",
-    }
-
-    method_text_map = {
-        "qij": "$f_{score}$",
-        "rnx": "$AUC_{log}RNX$",
-        "bic": "BIC",
-        "prediction": "Good prediction",
-        "all": "All scores",
-        "": "",
-    }
-
-    def transform_text(text):
-        res = []
-        for s in text.split():
-            s = s.strip()
-            m = re.compile("([+-=~]*)([a-z]*)")
-            g = m.match(s)
-            if g:
-                symbol, method_text = g.groups()
-                res.append(f"{method_text_map[method_text]} {symbol_map[symbol]:<2}")
-            else:
-                print("[Deubg] Invalid selected param: ", s, text)
-        return "\n".join(res)
-
-    def transform_list_items(list_items):
-        transformed_list = []
-        for *p, text in list_items:
-            print(*p, text)
-            transformed_list.append((*p, transform_text(text)))
-        return transformed_list
-
-    config_params = {
-        "20NEWS5": {
-            "tsne": {
-                (130, "++qij, ++bic, --rnx, ~prediction"),
-                (89, "++qij, ++bic, +rnx"),
-                (25, "--qij, --bic, ++rnx"),
-                (512, "--all"),
-            },
-            "umap": [
-                (15, 0.2154, "++rnx"),
-                (134, 0.001, "++qij"),
-                (147, 0.01, "~prediction"),
-                (86, 0.0464, "+qij, =rnx"),
-                (7, 0.1, "++rnx, --qij"),
-            ],
-        },
-        "DIGITS": {
-            "tsne": [
-                (50, "++qij, ++bic, +rnx, ~prediction"),
-                (14, "+qij, -bic, ++rnx"),
-                (90, "+qij, ++bic, --rnx,"),
-                (260, "--all"),
-            ],
-            "umap": {
-                (5, 0.001, "+qij, ++rnx"),
-                (11, 0.0022, "++qij, +rnx, ~prediction"),
-                (19, 0.0046, "++qij, +rnx"),
-                (401, 0.0464, "--qij, +rnx"),
-            },
-        },
-        "COIL20": {
-            "tsne": [
-                (40, "++qij, ++bic, ++rnx, ~prediction"),
-                (28, "++qij, ++bic, ++rnx"),
-                (124, "--qij, --bic, +rnx,"),
-                (247, "--all"),
-            ],
-            "umap": [
-                (11, 0.01, "++qij, -rnx"),
-                (5, 0.4642, "-qij, ++rnx"),
-                (102, 0.1, "--qij, +rnx"),
-                # (8, 0.01, "~prediction, ++qij, =rnx"),
-                # # bo_constraint.py  --seed 2019 -d COIL20 -m umap -u ei -x 0.1 -nr 40 --run
-                # # (5, 0.01, "+qij, +rnx"),
-                # (4, 0.4642, "--qij, ++rnx"),
-                # (56, 0.1, "--qij, +rnx"),
-                (300, 0.4642, "--all"),
-            ],
-        },
-        "NEURON_1K": {
-            "tsne": [
-                (72, "++qij, ++bic, --rnx, ~prediction"),
-                (13, " --qij, -bic, ++rnx"),
-                (40, "=qij, +rnx,  ++bic"),
-                (150, "--all"),
-            ],
-            "umap": [
-                (16, 0.001, "~prediction, ++qij, +rnx"),
-                (5, 0.1, "++rnx, +qij"),
-                (150, 0.0464, "-qij, -rnx"),
-            ],
-        },
-        "FASHION_MOBILENET": {
-            "tsne": [
-                (82, "++qij, ++bic, +rnx, ~prediction"),
-                (12, "-qij, --bic, ++rnx"),
-                (35, "++qij, --bic, ++rnx"),
-                (151, "++qij, ++bic, --rnx"),
-            ],
-            "umap": [
-                (19, 0.0022, "~prediction, +"),
-                (9, 0.0046, "++rnx, +qij"),
-                (310, 0.1, "="),
-            ],
-        },
-        "FASHION1000": {
-            "tsne": [
-                (36, "++qij, +bic, ++rnx, ~prediction"),
-                (14, "+qij, --bic, ++rnx, "),
-                (69, "+qij, ++bic, =rnx"),
-                (220, "--all"),
-            ],
-            "umap": [
-                # (4, 0.01, "++qij, +rnx"),
-                (4, 0.2154, "++qij, ++rnx"),
-                (6, 0.01, "~prediction"),
-                # bo_constraint.py  --seed 2018 -d FASHION1000 -m umap -u ei -x 0.1 -nr 50
-                (50, 0.1, "+qij, +rnx"),
-                (150, 0.4642, "-qij, +rnx"),
-            ],
-        },
-    }
-
-    params = config_params[dataset_name][method_name]
-    return transform_list_items(params)
 
 
 def plot_samples(dataset_name, data, plot_dir="", n_samples=4, transpose=False, cmap="gray"):
@@ -741,7 +645,7 @@ if __name__ == "__main__":
     dataset_name = args.dataset_name
     method_name = args.method_name
 
-    # print(get_params_to_show(dataset_name, method_name))
+    # print(get_hyperparams_to_show(dataset_name, method_name))
     # sys.exit(0)
 
     X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method="auto")
@@ -766,8 +670,17 @@ if __name__ == "__main__":
         plot_test_vis(X, dataset_name, plot_dir, embedding_dir, labels, other_labels)
 
     if args.show_viz_grid:
-        list_params = get_params_to_show(dataset_name, method_name)
-        show_viz_grid(dataset_name, method_name, labels, plot_dir, embedding_dir, list_params)
+        plt.rcParams.update({"font.size": 8})
+        list_params = get_hyperparams_to_show(dataset_name, method_name)
+        show_viz_grid(
+            dataset_name,
+            method_name,
+            labels,
+            plot_dir,
+            embedding_dir,
+            list_params,
+            show_comment=False,  # do not show comment on the level of favoribility
+        )
 
     if args.plot_metamap:
         # plot_metamap(dataset_name, method_name, plot_dir, embedding_dir)

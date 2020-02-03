@@ -401,7 +401,7 @@ def plot_compare_qij_rnx_bic(
 
     # fig.tight_layout()
     fig.subplots_adjust(hspace=0.4, top=0.925, bottom=0.125, left=0.125, right=0.95)
-    fig.savefig(f"{plot_dir}/plot_compare.png")
+    fig.savefig(f"{plot_dir}/plot_compare.png", dpi=300)
     plt.close(fig)
 
 

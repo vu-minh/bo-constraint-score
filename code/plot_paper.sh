@@ -58,6 +58,16 @@
 
 
 ################################################################################
+# Metamap for tsne embeddings and selected visualizations
+# V2: Fig7 (1st row: metamap, 2nd row: grid of viz)
+# python plot_viz.py -d NEURON_1K -m tsne --plot_metamap --debug
+# python plot_viz.py -d NEURON_1K -m tsne --show_viz_grid
+
+python plot_viz.py -d COIL20 -m umap --plot_metamap --debug
+python plot_viz.py -d COIL20 -m umap --show_viz_grid
+
+
+################################################################################
 # Run BayOpt for tsne 1D
 # python bo_constraint.py -d DIGITS -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 2018
 # python bo_constraint.py -d COIL20 -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 2018

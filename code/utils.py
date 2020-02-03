@@ -210,6 +210,146 @@ def get_config_labels_for_score_flexibility():
     }
 
 
+def get_hyperparams_to_show(dataset_name, method_name):
+    symbol_map = {
+        "++": " ⇧⇧",
+        "+": "   ⇧",
+        "=": "   ▯",
+        "-": "   ⇩",
+        "--": " ⇩⇩",
+        "~": "   ☆",
+        "": "     ",
+    }
+
+    method_text_map = {
+        "qij": "$f_{score}$",
+        "rnx": "$AUC_{log}RNX$",
+        "bic": "BIC",
+        "prediction": "Good prediction",
+        "all": "All scores",
+        "": "",
+    }
+
+    def transform_text(text):
+        import re
+
+        res = []
+        for s in text.split():
+            s = s.strip()
+            m = re.compile("([+-=~]*)([a-z]*)")
+            g = m.match(s)
+            if g:
+                symbol, method_text = g.groups()
+                res.append(f"{method_text_map[method_text]} {symbol_map[symbol]:<2}")
+            else:
+                print("[Deubg] Invalid selected param: ", s, text)
+        return "\n".join(res)
+
+    def transform_list_items(list_items):
+        transformed_list = []
+        for *p, text in list_items:
+            print(*p, text)
+            transformed_list.append((*p, transform_text(text)))
+        return transformed_list
+
+    config_params = {
+        "20NEWS5": {
+            "tsne": {
+                (130, "++qij, ++bic, --rnx, ~prediction"),
+                (89, "++qij, ++bic, +rnx"),
+                (25, "--qij, --bic, ++rnx"),
+                (512, "--all"),
+            },
+            "umap": [
+                (15, 0.2154, "++rnx"),
+                (134, 0.001, "++qij"),
+                (147, 0.01, "~prediction"),
+                (86, 0.0464, "+qij, =rnx"),
+                (7, 0.1, "++rnx, --qij"),
+            ],
+        },
+        "DIGITS": {
+            "tsne": [
+                (50, "++qij, ++bic, +rnx, ~prediction"),
+                (14, "+qij, -bic, ++rnx"),
+                (90, "+qij, ++bic, --rnx,"),
+                (260, "--all"),
+            ],
+            "umap": {
+                (5, 0.001, "+qij, ++rnx"),
+                (11, 0.0022, "++qij, +rnx, ~prediction"),
+                (19, 0.0046, "++qij, +rnx"),
+                (401, 0.0464, "--qij, +rnx"),
+            },
+        },
+        "COIL20": {
+            "tsne": [
+                (40, "++qij, ++bic, ++rnx, ~prediction"),
+                (28, "++qij, ++bic, ++rnx"),
+                (124, "--qij, --bic, +rnx,"),
+                (247, "--all"),
+            ],
+            "umap": [
+                (11, 0.01, "++qij, -rnx"),
+                (5, 0.4642, "-qij, ++rnx"),
+                (102, 0.1, "--qij, +rnx"),
+                # (8, 0.01, "~prediction, ++qij, =rnx"),
+                # # bo_constraint.py  --seed 2019 -d COIL20 -m umap -u ei -x 0.1 -nr 40 --run
+                # # (5, 0.01, "+qij, +rnx"),
+                # (4, 0.4642, "--qij, ++rnx"),
+                # (56, 0.1, "--qij, +rnx"),
+                (300, 0.4642, "--all"),
+            ],
+        },
+        "NEURON_1K": {
+            "tsne": [
+                (72, "++qij, ++bic, --rnx, ~prediction"),
+                (13, " --qij, -bic, ++rnx"),
+                # (40, "=qij, +rnx,  ++bic"),
+                (65, "=qij, +rnx,  ++bic"),
+                (150, "--all"),
+            ],
+            "umap": [
+                (16, 0.001, "~prediction, ++qij, +rnx"),
+                (5, 0.1, "++rnx, +qij"),
+                (150, 0.0464, "-qij, -rnx"),
+            ],
+        },
+        "FASHION_MOBILENET": {
+            "tsne": [
+                (82, "++qij, ++bic, +rnx, ~prediction"),
+                (12, "-qij, --bic, ++rnx"),
+                (35, "++qij, --bic, ++rnx"),
+                (151, "++qij, ++bic, --rnx"),
+            ],
+            "umap": [
+                (19, 0.0022, "~prediction, +"),
+                (9, 0.0046, "++rnx, +qij"),
+                (310, 0.1, "="),
+            ],
+        },
+        "FASHION1000": {
+            "tsne": [
+                (36, "++qij, +bic, ++rnx, ~prediction"),
+                (14, "+qij, --bic, ++rnx, "),
+                (69, "+qij, ++bic, =rnx"),
+                (220, "--all"),
+            ],
+            "umap": [
+                # (4, 0.01, "++qij, +rnx"),
+                (4, 0.2154, "++qij, ++rnx"),
+                (6, 0.01, "~prediction"),
+                # bo_constraint.py  --seed 2018 -d FASHION1000 -m umap -u ei -x 0.1 -nr 50
+                (50, 0.1, "+qij, +rnx"),
+                (150, 0.4642, "-qij, +rnx"),
+            ],
+        },
+    }
+
+    params = config_params[dataset_name][method_name]
+    return transform_list_items(params)
+
+
 def change_border(ax, width=0.25, color="black"):
     ax.axes.get_yaxis().set_visible(False)
     ax.axes.get_xaxis().set_visible(False)
