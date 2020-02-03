@@ -63,18 +63,18 @@
 # python plot_viz.py -d NEURON_1K -m tsne --plot_metamap --debug
 # python plot_viz.py -d NEURON_1K -m tsne --show_viz_grid
 
-python plot_viz.py -d COIL20 -m umap --plot_metamap --debug
-python plot_viz.py -d COIL20 -m umap --show_viz_grid
+# python plot_viz.py -d COIL20 -m umap --plot_metamap --debug
+# python plot_viz.py -d COIL20 -m umap --show_viz_grid
 
 
 ################################################################################
 # Run BayOpt for tsne 1D
-# python bo_constraint.py -d DIGITS -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 2018
-# python bo_constraint.py -d COIL20 -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 2018
-# python bo_constraint.py -d FASHION1000 -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 2018
-# python bo_constraint.py -d FASHION_MOBILENET -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 1024
-# python bo_constraint.py -d 20NEW5 -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 1024
-# python bo_constraint.py -d NEURON_1K -m tsne -nr 15 -u ei -x 0.05 --run --plot --seed 1024
+# python bo_constraint.py -d DIGITS -m tsne -nr 15 -u ei -x 0.05 --plot --seed 2018
+# python bo_constraint.py -d COIL20 -m tsne -nr 15 -u ei -x 0.05  --plot --seed 2018
+# python bo_constraint.py -d FASHION1000 -m tsne -nr 15 -u ei -x 0.05 --plot --seed 2018
+# python bo_constraint.py -d FASHION_MOBILENET -m tsne -nr 15 -u ei -x 0.05 --plot --seed 1024
+# python bo_constraint.py -d 20NEWS5 -m tsne -nr 15 -u ei -x 0.1 --plot --seed 1024
+# python bo_constraint.py -d NEURON_1K -m tsne -nr 15 -u ei -x 0.05 --plot --seed 1024
 
 
 ################################################################################
@@ -83,5 +83,5 @@ python plot_viz.py -d COIL20 -m umap --show_viz_grid
 # python bo_constraint.py -d COIL20 -m umap -nr 40 -u ei --run --plot
 # python bo_constraint.py -d FASHION1000 -m umap -nr 40 -u ei --run --plot
 # python bo_constraint.py -d FASHION_MOBILENET -m umap -nr 40 -u ei --run --plot
-# python bo_constraint.py -d 20NEW5 -m umap -nr 40 -u ei --run --plot
+# python bo_constraint.py -d 20NEWS5 -m umap -nr 40 -u ei --run --plot
 # python bo_constraint.py -d NEURON_1K -m umap -nr 40 -u ei --run --plot

@@ -46,28 +46,28 @@ def _plot_true_target_values(ax, list_params, true_score, threshold=0.95):
         alpha=0.75,
         linewidth=1.25,
     )
-    ax.set_ylabel(f"constraint score")
+    ax.set_ylabel("$f_{score}$")
 
-    # determine true best range
-    pivot = threshold * max(true_score)
-    (best_indices,) = np.where(true_score > pivot)
-    param_min = list_params[best_indices.min()][0]
-    param_max = list_params[best_indices.max()][0]
-    # plt.arrow(x=param_min, y=ax.get_ylim()[0], dx=param_max-param_min, dy=0,
-    #     width=0.005, color="orange", length_includes_head=True)
+    # # determine true best range
+    # pivot = threshold * max(true_score)
+    # (best_indices,) = np.where(true_score > pivot)
+    # param_min = list_params[best_indices.min()][0]
+    # param_max = list_params[best_indices.max()][0]
+    # # plt.arrow(x=param_min, y=ax.get_ylim()[0], dx=param_max-param_min, dy=0,
+    # #     width=0.005, color="orange", length_includes_head=True)
 
-    # add text to show the best range
-    value_min = int(np.exp(param_min))
-    value_max = int(np.exp(param_max))
-    ax.text(
-        x=0.0,
-        y=1.065,
-        transform=ax.transAxes,
-        ha="left",
-        va="center",
-        s=f"True best range: [{value_min}, {value_max}]",
-        fontsize=18,
-    )
+    # # add text to show the best range
+    # value_min = int(np.exp(param_min))
+    # value_max = int(np.exp(param_max))
+    # ax.text(
+    #     x=0.0,
+    #     y=1.065,
+    #     transform=ax.transAxes,
+    #     ha="left",
+    #     va="center",
+    #     s=f"True best range: [{value_min}, {value_max}]",
+    #     fontsize=18,
+    # )
 
 
 def _plot_observed_points(ax, x_obs, y_obs):
@@ -87,19 +87,19 @@ def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold=0.
         label="95% confidence",
     )
 
-    # determine best param range and best param value
-    pivot = threshold * max(pred_mu)
-    (best_indices,) = np.where(pred_mu > pivot)
-    param_min = list_params[best_indices.min()]
-    param_max = list_params[best_indices.max()]
-    # note best param here is max(pred_mu), should take into account
-    # the uncertainty in this prediction
-    # param_best = int(np.exp(list_params[np.argmax(pred_mu)]))
-    # print("Debug best param: ", param_best, np.max(pred_mu))
+    # # determine best param range and best param value
+    # pivot = threshold * max(pred_mu)
+    # (best_indices,) = np.where(pred_mu > pivot)
+    # param_min = list_params[best_indices.min()]
+    # param_max = list_params[best_indices.max()]
+    # # note best param here is max(pred_mu), should take into account
+    # # the uncertainty in this prediction
+    # # param_best = int(np.exp(list_params[np.argmax(pred_mu)]))
+    # # print("Debug best param: ", param_best, np.max(pred_mu))
 
-    # plot best predicted range
-    ax.axhline(pivot, linestyle="--", alpha=0.4)
-    _plot_best_range(ax, param_min, param_max)
+    # # plot best predicted range
+    # ax.axhline(pivot, linestyle="--", alpha=0.4)
+    # _plot_best_range(ax, param_min, param_max)
 
 
 def plot_bo_one_param_detail(
@@ -237,7 +237,10 @@ def plot_bo_one_param_summary(
     """ Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real GP params are in logscale)
     """
-    _, ax = plt.subplots(1, 1, figsize=(11, 5))
+    from utils import change_border
+
+    _, ax = plt.subplots(1, 1, figsize=(7, 3.5))
+    # change_border(ax)
 
     ax.set_xlim(left=list_params.min(), right=list_params.max())
     if true_score is not None:
@@ -250,7 +253,7 @@ def plot_bo_one_param_summary(
     # draw indicator hline at the current  max value of the  target function
     # ax.axhline([current_max_target_function], color='#A1AFF8', linestyle='--', alpha=0.7)
 
-    # draw indicator vline @ the best param
+    # # draw indicator vline @ the best param
     best_param = optimizer.max["params"][param_name]
     ax.axvline(
         best_param,
@@ -283,22 +286,23 @@ def plot_bo_one_param_summary(
     # plot text for best param
     ax.text(x=best_param, y=1.1 * ax.get_ylim()[0], ha="center", s=f"{int(np.exp(best_param))}")
 
-    # hint text for the top hightest scores horizontal line
-    pivot = threshold * max(pred_mu)
-    ax.text(
-        x=min(list_params),
-        y=pivot * 1.01,
-        ha="left",
-        va="bottom",
-        fontsize=18,
-        s="\u2199" + f"{threshold} max(score)",
-        color="#0047BB",
-    )
+    # # hint text for the top hightest scores horizontal line
+    # pivot = threshold * max(pred_mu)
+    # ax.text(
+    #     x=min(list_params),
+    #     y=pivot * 1.01,
+    #     ha="left",
+    #     va="bottom",
+    #     fontsize=18,
+    #     s="\u2199" + f"{threshold} max(score)",
+    #     color="#0047BB",
+    # )
 
     # set title and save figure
-    plt.legend(loc="upper center", ncol=4, prop={"size": 14})
+    plt.rcParams.update({"font.size": 14})
+    plt.legend(loc="upper center", ncol=4, prop={"size": 9})
     plt.tight_layout()
-    plt.savefig(f"{plot_dir}/bo_summary.png")
+    plt.savefig(f"{plot_dir}/bo_summary.png", dpi=300)
     plt.close()
 
 
