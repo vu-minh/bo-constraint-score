@@ -438,10 +438,12 @@ if __name__ == "__main__":
         sys.exit(0)
 
     if args.plot_compare:
-        list_score_names = ["Constraint score", "$AUC_{log}RNX$"]
-        if method_name == "tsne":
-            list_score_names += ["BIC"]
-
+        if method_name != "tsne":
+            raise Exception(
+                "Plot compare only for tsne."
+                "If want to compare for umap (contour plot), see bo_plot.py"
+            )
+        list_score_names = ["$f_{score}$", "$AUC_{log}RNX$", "BIC"]
         plot_compare_qij_rnx_bic(
             dataset_name,
             n_labels_each_class=10,

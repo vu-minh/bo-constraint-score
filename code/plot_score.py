@@ -338,6 +338,7 @@ def plot_compare_qij_rnx_bic(
     score_dir="",
     plot_dir="",
     list_score_names=["Constraint score", "$AUC_{log}RNX$", "BIC"],
+    show_range=False,
 ):
     # prepare subplots
     n_rows = len(list_score_names)
@@ -359,7 +360,7 @@ def plot_compare_qij_rnx_bic(
                 list_params = list(map(int, metrics_data["list_params"]))
                 score_data = np.array(metrics_data["auc_rnx"])
 
-        if title == "Constraint score":
+        if title == "$f_{score}$":
             # get qij score for 10 labeled points per class
             with open(f"{score_dir}/../qij/dof1.0_all.txt", "r") as in_file_qij:
                 qij_score_data = json.load(in_file_qij)
@@ -367,29 +368,32 @@ def plot_compare_qij_rnx_bic(
                 all_scores = qij_score_data["all_scores"]
                 score_data = np.mean(all_scores[str(n_labels_each_class)], axis=0)
 
-        # find best param range
-        if title == "BIC":  # need to find the min
-            pivot = (1.0 + (1.0 - threshold)) * min(score_data)
-            (best_indices,) = np.where(score_data < pivot)
-            param_best = list_params[np.argmin(score_data)]
-        else:  # need to find the max
-            pivot = threshold * score_data.max()
-            (best_indices,) = np.where(score_data > pivot)
-            param_best = list_params[np.argmax(score_data)]
-        param_min = list_params[best_indices.min()]
-        param_max = list_params[best_indices.max()]
+        if show_range:
+            # find best param range
+            if title == "BIC":  # need to find the min
+                pivot = (1.0 + (1.0 - threshold)) * min(score_data)
+                (best_indices,) = np.where(score_data < pivot)
+                param_best = list_params[np.argmin(score_data)]
+            else:  # need to find the max
+                pivot = threshold * score_data.max()
+                (best_indices,) = np.where(score_data > pivot)
+                param_best = list_params[np.argmax(score_data)]
+            param_min = list_params[best_indices.min()]
+            param_max = list_params[best_indices.max()]
 
-        _plot_score_with_best_param_and_range(
-            ax,
-            list_params,
-            pivot,
-            param_best,
-            param_min,
-            param_max,
-            score_mean=score_data,
-            score_sigma=None,
-            text_y_pos=-10,
-        )
+            _plot_score_with_best_param_and_range(
+                ax,
+                list_params,
+                pivot,
+                param_best,
+                param_min,
+                param_max,
+                score_mean=score_data,
+                score_sigma=None,
+                text_y_pos=-10,
+            )
+        else:
+            _plot_line_with_variance(ax, list_params, score_data, score_sigma=None)
 
         # show title for last subplot
         if i == len(list_score_names) - 1:

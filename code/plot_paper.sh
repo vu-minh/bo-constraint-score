@@ -8,7 +8,7 @@
 # V2-Fig4 : all f_score
 # V2-Fig2 : all kl loss
 
-python run_score.py --plot_all_score
+# python run_score.py --plot_all_score
 
 
 ################################################################################
@@ -44,6 +44,17 @@ python run_score.py --plot_all_score
 # python bo_constraint.py --seed 42 -d NEURON_1K --use_other_label umi -m tsne -u ei -x 0.1 --plot --run -nr 15
 # note to `change ncol=min(6, len(label_names1))`
 # python plot_viz.py -d NEURON_1K -m tsne --plot_score_flexibility
+
+
+################################################################################
+# Compare f_score, ACU_RNX, BIC
+# V2: Fig8
+# python run_score.py -d DIGITS -m tsne --plot_compare
+# python run_score.py -d FASHION1000 -m tsne --plot_compare
+# python run_score.py -d FASHION_MOBILENET -m tsne --plot_compare
+# python run_score.py -d 20NEWS5 -m tsne --plot_compare
+# python run_score.py -d NEURON_1K -m tsne --plot_compare
+# python run_score.py -d COIL20 -m tsne --plot_compare
 
 
 ################################################################################
