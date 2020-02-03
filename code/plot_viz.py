@@ -635,19 +635,19 @@ def get_params_to_show(dataset_name, method_name):
     return transform_list_items(params)
 
 
-def plot_samples(dataset_name, data, plot_dir="", n_samples=4, transpose=False):
+def plot_samples(dataset_name, data, plot_dir="", n_samples=4, transpose=False, cmap="gray"):
     img_size = int(math.sqrt(data.shape[1]))
     fig, axes = plt.subplots(1, n_samples, figsize=(n_samples, 1.0))
     for i, ax in enumerate(axes.ravel()):
         X = data[i].reshape(img_size, img_size)
         if transpose:
             X = X.transpose()
-        ax.imshow(X, cmap="gray")
+        ax.imshow(X, cmap=cmap)
         ax.axis("off")
 
     plt.tight_layout()
-    plt.subplots_adjust(wspace=0.05, bottom=0.1, top=0.9, left=0.05, right=0.95)
-    fig.savefig(f"{plot_dir}/{dataset_name}_samples.pdf")
+    plt.subplots_adjust(wspace=0.05, bottom=0.1, top=0.9, left=0.02, right=0.98)
+    fig.savefig(f"{plot_dir}/{dataset_name}_samples.png", dpi=300)
     plt.close()
 
 
@@ -782,15 +782,15 @@ if __name__ == "__main__":
 
     if args.plot_samples:
         n_samples = 4
-        transpose = True if dataset_name == "COIL20" else False
+        np.random.seed(1024)
         data = X_origin[np.random.choice(X_origin.shape[0], size=n_samples)]
-        print("Sampled data: ", data.shape)
         plot_samples(
             dataset_name,
             data,
             plot_dir=f"./plots/{dataset_name}",
             n_samples=n_samples,
-            transpose=transpose,
+            transpose={"COIL20": True}.get(dataset_name, False),
+            cmap={"FASHION1000": "gray_r", "DIGITS": "gray_r"}.get(dataset_name, "gray"),
         )
 
     if args.plot_score_flexibility:

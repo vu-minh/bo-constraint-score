@@ -7,6 +7,13 @@ LIST_DATASETS=("DIGITS" "COIL20" "FASHION1000" "FASHION_MOBILENET" "NEURON_1K" "
 LIST_METHODS=("tsne" "umap")
 TARGET_DIR="../tex/figures"
 
+# # Examples for Table2 introducing the datasets
+
+cp plots/DIGITS/DIGITS_samples.png ../tex/figures/DIGITS_samples.png
+cp plots/COIL20/COIL20_samples.png ../tex/figures/COIL20_samples.png
+cp plots/FASHION1000/FASHION1000_samples.png ../tex/figures/FASHION1000_samples.png
+
+
 # # (1) figures to show the stability of the scores
 
 # V2-Fig.5
