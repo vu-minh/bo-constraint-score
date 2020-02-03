@@ -322,6 +322,7 @@ def plot_metamap_with_scores_tsne(
     n_labels_each_class=10,
     threshold=0.96,
     use_cache=False,
+    top_percent=10,
 ):
     ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
     score_config = [
@@ -366,7 +367,7 @@ def plot_metamap_with_scores_tsne(
                 # pivot = threshold * scores.max()
                 # (best_indices,) = np.where(scores > pivot)
                 best_idx = int(np.argmax(scores))
-                best_indices = np.argsort(scores)[::-1][: int(0.1 * len(scores))]
+                best_indices = np.argsort(scores)[::-1][: int(top_percent / 100 * len(scores))]
             print("\n[DEBUG]", len(scores), len(best_indices))
             print("[DEBUG] best perplexity: ", score_name, perp_values[best_idx])
 
@@ -409,6 +410,7 @@ def plot_metamap_with_scores_umap(
     n_labels_each_class=10,
     threshold=0.96,
     use_cache=False,
+    top_percent=5,
 ):
     df_qij = pd.read_csv(f"{score_dir}/qij/umap_scores.csv")
     qij_scores = df_qij["qij_score"].to_numpy()
@@ -416,11 +418,18 @@ def plot_metamap_with_scores_umap(
     print("Number of qij scores: ", n_params)
     list_n_neighbors = df_qij["n_neighbors"].to_numpy()
     list_min_dist = df_qij["min_dist"].to_numpy()
+    print("\n[DEBUG] f_score best hyperparams: ")
+    print(df_qij.iloc[df_qij["qij_score"].idxmax()])
 
     df_metrics = pd.read_csv(f"{score_dir}/qij/umap_metrics.csv")
     print("Number of metric scores: ", df_metrics.shape)
     assert n_params == df_metrics.shape[0]
     rnx_scores = df_metrics["auc_rnx"].to_numpy()
+    print("[DEBUG] RNX best hyperparams: ")
+    print(df_metrics.iloc[df_metrics["auc_rnx"].idxmax()])
+
+    sorted_df = df_metrics.sort_values(by=["auc_rnx"], ascending=False)
+    sorted_df.to_csv("test.csv")
 
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
     print("Number of embeddings: ", len(all_embeddings))
@@ -450,10 +459,16 @@ def plot_metamap_with_scores_umap(
             best_indices, best_idx = None, None
             show_legend = True
         else:
-            pivot = threshold * score_values.max()
-            (best_indices,) = np.where(score_values > pivot)
-            best_idx = np.argmax(score_values)
+            # UPDATE 03/02: Get top 5% highest scores
+            # pivot = threshold * score_values.max()
+            # (best_indices,) = np.where(score_values > pivot)
+            # best_idx = np.argmax(score_values)
             show_legend = False
+            best_idx = int(np.argmax(score_values))
+            best_indices = np.argsort(score_values)[::-1][
+                : int(top_percent / 100 * len(score_values))
+            ]
+            print("\n[DEBUG]", len(score_values), len(best_indices))
 
         _scatter_with_colorbar_and_legend_size(
             ax,

@@ -290,9 +290,12 @@ def get_hyperparams_to_show(dataset_name, method_name):
                 (247, "--all"),
             ],
             "umap": [
-                (11, 0.01, "++qij, -rnx"),
-                (5, 0.4642, "-qij, ++rnx"),
-                (102, 0.1, "--qij, +rnx"),
+                # (11, 0.01, "++qij, -rnx"),
+                # (5, 0.4642, "-qij, ++rnx"),
+                # (102, 0.1, "--qij, +rnx"),
+                (20, 0.001, "++qij"),
+                (4, 0.2154, "++rnx"),
+                (67, 0.4642, "--qij, +rnx"),
                 # (8, 0.01, "~prediction, ++qij, =rnx"),
                 # # bo_constraint.py  --seed 2019 -d COIL20 -m umap -u ei -x 0.1 -nr 40 --run
                 # # (5, 0.01, "+qij, +rnx"),
