@@ -18,9 +18,11 @@ COPY=true
 # V2-Fig2 : all kl loss
 
 # python run_score.py --plot_all_score
-# if $COPY; then
-# 	cp plots/all_scores_all_methods.pdf $TARGET_DIR/all_scores_all_methods.pdf
-# fi
+if $COPY; then
+	echo "Copy V2-Fig2, V2-Fig4"
+	# cp plots/all_scores_all_methods.$EXT $TARGET_DIR/all_scores_all_methods.$EXT
+	# cp plots/all_kl_loss.$EXT $TARGET_DIR/all_kl_loss.$EXT
+fi
 
 ################################################################################
 # Figure showing score stability for COIL20

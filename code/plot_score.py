@@ -483,10 +483,15 @@ def plot_all_score_all_method_all_dataset(
                 )
                 ax.text(0.05, 0.85, "$f_{score}$", transform=ax.transAxes, fontsize=22)
 
+            # maker ax border grey
+            for axis in ["top", "bottom", "left", "right"]:
+                ax.spines[axis].set_linewidth(0.1)
+                ax.spines[axis].set_edgecolor("0.5")
+
     fig.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     draw_seperator_between_subplots(fig, axes, color="gray", linestyle="--", linewidth=1.0)
     fig.subplots_adjust(hspace=0.6)
-    fig.savefig(f"{plot_root_dir}/all_scores_all_methods.png", dpi=300)
+    fig.savefig(f"{plot_root_dir}/all_scores_all_methods.pdf")
     plt.close(fig)
 
 
@@ -526,6 +531,6 @@ def plot_kl_loss(list_datasets=[], score_root_dir="", plot_root_dir=""):
     ax.set_xlim(left=2, right=1100)  # [2, N//3]
     ax.yaxis.grid(linestyle="--")
     plt.legend(loc="upper right")
-    plt.rcParams.update({"font.size": 16})
+    plt.rcParams.update({"font.size": 18})
     fig.tight_layout()
-    fig.savefig(f"{plot_root_dir}/all_kl_loss.png", dpi=300)
+    fig.savefig(f"{plot_root_dir}/all_kl_loss.pdf")
