@@ -81,13 +81,25 @@ fi
 
 ################################################################################
 # Compare f_score, ACU_RNX, BIC
+# See plot_score::plot_compare_qij_rnx_bic
 # V2: Fig8
+
 # python run_score.py -d DIGITS -m tsne --plot_compare
+# python run_score.py -d COIL20 -m tsne --plot_compare
 # python run_score.py -d FASHION1000 -m tsne --plot_compare
 # python run_score.py -d FASHION_MOBILENET -m tsne --plot_compare
 # python run_score.py -d 20NEWS5 -m tsne --plot_compare
 # python run_score.py -d NEURON_1K -m tsne --plot_compare
-# python run_score.py -d COIL20 -m tsne --plot_compare
+
+if $COPY; then
+	echo "Copy V2-Fig8"
+	# cp plots/DIGITS/tsne/plot_compare.$EXT ${TARGET_DIR}/DIGITS_tsne_compare_scores.$EXT
+	# cp plots/COIL20/tsne/plot_compare.$EXT ${TARGET_DIR}/COIL20_tsne_compare_scores.$EXT
+	# cp plots/FASHION1000/tsne/plot_compare.$EXT ${TARGET_DIR}/FASHION1000_tsne_compare_scores.$EXT
+	# cp plots/FASHION_MOBILENET/tsne/plot_compare.$EXT ${TARGET_DIR}/FASHION_MOBILENET_tsne_compare_scores.$EXT
+	# cp plots/20NEWS5/tsne/plot_compare.$EXT ${TARGET_DIR}/20NEWS5_tsne_compare_scores.$EXT
+	# cp plots/NEURON_1K/tsne/plot_compare.$EXT ${TARGET_DIR}/NEURON_1K_tsne_compare_scores.$EXT
+fi
 
 
 ################################################################################

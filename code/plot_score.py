@@ -171,7 +171,7 @@ def plot_scores(
 
     # prepare subplots
     n_rows = len(list_n_labels_values) + (1 if compare_with_rnx else 0)
-    fig, axes = plt.subplots(n_rows, 1, figsize=(8, 5 * n_rows))
+    fig, axes = plt.subplots(n_rows, 1, figsize=(7.5, 4.75 * n_rows))
 
     for ax, n_labels_each_class in zip(
         np.array(axes).ravel(), sorted(list_n_labels_values) + [99]
@@ -342,7 +342,7 @@ def plot_compare_qij_rnx_bic(
 ):
     # prepare subplots
     n_rows = len(list_score_names)
-    fig, axes = plt.subplots(n_rows, 1, figsize=(7, 3.5 * n_rows))
+    fig, axes = plt.subplots(n_rows, 1, figsize=(6, 4 * n_rows))
 
     for i, (ax, title) in enumerate(zip(axes.ravel(), list_score_names)):
         ax.set_title(title, loc="left")
@@ -399,9 +399,12 @@ def plot_compare_qij_rnx_bic(
         if i == len(list_score_names) - 1:
             ax.set_xlabel("perplexity in log-scale")
 
-    # fig.tight_layout()
-    fig.subplots_adjust(hspace=0.4, top=0.925, bottom=0.125, left=0.125, right=0.95)
-    fig.savefig(f"{plot_dir}/plot_compare.png", dpi=300)
+        # make the border grey
+        utils.change_border(ax, width=0.1, color="0.5", hide_axis=False)
+
+    fig.tight_layout()
+    fig.subplots_adjust(hspace=0.4, top=0.96, bottom=0.075, left=0.15, right=0.94)
+    fig.savefig(f"{plot_dir}/plot_compare.pdf")
     plt.close(fig)
 
 
