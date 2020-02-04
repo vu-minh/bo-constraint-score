@@ -348,7 +348,7 @@ def plot_compare_qij_rnx_bic(
 ):
     # prepare subplots
     n_rows = len(list_score_names)
-    fig, axes = plt.subplots(n_rows, 1, figsize=(6, 4 * n_rows))
+    fig, axes = plt.subplots(n_rows, 1, figsize=(5.5, 3.5 * n_rows))
 
     for i, (ax, title) in enumerate(zip(axes.ravel(), list_score_names)):
         ax.set_title(title, loc="left")
