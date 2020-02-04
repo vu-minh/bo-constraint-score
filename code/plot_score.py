@@ -60,6 +60,12 @@ def _plot_best_param(ax, best_param_value, text_y_pos=0.0, text_align=None):
     if text_align is not None:
         ax.text(x=best_param_value, y=text_y_pos, s=str(best_param_value), ha=text_align)
 
+    # plot text for best param
+    text_y_pos = ax.get_ylim()[0] + 0.1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
+    ax.text(
+        x=best_param_value, y=text_y_pos, ha="center", s=best_param_value,
+    )
+
 
 def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0, best_param=None):
     ax.axvspan(param_min, param_max, alpha=0.12, color="orange")
@@ -131,15 +137,15 @@ def _plot_score_with_best_param_and_range(
         text_align = "right" if (param_best - param_min) > (param_max - param_best) else "left"
     _plot_best_param(ax, param_best, text_y_pos, text_align)
 
-    # # plot also the best param range (the top 96% scores)
-    # show_best_param_on_top = text_y_pos < 10
-    # _plot_best_range(
-    #     ax,
-    #     param_min,
-    #     param_max,
-    #     text_y_pos,
-    #     best_param=None if not show_best_param_on_top else param_best,
-    # )
+    # plot also the best param range (the top 96% scores)
+    show_best_param_on_top = text_y_pos < 10
+    _plot_best_range(
+        ax,
+        param_min,
+        param_max,
+        text_y_pos,
+        best_param=None if not show_best_param_on_top else param_best,
+    )
 
 
 def plot_scores(
@@ -338,7 +344,7 @@ def plot_compare_qij_rnx_bic(
     score_dir="",
     plot_dir="",
     list_score_names=["Constraint score", "$AUC_{log}RNX$", "BIC"],
-    show_range=True,
+    show_range=False,
 ):
     # prepare subplots
     n_rows = len(list_score_names)
@@ -368,19 +374,22 @@ def plot_compare_qij_rnx_bic(
                 all_scores = qij_score_data["all_scores"]
                 score_data = np.mean(all_scores[str(n_labels_each_class)], axis=0)
 
-        if show_range:
-            # find best param range
-            if title == "BIC":  # need to find the min
-                pivot = (1.0 + (1.0 - threshold)) * min(score_data)
-                (best_indices,) = np.where(score_data < pivot)
-                param_best = list_params[np.argmin(score_data)]
-            else:  # need to find the max
-                pivot = threshold * score_data.max()
-                (best_indices,) = np.where(score_data > pivot)
-                param_best = list_params[np.argmax(score_data)]
-            param_min = list_params[best_indices.min()]
-            param_max = list_params[best_indices.max()]
+        # find best param range
+        if title == "BIC":  # need to find the min
+            pivot = (1.0 + (1.0 - threshold)) * min(score_data)
+            (best_indices,) = np.where(score_data < pivot)
+            param_best = list_params[np.argmin(score_data)]
+        else:  # need to find the max
+            pivot = threshold * score_data.max()
+            (best_indices,) = np.where(score_data > pivot)
+            param_best = list_params[np.argmax(score_data)]
+        param_min = list_params[best_indices.min()]
+        param_max = list_params[best_indices.max()]
 
+        # y-position to show best param value
+        text_y_pos = -10
+
+        if show_range:
             _plot_score_with_best_param_and_range(
                 ax,
                 list_params,
@@ -390,10 +399,20 @@ def plot_compare_qij_rnx_bic(
                 param_max,
                 score_mean=score_data,
                 score_sigma=None,
-                text_y_pos=-10,
+                text_y_pos=text_y_pos,
             )
         else:
             _plot_line_with_variance(ax, list_params, score_data, score_sigma=None)
+
+            # plot bestparam in the same customized xaxis
+            # but do not show text if the best param is overlapped with the best range
+            if param_best == param_min or param_best == param_max:
+                text_align = None
+            else:
+                text_align = (
+                    "right" if (param_best - param_min) > (param_max - param_best) else "left"
+                )
+            _plot_best_param(ax, param_best, text_y_pos, text_align)
 
         # show title for last subplot
         if i == len(list_score_names) - 1:

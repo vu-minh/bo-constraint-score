@@ -131,7 +131,7 @@ fi
 # python bo_constraint.py -d DIGITS 			-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 
 # python bo_constraint.py -d COIL20 				-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 --run
 # python bo_constraint.py -d FASHION1000 			-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 --run
-# python bo_constraint.py -d FASHION_MOBILENET 	-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 --run 
+# python bo_constraint.py -d FASHION_MOBILENET 	-m tsne -nr 15 -u ei -x 0.1 --plot --seed 24 --run 
 # python bo_constraint.py -d 20NEWS5 				-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 --run 
 # python bo_constraint.py -d NEURON_1K 			-m tsne -nr 15 -u ei -x 0.1 --plot --seed 24 --run
 
