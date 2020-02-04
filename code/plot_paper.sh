@@ -107,3 +107,19 @@ fi
 # python bo_constraint.py -d FASHION_MOBILENET -m umap -nr 40 -u ei --run --plot
 # python bo_constraint.py -d 20NEWS5 -m umap -nr 40 -u ei --run --plot
 # python bo_constraint.py -d NEURON_1K -m umap -nr 40 -u ei --run --plot
+
+
+################################################################################
+# Plot samples for table dataset
+# See plot_viz::plot_samples
+
+# python plot_viz.py -d DIGITS --plot_samples
+# python plot_viz.py -d COIL20 --plot_samples
+# python plot_viz.py -d FASHION1000 --plot_samples
+
+if $COPY; then
+	echo "Copy samples for table datasets"
+	# cp plots/DIGITS/DIGITS_samples.$EXT $TARGET_DIR/DIGITS_samples.$EXT
+	# cp plots/COIL20/COIL20_samples.$EXT $TARGET_DIR/COIL20_samples.$EXT
+	# cp plots/FASHION1000/FASHION1000_samples.$EXT $TARGET_DIR/FASHION1000_samples.$EXT
+fi

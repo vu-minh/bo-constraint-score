@@ -354,7 +354,7 @@ def plot_metamap_with_scores_tsne(
     X = StandardScaler().fit_transform(X)
     Z = meta_umap(X, meta_n_neighbors, cache=use_cache, embedding_dir=embedding_dir)
 
-    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(18, 5))
+    fig, [ax0, ax1, ax2, ax3] = plt.subplots(1, 4, figsize=(18, 5.5))
     # note: roll axes to make subfigure for perplexity being moved from last to first
     for config, scores, ax in zip(score_config, all_scores, [ax1, ax2, ax3, ax0]):
         score_name, score_title, score_cmap = config
@@ -571,7 +571,7 @@ def plot_samples(dataset_name, data, plot_dir="", n_samples=4, transpose=False, 
 
     plt.tight_layout()
     plt.subplots_adjust(wspace=0.05, bottom=0.1, top=0.9, left=0.02, right=0.98)
-    fig.savefig(f"{plot_dir}/{dataset_name}_samples.png", dpi=300)
+    fig.savefig(f"{plot_dir}/{dataset_name}_samples.pdf")
     plt.close()
 
 
