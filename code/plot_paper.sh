@@ -62,16 +62,21 @@ fi
 
 # Run BayOpt to find best params
 # python bo_constraint.py --seed 42 -d FASHION_MOBILENET --use_other_label class_matcat -m tsne -u ei -x 0.1 --plot --run -nr 15
-# note to `change ncol=min(3, len(label_names1))`
 # python plot_viz.py -d FASHION_MOBILENET -m tsne --plot_score_flexibility
 
 # python bo_constraint.py --seed 42 -d 20NEWS5 --use_other_label matcat -m tsne -u ei -x 0.1 --plot --run -nr 15
-# note to `change ncol=min(4, len(label_names1))`
 # python plot_viz.py -d 20NEWS5 -m tsne --plot_score_flexibility
 
 # python bo_constraint.py --seed 42 -d NEURON_1K --use_other_label umi -m tsne -u ei -x 0.1 --plot --run -nr 15
-# note to `change ncol=min(6, len(label_names1))`
 # python plot_viz.py -d NEURON_1K -m tsne --plot_score_flexibility
+
+if $COPY; then
+	echo "Copy V2-Fig6"
+	# cp plots/FASHION_MOBILENET/tsne/score_flexibility.$EXT $TARGET_DIR/FASHION_MOBILENET_score_flexibility.$EXT
+	# cp plots/20NEWS5/tsne/score_flexibility.$EXT $TARGET_DIR/20NEWS5_score_flexibility.$EXT
+	# cp plots/NEURON_1K/tsne/score_flexibility.$EXT $TARGET_DIR/NEURON_1K_score_flexibility.$EXT
+fi
+
 
 
 ################################################################################

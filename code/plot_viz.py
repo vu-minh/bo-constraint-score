@@ -601,10 +601,14 @@ def plot_viz_with_score_flexibility(
         ax_lbl2.text(0.98, 0.02, t2, transform=ax_lbl2.transAxes, fontsize=16, ha="right")
 
     for ax in [ax0, ax1, ax2, ax3]:
-        change_border(ax, width=0.25, color="black")
+        change_border(ax, width=0.1, color="0.5")
         # ax.set_aspect("equal")
 
     # legend
+    num_cols_in_legend = {"20NEWS5": 3, "FASHION_MOBILENET": 4, "NEURON_1K": 6}.get(
+        dataset_name, 6
+    )
+
     if label_names1 is None:
         label_names1 = range(len(np.unique(labels1)))
     handles1, _ = s1.legend_elements()
@@ -615,7 +619,7 @@ def plot_viz_with_score_flexibility(
         loc="upper left",
         bbox_to_anchor=(0.0, 1.3),
         borderaxespad=0.1,
-        ncol=min(6, len(label_names1)),  # note to change according to dataset
+        ncol=min(num_cols_in_legend, len(label_names1)),
         title=title1,
         fontsize="small",
     )
@@ -639,7 +643,7 @@ def plot_viz_with_score_flexibility(
     # This works for NEURON_1K
     # plt.subplots_adjust(wspace=0.02, hspace=0.02, left=0.01, right=0.99)
     plt.subplots_adjust(wspace=0.05, hspace=0.02, left=0.02, right=0.98)
-    fig.savefig(f"{plot_dir}/score_flexibility.png", dpi=300)
+    fig.savefig(f"{plot_dir}/score_flexibility.pdf")
     plt.close(fig)
 
 
