@@ -370,6 +370,9 @@ def plot_density_2D(
     # plot best param
     ax.plot(best_n_neighbors, best_min_dist, "s", c="orange")
 
+    # make the border grey
+    utils.change_border(ax, width=0.1, color="0.5", hide_axis=False)
+
     if plot_dir is not None:
         plt.tight_layout()
         plt.savefig(f"{plot_dir}/2D/{target_key_name}.png")
@@ -541,7 +544,7 @@ def plot_density_for_all_datasets(list_datasets=[], list_scores=[]):
                 fig=fig,
             )
     fig.tight_layout()
-    fig.savefig("./plots/umap2D_compare.png")
+    fig.savefig("./plots/umap2D_compare.pdf")
     plt.close(fig)
 
 

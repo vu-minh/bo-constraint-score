@@ -47,11 +47,11 @@ fi
 # See: bo_plot::plot_density_for_all_datasets
 # V2-Fig10
 
-python bo_plot.py
+# python bo_plot.py
 
 if $COPY; then
-	echo "Copy V2-Fig5"
-	cp plots/umap2D_compare.$EXT $TARGET_DIR/umap2D_compare.$EXT
+	echo "Copy V2-Fig10"
+	# cp plots/umap2D_compare.$EXT $TARGET_DIR/umap2D_compare.$EXT
 fi
 
 
