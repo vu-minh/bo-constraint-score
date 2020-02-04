@@ -67,14 +67,19 @@ def plot_test_vis(
 
 def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=False):
     ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap="Spectral", s=6)
-    ax.set_title(title, loc="center")
+    # ax.set_title(title, loc="center")
     ax.text(
         x=1.0, y=0.0, s=comment, transform=ax.transAxes, ha="right", va="bottom", fontsize=14,
     )
     if axis_off:
         ax.axis("off")
     else:
-        change_border(ax, width=0.25, color="black")
+        change_border(ax, width=0.1, color="0.5")
+
+    # custom show xlabel after changing ax border
+    ax.axes.get_xaxis().set_visible(True)
+    ax.set_xticks([])
+    ax.set_xlabel(title)
 
 
 def _simple_scatter_with_colorbar(
@@ -281,8 +286,8 @@ def show_viz_grid(
         _simple_scatter(ax, Z, labels, title=param_explanation, comment=comment)
 
     fig.tight_layout()
-    fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.01, top=0.9)
-    fig.savefig(f"{plot_dir}/show.png", dpi=300)
+    # fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.2, top=0.99)
+    fig.savefig(f"{plot_dir}/show.pdf")
     plt.close()
 
 
