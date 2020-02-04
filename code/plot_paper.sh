@@ -51,7 +51,7 @@ fi
 
 if $COPY; then
 	echo "Copy V2-Fig10"
-	# cp plots/umap2D_compare.$EXT $TARGET_DIR/umap2D_compare.$EXT
+	cp plots/umap2D_compare.$EXT $TARGET_DIR/umap2D_compare.$EXT
 fi
 
 
@@ -128,12 +128,12 @@ fi
 # add --run to re-run
 # V2: Fig11
 
-# python bo_constraint.py -d DIGITS -m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018
-# python bo_constraint.py -d COIL20 -m tsne -nr 15 -u ei -x 0.1  --plot --seed 2018
-# python bo_constraint.py -d FASHION1000 -m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018
-# python bo_constraint.py -d FASHION_MOBILENET -m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018
-# python bo_constraint.py -d 20NEWS5 -m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018
-# python bo_constraint.py -d NEURON_1K -m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018
+# python bo_constraint.py -d DIGITS 			-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 
+# python bo_constraint.py -d COIL20 			-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 
+# python bo_constraint.py -d FASHION1000 		-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 
+# python bo_constraint.py -d FASHION_MOBILENET 	-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 
+# python bo_constraint.py -d 20NEWS5 			-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 
+# python bo_constraint.py -d NEURON_1K 			-m tsne -nr 15 -u ei -x 0.1 --plot --seed 2018 
 
 if $COPY; then
 	echo "Copy V2-Fig11"
@@ -154,21 +154,21 @@ fi
 # Note: run COIL20, now disable pca when loading dataset (pca=None)
 # V2: Fig12
 
-# python bo_constraint.py -d DIGITS -m umap -nr 40 -u ei --plot
-# python bo_constraint.py -d COIL20 -m umap -nr 40 -u ei --plot
-# python bo_constraint.py -d FASHION1000 -m umap -nr 40 -u ei --plot
-# python bo_constraint.py -d FASHION_MOBILENET -m umap -nr 40 -u ei --plot
-# python bo_constraint.py -d 20NEWS5 -m umap -nr 40 -u ei --plot --run
-# python bo_constraint.py -d NEURON_1K -m umap -nr 40 -u ei --plot
+# python bo_constraint.py -d DIGITS 				-m umap -nr 40 -u ei -x 0.1 --plot --seed 2018 --run
+# python bo_constraint.py -d COIL20 				-m umap	-nr 40 -u ei -x 0.1 --plot --seed 2018 --run
+python bo_constraint.py -d FASHION1000 			-m umap -nr 40 -u ei -x 0.1 --plot --seed 2018 --run
+python bo_constraint.py -d FASHION_MOBILENET 	-m umap -nr 40 -u ei -x 0.1 --plot --seed 2018 --run
+python bo_constraint.py -d 20NEWS5 				-m umap -nr 40 -u ei -x 0.1 --plot --seed 2018 --run
+python bo_constraint.py -d NEURON_1K 			-m umap -nr 40 -u ei -x 0.1 --plot --seed 2018 --run
 
 if $COPY; then
 	echo "Copy V2-Fig12"
 	# cp plots/DIGITS/umap/qij/predicted_score.$EXT ${TARGET_DIR}/DIGITS_umap_predicted_score.$EXT
 	# cp plots/COIL20/umap/qij/predicted_score.$EXT ${TARGET_DIR}/COIL20_umap_predicted_score.$EXT
-	# cp plots/FASHION1000/umap/qij/predicted_score.$EXT ${TARGET_DIR}/FASHION1000_umap_predicted_score.$EXT
-	# cp plots/FASHION_MOBILENET/umap/qij/predicted_score.$EXT ${TARGET_DIR}/FASHION_MOBILENET_umap_predicted_score.$EXT
-	# cp plots/20NEWS5/umap/qij/predicted_score.$EXT ${TARGET_DIR}/20NEWS5_umap_predicted_score.$EXT
-	# cp plots/NEURON_1K/umap/qij/predicted_score.$EXT ${TARGET_DIR}/NEURON_1K_umap_predicted_score.$EXT
+	cp plots/FASHION1000/umap/qij/predicted_score.$EXT ${TARGET_DIR}/FASHION1000_umap_predicted_score.$EXT
+	cp plots/FASHION_MOBILENET/umap/qij/predicted_score.$EXT ${TARGET_DIR}/FASHION_MOBILENET_umap_predicted_score.$EXT
+	cp plots/20NEWS5/umap/qij/predicted_score.$EXT ${TARGET_DIR}/20NEWS5_umap_predicted_score.$EXT
+	cp plots/NEURON_1K/umap/qij/predicted_score.$EXT ${TARGET_DIR}/NEURON_1K_umap_predicted_score.$EXT
 fi
 
 ################################################################################

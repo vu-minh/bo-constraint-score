@@ -41,37 +41,38 @@ def _plot_true_target_values(ax, list_params, true_score, threshold=0.95):
         true_score,
         label="True target",
         marker="s",
-        markersize=3,
+        markersize=2,
         color="#FF8200",
         alpha=0.75,
         linewidth=1.25,
     )
     ax.set_ylabel("$f_{score}$")
 
-    # # determine true best range
-    # pivot = threshold * max(true_score)
-    # (best_indices,) = np.where(true_score > pivot)
-    # param_min = list_params[best_indices.min()][0]
-    # param_max = list_params[best_indices.max()][0]
-    # # plt.arrow(x=param_min, y=ax.get_ylim()[0], dx=param_max-param_min, dy=0,
-    # #     width=0.005, color="orange", length_includes_head=True)
+    if threshold is not None:
+        # determine true best range
+        pivot = threshold * max(true_score)
+        (best_indices,) = np.where(true_score > pivot)
+        param_min = list_params[best_indices.min()][0]
+        param_max = list_params[best_indices.max()][0]
+        # plt.arrow(x=param_min, y=ax.get_ylim()[0], dx=param_max-param_min, dy=0,
+        #     width=0.005, color="orange", length_includes_head=True)
 
-    # # add text to show the best range
-    # value_min = int(np.exp(param_min))
-    # value_max = int(np.exp(param_max))
-    # ax.text(
-    #     x=0.0,
-    #     y=1.065,
-    #     transform=ax.transAxes,
-    #     ha="left",
-    #     va="center",
-    #     s=f"True best range: [{value_min}, {value_max}]",
-    #     fontsize=18,
-    # )
+        # add text to show the best range
+        value_min = int(np.exp(param_min))
+        value_max = int(np.exp(param_max))
+        ax.text(
+            x=0.0,
+            y=1.065,
+            transform=ax.transAxes,
+            ha="left",
+            va="center",
+            s=f"True best range: [{value_min}, {value_max}]",
+            fontsize=18,
+        )
 
 
 def _plot_observed_points(ax, x_obs, y_obs):
-    ax.plot(x_obs.flatten(), y_obs, "o", markersize=7, label="Observations", color="#1B365D")
+    ax.plot(x_obs.flatten(), y_obs, "o", markersize=4, label="Observations", color="#1B365D")
 
 
 def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold=0.95):
@@ -87,19 +88,20 @@ def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold=0.
         label="95% confidence",
     )
 
-    # # determine best param range and best param value
-    # pivot = threshold * max(pred_mu)
-    # (best_indices,) = np.where(pred_mu > pivot)
-    # param_min = list_params[best_indices.min()]
-    # param_max = list_params[best_indices.max()]
-    # # note best param here is max(pred_mu), should take into account
-    # # the uncertainty in this prediction
-    # # param_best = int(np.exp(list_params[np.argmax(pred_mu)]))
-    # # print("Debug best param: ", param_best, np.max(pred_mu))
+    if threshold is not None:
+        # determine best param range and best param value
+        pivot = threshold * max(pred_mu)
+        (best_indices,) = np.where(pred_mu > pivot)
+        param_min = list_params[best_indices.min()]
+        param_max = list_params[best_indices.max()]
+        # note best param here is max(pred_mu), should take into account
+        # the uncertainty in this prediction
+        # param_best = int(np.exp(list_params[np.argmax(pred_mu)]))
+        # print("Debug best param: ", param_best, np.max(pred_mu))
 
-    # # plot best predicted range
-    # ax.axhline(pivot, linestyle="--", alpha=0.4)
-    # _plot_best_range(ax, param_min, param_max)
+        # plot best predicted range
+        ax.axhline(pivot, linestyle="--", alpha=0.4)
+        _plot_best_range(ax, param_min, param_max)
 
 
 def plot_bo_one_param_detail(
@@ -233,25 +235,29 @@ def plot_bo_one_param_summary(
     kappa=5,
     xi=0.01,
     plot_dir="",
+    show_best_range=False,
 ):
+    plt.rcParams.update({"font.size": 14})
+
     """ Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real GP params are in logscale)
     """
-    _, ax = plt.subplots(1, 1, figsize=(7, 3.5))
-    utills.change_border(ax, width=0.1, color="0.5", hide_axis=False)
+    fig, ax = plt.subplots(1, 1, figsize=(5.25, 3))
+    utils.change_border(ax, width=0.1, color="0.5", hide_axis=False)
 
     ax.set_xlim(left=list_params.min(), right=list_params.max())
     if true_score is not None:
-        ax.set_ylim(top=1.1 * max(true_score), bottom=0.9 * min(true_score))
-        _plot_true_target_values(ax, list_params, true_score, threshold=threshold)
+        # ax.set_ylim(top=1.1 * max(true_score), bottom=0.9 * min(true_score))
+        _plot_true_target_values(
+            ax, list_params, true_score, threshold=threshold if show_best_range else None
+        )
 
     _plot_observed_points(ax, x_obs, y_obs)
-    _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold=threshold)
+    _plot_gp_predicted_values(
+        ax, pred_mu, pred_sigma, list_params, threshold=threshold if show_best_range else None
+    )
 
-    # draw indicator hline at the current  max value of the  target function
-    # ax.axhline([current_max_target_function], color='#A1AFF8', linestyle='--', alpha=0.7)
-
-    # # draw indicator vline @ the best param
+    # draw indicator vline @ the best param
     best_param = optimizer.max["params"][param_name]
     ax.axvline(
         best_param,
@@ -259,7 +265,7 @@ def plot_bo_one_param_summary(
         linestyle="--",
         alpha=0.5,
         marker="^",
-        markersize=16,
+        markersize=8,
         clip_on=False,
         markeredgecolor="#FF8200",
         markerfacecolor="#FF8200",
@@ -268,13 +274,13 @@ def plot_bo_one_param_summary(
 
     # set limit value for yaxis in gp prediction chart
     # ax.set_ylim((0.95 * y_obs.min(), 1.12 * y_obs.max()))  # make place for legend
-    ax.locator_params(axis="y", nbins=4)
+    ax.locator_params(axis="y", nbins=3)
     # ax.yaxis.grid(linestyle="--")
     # ax.xaxis.grid(linestyle="--", alpha=0.3)
 
     # show param in log scale in xaxis
     list_params_to_show = utils.generate_value_range(
-        min_val=min(list_params), max_val=max(list_params), num=9, range_type="log", dtype=int
+        min_val=min(list_params), max_val=max(list_params), num=6, range_type="log", dtype=int
     )
     ax.set_xlim(left=min(list_params), right=max(list_params))
     ax.set_xticks(list_params_to_show)
@@ -282,26 +288,30 @@ def plot_bo_one_param_summary(
     ax.set_xlabel(f"{param_name} in log-scale")
 
     # plot text for best param
-    ax.text(x=best_param, y=1.1 * ax.get_ylim()[0], ha="center", s=f"{int(np.exp(best_param))}")
+    ax.text(
+        x=best_param, y=1.05 * ax.get_ylim()[0], ha="center", s=f"{int(np.exp(best_param))}"
+    )
 
-    # # hint text for the top hightest scores horizontal line
-    # pivot = threshold * max(pred_mu)
-    # ax.text(
-    #     x=min(list_params),
-    #     y=pivot * 1.01,
-    #     ha="left",
-    #     va="bottom",
-    #     fontsize=18,
-    #     s="\u2199" + f"{threshold} max(score)",
-    #     color="#0047BB",
-    # )
+    if show_best_range:
+        # draw indicator hline at the current  max value of the  target function
+        ax.axhline([current_max_target_function], color="#A1AFF8", linestyle="--", alpha=0.7)
 
-    # set title and save figure
-    plt.rcParams.update({"font.size": 14})
-    plt.legend(loc="upper center", ncol=4, prop={"size": 9})
-    plt.tight_layout()
-    plt.savefig(f"{plot_dir}/bo_summary.pdf")
-    plt.close()
+        # hint text for the top hightest scores horizontal line
+        pivot = threshold * max(pred_mu)
+        ax.text(
+            x=min(list_params),
+            y=pivot * 1.01,
+            ha="left",
+            va="bottom",
+            fontsize=18,
+            s="\u2199" + f"{threshold} max(score)",
+            color="#0047BB",
+        )
+
+    # plt.legend(loc="upper center", ncol=4, prop={"size": 14})
+    # fig.tight_layout()
+    fig.savefig(f"{plot_dir}/bo_summary.pdf", bbox_inches="tight")
+    plt.close(fig)
 
 
 def plot_density_2D(
@@ -328,6 +338,7 @@ def plot_density_2D(
     min_dist_values = Z.index.to_numpy()
     n_neighbors_values = Z.columns.to_numpy()
     Z = Z.to_numpy()
+    print("Score values: ", Z.min(), Z.max())
     # print(Z.shape, min_dist_values.shape, n_neighbors_values.shape)
 
     # get the row of max value
@@ -342,22 +353,23 @@ def plot_density_2D(
     # print(X.shape, Y.shape)
 
     if ax is None or fig is None:
-        fig, ax = plt.subplots(1, 1, figsize=(8, 3))
+        fig, ax = plt.subplots(1, 1, figsize=(12, 4.5))
     ax.set_title(f"[{dataset_name}] {title}", fontsize=22)
 
     # contour for score
-    ax.contour(X, Y, Z, levels=contour_levels, linewidths=0.5, colors="k")
+    ax.contour(X, Y, Z, levels=contour_levels, linewidths=0.25, colors="#696969")
     cntr1 = ax.contourf(X, Y, Z, levels=contour_levels, cmap=contour_cmap)
-    fig.colorbar(cntr1, ax=ax)
+    cbar = fig.colorbar(cntr1, ax=ax)
+    cbar.ax.locator_params(nbins=3)
 
     # grid of sampled points
     ax.plot(df.n_neighbors, df.min_dist, ".w", ms=1)
 
     # custom axes
     ax.set_xscale("log", basex=np.e)
-    ax.set_xlabel("n_neighbors in log-scale")
+    # ax.set_xlabel("n_neighbors in log-scale")
     ax.set_yscale("log", basey=np.e)
-    ax.set_ylabel("min_dist in log-scale")
+    # ax.set_ylabel("min_dist in log-scale")
 
     # show ticks values in log scale
     ax.xaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
@@ -389,6 +401,8 @@ def plot_prediction_density_2D(
     contour_cmap="gray",
     show_best_range=False,
 ):
+    plt.rcParams.update({"font.size": 16})
+
     # plot contour/contourf guide:
     # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
 
@@ -420,11 +434,12 @@ def plot_prediction_density_2D(
     input_grid = np.log(list(product(list_min_dist, list_n_neigbors)))
     predicted = gp.predict(input_grid)
     Z = predicted.reshape(X.shape)
+    print("Score values: ", Z.shape, Z.min(), Z.max())
 
     # plot contour and contourf for the sampled grid
-    fig = plt.figure(figsize=(5 + 2.5, 2.5 + 1.5))
+    fig = plt.figure(figsize=(5.5 + 2.5, 3.5 + 1.5))
     gs = gridspec.GridSpec(
-        2, 2, height_ratios=[1, 2], width_ratios=[3, 1], wspace=0.22, hspace=0.22
+        2, 2, height_ratios=[1, 2], width_ratios=[3, 1], wspace=0.3, hspace=0.25
     )
     ax = plt.subplot(gs[1, 0])
 
@@ -432,7 +447,7 @@ def plot_prediction_density_2D(
     ax.plot(X, Y, ".w", ms=0.5)
 
     # contour for the prediction (in linear space)
-    ax.contour(X, Y, Z, levels=contour_levels, linewidths=0.5, colors="k")
+    ax.contour(X, Y, Z, levels=contour_levels, linewidths=0.25, colors="#696969")
     cntr1 = ax.contourf(X, Y, Z, levels=contour_levels, cmap=contour_cmap)
 
     # scatter plot the selected points in optimizer
@@ -497,7 +512,7 @@ def plot_prediction_density_2D(
 
     # partial dependence: plot score by min_dist
     ax1 = plt.subplot(gs[1, 1], sharey=ax)
-    ax1.set_title("Score by min_dist")
+    ax1.set_title("Score by \n min_dist")
     score_by_min_dist = Z.mean(axis=1)
     (plt_score_by_min_dist,) = ax1.plot(score_by_min_dist, list_min_dist)
     plt.setp(ax1.get_yticklabels(), visible=False)
@@ -518,10 +533,10 @@ def plot_prediction_density_2D(
 
     ax2 = plt.subplot(gs[0, 1])
     ax2.axis("off")
-    cax2 = inset_axes(ax2, width="125%", height="20%", loc="upper center")
+    cax2 = inset_axes(ax2, width="120%", height="15%", loc="upper center")
     cbar = fig.colorbar(cntr1, cax=cax2, orientation="horizontal")
     cbar.ax.set_title("Score value")
-    cbar.ax.locator_params(nbins=6)
+    cbar.ax.locator_params(nbins=3)
 
     # maker border gray
     for ax_i in [ax, ax0, ax1, ax2]:
@@ -530,7 +545,7 @@ def plot_prediction_density_2D(
     # ax2.legend((plt_score_by_min_dist, plt_score_by_n_neighbors),
     #           ("Score by min_dis", "Score by n_neighbors"), loc="lower center")
     # fig.tight_layout()
-    fig.subplots_adjust(hspace=0.2, top=0.92, bottom=0.075, left=0.05, right=0.96)
+    fig.subplots_adjust(top=0.92, bottom=0.075, left=0.07, right=0.93)
     fig.savefig(f"{plot_dir}/predicted_score.pdf")
     plt.close(fig)
 
@@ -560,7 +575,7 @@ def plot_density_for_all_datasets(list_datasets=[], list_scores=[]):
 
 if __name__ == "__main__":
     # note to make big font size for plots in the paper
-    plt.rcParams.update({"font.size": 10})
+    plt.rcParams.update({"font.size": 16})
 
     list_datasets = [
         "DIGITS",

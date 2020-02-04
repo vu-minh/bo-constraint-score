@@ -276,7 +276,10 @@ if __name__ == "__main__":
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
 
     _, X, default_labels = dataset.load_dataset(
-        dataset_name, preprocessing_method="auto", pca=0.9
+        # note COIL20 with UMAP now only run without PCA (pca=None)
+        dataset_name,
+        preprocessing_method="auto",
+        pca=0.9,
     )
     # note: only with COIL dataset, use `pca=None`
 
