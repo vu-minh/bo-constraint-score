@@ -310,7 +310,7 @@ def get_hyperparams_to_show(dataset_name, method_name):
                 (13, " --qij, -bic, ++rnx"),
                 # (40, "=qij, +rnx,  ++bic"),
                 (65, "=qij, +rnx,  ++bic"),
-                (150, "--all"),
+                (330, "--all"),  # 150
             ],
             "umap": [
                 (16, 0.001, "~prediction, ++qij, +rnx"),

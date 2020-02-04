@@ -46,7 +46,7 @@ def _plot_true_target_values(ax, list_params, true_score, threshold=0.95):
         alpha=0.75,
         linewidth=1.25,
     )
-    ax.set_ylabel("$f_{score}$")
+    # ax.set_ylabel("$f_{score}$")
 
     if threshold is not None:
         # determine true best range
@@ -242,7 +242,7 @@ def plot_bo_one_param_summary(
     """ Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real GP params are in logscale)
     """
-    fig, ax = plt.subplots(1, 1, figsize=(5.25, 3))
+    fig, ax = plt.subplots(1, 1, figsize=(5, 2.5))
     utils.change_border(ax, width=0.1, color="0.5", hide_axis=False)
 
     ax.set_xlim(left=list_params.min(), right=list_params.max())
@@ -285,7 +285,7 @@ def plot_bo_one_param_summary(
     ax.set_xlim(left=min(list_params), right=max(list_params))
     ax.set_xticks(list_params_to_show)
     ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{int(round(np.exp(x)))}"))
-    ax.set_xlabel(f"{param_name} in log-scale")
+    # ax.set_xlabel(f"{param_name} in log-scale")
 
     # plot text for best param
     ax.text(

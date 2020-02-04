@@ -131,15 +131,15 @@ def _plot_score_with_best_param_and_range(
         text_align = "right" if (param_best - param_min) > (param_max - param_best) else "left"
     _plot_best_param(ax, param_best, text_y_pos, text_align)
 
-    # plot also the best param range (the top 96% scores)
-    show_best_param_on_top = text_y_pos < 10
-    _plot_best_range(
-        ax,
-        param_min,
-        param_max,
-        text_y_pos,
-        best_param=None if not show_best_param_on_top else param_best,
-    )
+    # # plot also the best param range (the top 96% scores)
+    # show_best_param_on_top = text_y_pos < 10
+    # _plot_best_range(
+    #     ax,
+    #     param_min,
+    #     param_max,
+    #     text_y_pos,
+    #     best_param=None if not show_best_param_on_top else param_best,
+    # )
 
 
 def plot_scores(
@@ -338,7 +338,7 @@ def plot_compare_qij_rnx_bic(
     score_dir="",
     plot_dir="",
     list_score_names=["Constraint score", "$AUC_{log}RNX$", "BIC"],
-    show_range=False,
+    show_range=True,
 ):
     # prepare subplots
     n_rows = len(list_score_names)
