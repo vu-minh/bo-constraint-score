@@ -21,8 +21,8 @@ COPY=true
 
 if $COPY; then
 	echo "Copy V2-Fig2, V2-Fig4"
-	# cp plots/all_scores_all_methods.$EXT $TARGET_DIR/all_scores_all_methods.$EXT
-	# cp plots/all_kl_loss.$EXT $TARGET_DIR/all_kl_loss.$EXT
+	cp plots/all_scores_all_methods.$EXT $TARGET_DIR/all_scores_all_methods.$EXT
+	cp plots/all_kl_loss.$EXT $TARGET_DIR/all_kl_loss.$EXT
 fi
 
 ################################################################################
@@ -36,9 +36,9 @@ fi
 
 if $COPY; then
 	echo "Copy V2-Fig5"
-	# cp plots/COIL20/umap/scores.$EXT $TARGET_DIR/COIL20_umap_scores.$EXT
-	# cp plots/COIL20/tsne/scores.$EXT $TARGET_DIR/COIL20_tsne_scores.$EXT
-	# cp plots/COIL20/largevis/scores.$EXT $TARGET_DIR/COIL20_largevis_scores.$EXT
+	cp plots/COIL20/umap/scores.$EXT $TARGET_DIR/COIL20_umap_scores.$EXT
+	cp plots/COIL20/tsne/scores.$EXT $TARGET_DIR/COIL20_tsne_scores.$EXT
+	cp plots/COIL20/largevis/scores.$EXT $TARGET_DIR/COIL20_largevis_scores.$EXT
 fi
 
 
@@ -51,7 +51,7 @@ fi
 
 if $COPY; then
 	echo "Copy V2-Fig10"
-	# cp plots/umap2D_compare.$EXT $TARGET_DIR/umap2D_compare.$EXT
+	cp plots/umap2D_compare.$EXT $TARGET_DIR/umap2D_compare.$EXT
 fi
 
 
@@ -72,9 +72,9 @@ fi
 
 if $COPY; then
 	echo "Copy V2-Fig6"
-	# cp plots/FASHION_MOBILENET/tsne/score_flexibility.$EXT $TARGET_DIR/FASHION_MOBILENET_score_flexibility.$EXT
-	# cp plots/20NEWS5/tsne/score_flexibility.$EXT $TARGET_DIR/20NEWS5_score_flexibility.$EXT
-	# cp plots/NEURON_1K/tsne/score_flexibility.$EXT $TARGET_DIR/NEURON_1K_score_flexibility.$EXT
+	cp plots/FASHION_MOBILENET/tsne/score_flexibility.$EXT $TARGET_DIR/FASHION_MOBILENET_score_flexibility.$EXT
+	cp plots/20NEWS5/tsne/score_flexibility.$EXT $TARGET_DIR/20NEWS5_score_flexibility.$EXT
+	cp plots/NEURON_1K/tsne/score_flexibility.$EXT $TARGET_DIR/NEURON_1K_score_flexibility.$EXT
 fi
 
 
@@ -84,12 +84,12 @@ fi
 # See plot_score::plot_compare_qij_rnx_bic
 # V2: Fig8
 
-python run_score.py -d DIGITS -m tsne --plot_compare
-python run_score.py -d COIL20 -m tsne --plot_compare
-python run_score.py -d FASHION1000 -m tsne --plot_compare
-python run_score.py -d FASHION_MOBILENET -m tsne --plot_compare
-python run_score.py -d 20NEWS5 -m tsne --plot_compare
-python run_score.py -d NEURON_1K -m tsne --plot_compare
+# python run_score.py -d DIGITS -m tsne --plot_compare
+# python run_score.py -d COIL20 -m tsne --plot_compare
+# python run_score.py -d FASHION1000 -m tsne --plot_compare
+# python run_score.py -d FASHION_MOBILENET -m tsne --plot_compare
+# python run_score.py -d 20NEWS5 -m tsne --plot_compare
+# python run_score.py -d NEURON_1K -m tsne --plot_compare
 
 if $COPY; then
 	echo "Copy V2-Fig8"
@@ -116,11 +116,11 @@ fi
 
 if $COPY; then
 	echo "Copy V2:Fig7, V2:Fig9"
-	# cp plots/NEURON_1K/tsne/metamap_scores_50.$EXT ${TARGET_DIR}/NEURON_1K_tsne_metamap.$EXT
-	# cp plots/NEURON_1K/tsne/show.$EXT $TARGET_DIR/NEURON_1K_tsne_show.$EXT
+	cp plots/NEURON_1K/tsne/metamap_scores_50.$EXT ${TARGET_DIR}/NEURON_1K_tsne_metamap.$EXT
+	cp plots/NEURON_1K/tsne/show.$EXT $TARGET_DIR/NEURON_1K_tsne_show.$EXT
 
-	# cp plots/COIL20/umap/metamap_scores_100.$EXT ${TARGET_DIR}/COIL20_umap_metamap.$EXT
-	# cp plots/COIL20/umap/show.$EXT $TARGET_DIR/COIL20_umap_show.$EXT
+	cp plots/COIL20/umap/metamap_scores_100.$EXT ${TARGET_DIR}/COIL20_umap_metamap.$EXT
+	cp plots/COIL20/umap/show.$EXT $TARGET_DIR/COIL20_umap_show.$EXT
 fi
 
 ################################################################################
@@ -137,12 +137,12 @@ fi
 
 if $COPY; then
 	echo "Copy V2-Fig11"
-	# cp plots/DIGITS/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/DIGITS_tsne_bo.$EXT
-	# cp plots/COIL20/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/COIL20_tsne_bo.$EXT
-	# cp plots/FASHION1000/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/FASHION1000_tsne_bo.$EXT
-	# cp plots/FASHION_MOBILENET/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/FASHION_MOBILENET_tsne_bo.$EXT
-	# cp plots/20NEWS5/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/20NEWS5_tsne_bo.$EXT
-	# cp plots/NEURON_1K/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/NEURON_1K_tsne_bo.$EXT
+	cp plots/DIGITS/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/DIGITS_tsne_bo.$EXT
+	cp plots/COIL20/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/COIL20_tsne_bo.$EXT
+	cp plots/FASHION1000/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/FASHION1000_tsne_bo.$EXT
+	cp plots/FASHION_MOBILENET/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/FASHION_MOBILENET_tsne_bo.$EXT
+	cp plots/20NEWS5/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/20NEWS5_tsne_bo.$EXT
+	cp plots/NEURON_1K/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/NEURON_1K_tsne_bo.$EXT
 fi
 
 
@@ -163,12 +163,12 @@ fi
 
 if $COPY; then
 	echo "Copy V2-Fig12"
-	# cp plots/DIGITS/umap/qij/predicted_score.$EXT ${TARGET_DIR}/DIGITS_umap_predicted_score.$EXT
-	# cp plots/COIL20/umap/qij/predicted_score.$EXT ${TARGET_DIR}/COIL20_umap_predicted_score.$EXT
-	# cp plots/FASHION1000/umap/qij/predicted_score.$EXT ${TARGET_DIR}/FASHION1000_umap_predicted_score.$EXT
-	# cp plots/FASHION_MOBILENET/umap/qij/predicted_score.$EXT ${TARGET_DIR}/FASHION_MOBILENET_umap_predicted_score.$EXT
-	# cp plots/20NEWS5/umap/qij/predicted_score.$EXT ${TARGET_DIR}/20NEWS5_umap_predicted_score.$EXT
-	# cp plots/NEURON_1K/umap/qij/predicted_score.$EXT ${TARGET_DIR}/NEURON_1K_umap_predicted_score.$EXT
+	cp plots/DIGITS/umap/qij/predicted_score.$EXT ${TARGET_DIR}/DIGITS_umap_predicted_score.$EXT
+	cp plots/COIL20/umap/qij/predicted_score.$EXT ${TARGET_DIR}/COIL20_umap_predicted_score.$EXT
+	cp plots/FASHION1000/umap/qij/predicted_score.$EXT ${TARGET_DIR}/FASHION1000_umap_predicted_score.$EXT
+	cp plots/FASHION_MOBILENET/umap/qij/predicted_score.$EXT ${TARGET_DIR}/FASHION_MOBILENET_umap_predicted_score.$EXT
+	cp plots/20NEWS5/umap/qij/predicted_score.$EXT ${TARGET_DIR}/20NEWS5_umap_predicted_score.$EXT
+	cp plots/NEURON_1K/umap/qij/predicted_score.$EXT ${TARGET_DIR}/NEURON_1K_umap_predicted_score.$EXT
 fi
 
 ################################################################################
@@ -181,7 +181,7 @@ fi
 
 if $COPY; then
 	echo "Copy samples for table datasets"
-	# cp plots/DIGITS/DIGITS_samples.$EXT $TARGET_DIR/DIGITS_samples.$EXT
-	# cp plots/COIL20/COIL20_samples.$EXT $TARGET_DIR/COIL20_samples.$EXT
-	# cp plots/FASHION1000/FASHION1000_samples.$EXT $TARGET_DIR/FASHION1000_samples.$EXT
+	cp plots/DIGITS/DIGITS_samples.$EXT $TARGET_DIR/DIGITS_samples.$EXT
+	cp plots/COIL20/COIL20_samples.$EXT $TARGET_DIR/COIL20_samples.$EXT
+	cp plots/FASHION1000/FASHION1000_samples.$EXT $TARGET_DIR/FASHION1000_samples.$EXT
 fi
