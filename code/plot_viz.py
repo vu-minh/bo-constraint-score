@@ -164,7 +164,7 @@ def _scatter_with_colorbar_and_legend_size(
     if axis_off:
         ax.axis("off")
     else:
-        change_border(ax, width=0.25, color="black")
+        change_border(ax, width=0.1, color="0.5")
 
     c_min, c_max = labels.min(), labels.max()
     norm = plt.Normalize(c_min, c_max)
@@ -456,7 +456,7 @@ def plot_metamap_with_scores_umap(
         ScoreConfig("rnx", "$AUC_{log}RNX$ values in log-scale", "Blues", rnx_scores),
     ]
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    fig, axes = plt.subplots(1, 3, figsize=(15, 6))
     for config, ax in zip(score_config, axes.ravel()):
         score_name, score_title, score_cmap, score_values = config
 
@@ -506,7 +506,7 @@ def plot_metamap_with_scores_umap(
 
     fig.tight_layout()
     plt.subplots_adjust(bottom=-0.05, top=0.98, left=0.01, right=0.99, wspace=0.05)
-    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png", dpi=200)
+    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.pdf")
     plt.close(fig)
 
 

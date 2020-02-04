@@ -84,6 +84,9 @@ if $COPY; then
 	echo "Copy V2:Fig7, V2:Fig9"
 	# cp plots/NEURON_1K/tsne/metamap_scores_50.$EXT ${TARGET_DIR}/NEURON_1K_tsne_metamap.$EXT
 	# cp plots/NEURON_1K/tsne/show.$EXT $TARGET_DIR/NEURON_1K_tsne_show.$EXT
+
+	# cp plots/COIL20/umap/metamap_scores_100.$EXT ${TARGET_DIR}/COIL20_umap_metamap.$EXT
+	# cp plots/COIL20/umap/show.$EXT $TARGET_DIR/COIL20_umap_show.$EXT
 fi
 
 ################################################################################
