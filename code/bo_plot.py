@@ -237,10 +237,8 @@ def plot_bo_one_param_summary(
     """ Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real GP params are in logscale)
     """
-    from utils import change_border
-
     _, ax = plt.subplots(1, 1, figsize=(7, 3.5))
-    # change_border(ax)
+    utills.change_border(ax, width=0.1, color="0.5", hide_axis=False)
 
     ax.set_xlim(left=list_params.min(), right=list_params.max())
     if true_score is not None:
@@ -302,7 +300,7 @@ def plot_bo_one_param_summary(
     plt.rcParams.update({"font.size": 14})
     plt.legend(loc="upper center", ncol=4, prop={"size": 9})
     plt.tight_layout()
-    plt.savefig(f"{plot_dir}/bo_summary.png", dpi=300)
+    plt.savefig(f"{plot_dir}/bo_summary.pdf")
     plt.close()
 
 
@@ -389,6 +387,7 @@ def plot_prediction_density_2D(
     plot_dir: str = "",
     contour_levels=10,
     contour_cmap="gray",
+    show_best_range=False,
 ):
     # plot contour/contourf guide:
     # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
@@ -485,12 +484,15 @@ def plot_prediction_density_2D(
     (plt_score_by_n_neighbors,) = ax0.plot(list_n_neigbors, score_by_n_neighbors)
     plt.setp(ax0.get_xticklabels(), visible=False)
 
-    # determine best param range and best param value
-    pivot = threshold * max(score_by_n_neighbors)
-    (best_indices,) = np.where(score_by_n_neighbors > pivot)
-    param_min0 = list_n_neigbors[best_indices.min()]
-    param_max0 = list_n_neigbors[best_indices.max()]
-    ax0.axvspan(xmin=param_min0, xmax=param_max0, alpha=0.1, ls="--", lw=2, edgecolor="blue")
+    if show_best_range:
+        # determine best param range and best param value
+        pivot = threshold * max(score_by_n_neighbors)
+        (best_indices,) = np.where(score_by_n_neighbors > pivot)
+        param_min0 = list_n_neigbors[best_indices.min()]
+        param_max0 = list_n_neigbors[best_indices.max()]
+        ax0.axvspan(
+            xmin=param_min0, xmax=param_max0, alpha=0.1, ls="--", lw=2, edgecolor="blue"
+        )
     ax0.axvline(best_n_neighbors, ls="--", c="orange")
 
     # partial dependence: plot score by min_dist
@@ -500,12 +502,15 @@ def plot_prediction_density_2D(
     (plt_score_by_min_dist,) = ax1.plot(score_by_min_dist, list_min_dist)
     plt.setp(ax1.get_yticklabels(), visible=False)
 
-    # determine best param range and best param value
-    pivot = threshold * max(score_by_min_dist)
-    (best_indices,) = np.where(score_by_min_dist > pivot)
-    param_min1 = list_min_dist[best_indices.min()]
-    param_max1 = list_min_dist[best_indices.max()]
-    ax1.axhspan(ymin=param_min1, ymax=param_max1, alpha=0.1, ls="--", lw=2, edgecolor="blue")
+    if show_best_range:
+        # determine best param range and best param value
+        pivot = threshold * max(score_by_min_dist)
+        (best_indices,) = np.where(score_by_min_dist > pivot)
+        param_min1 = list_min_dist[best_indices.min()]
+        param_max1 = list_min_dist[best_indices.max()]
+        ax1.axhspan(
+            ymin=param_min1, ymax=param_max1, alpha=0.1, ls="--", lw=2, edgecolor="blue"
+        )
     ax1.axhline(best_min_dist, ls="--", c="orange")
 
     # for plotting colorbar and legend
@@ -518,11 +523,16 @@ def plot_prediction_density_2D(
     cbar.ax.set_title("Score value")
     cbar.ax.locator_params(nbins=6)
 
+    # maker border gray
+    for ax_i in [ax, ax0, ax1, ax2]:
+        utils.change_border(ax_i, width=0.1, color="0.5", hide_axis=False)
+
     # ax2.legend((plt_score_by_min_dist, plt_score_by_n_neighbors),
     #           ("Score by min_dis", "Score by n_neighbors"), loc="lower center")
-    plt.tight_layout()
-    plt.savefig(f"{plot_dir}/predicted_score.png")
-    plt.close()
+    # fig.tight_layout()
+    fig.subplots_adjust(hspace=0.2, top=0.92, bottom=0.075, left=0.05, right=0.96)
+    fig.savefig(f"{plot_dir}/predicted_score.pdf")
+    plt.close(fig)
 
 
 def plot_density_for_all_datasets(list_datasets=[], list_scores=[]):
