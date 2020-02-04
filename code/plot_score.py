@@ -153,8 +153,6 @@ def plot_scores(
     compare_with_rnx=False,
     show_best_range=False,
 ):
-    plt.rcParams.update({"font.size": 26})
-
     # prepare qij score data
     with open(f"{score_dir}/dof1.0_all.txt", "r") as in_file:
         qij_score_data = json.load(in_file)
@@ -173,7 +171,7 @@ def plot_scores(
 
     # prepare subplots
     n_rows = len(list_n_labels_values) + (1 if compare_with_rnx else 0)
-    fig, axes = plt.subplots(n_rows, 1, figsize=(8, 4.5 * n_rows))
+    fig, axes = plt.subplots(n_rows, 1, figsize=(8, 5 * n_rows))
 
     for ax, n_labels_each_class in zip(
         np.array(axes).ravel(), sorted(list_n_labels_values) + [99]
@@ -227,8 +225,9 @@ def plot_scores(
             # hint the dataset and method name
             ax.text(
                 x=0.985,
-                y=0.875,
-                s=f"{dataset_name}, {method_name}",
+                y=0.865,
+                # s=f"{dataset_name}, {method_name}",
+                s=dataset_name,
                 transform=ax.transAxes,
                 ha="right",
                 bbox=dict(edgecolor="b", facecolor="w"),
@@ -256,9 +255,10 @@ def plot_scores(
                     s=f"{threshold} max(score)" + "\u2198",
                     color="#0047BB",
                 )
-
+        # make the border grey
+        utils.change_border(ax, width=0.1, color="0.5", hide_axis=False)
     fig.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
-    fig.savefig(f"{plot_dir}/scores.png", dpi=300)
+    fig.savefig(f"{plot_dir}/scores.pdf")
     plt.close(fig)
 
 
@@ -419,7 +419,7 @@ def plot_all_score_all_method_all_dataset(
     lvis| ...            |
     """
     # re-set small fontsize (for tick labels)
-    plt.rcParams.update({"font.size": 18})
+    # plt.rcParams.update({"font.size": 18})
 
     n_rows = len(list_methods)  # + 1
     n_cols = len(list_datasets)  # + 1
@@ -483,10 +483,8 @@ def plot_all_score_all_method_all_dataset(
                 )
                 ax.text(0.05, 0.85, "$f_{score}$", transform=ax.transAxes, fontsize=22)
 
-            # maker ax border grey
-            for axis in ["top", "bottom", "left", "right"]:
-                ax.spines[axis].set_linewidth(0.1)
-                ax.spines[axis].set_edgecolor("0.5")
+            # make the border grey
+            utils.change_border(ax, width=0.1, color="0.5", hide_axis=False)
 
     fig.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
     draw_seperator_between_subplots(fig, axes, color="gray", linestyle="--", linewidth=1.0)
@@ -528,9 +526,11 @@ def plot_kl_loss(list_datasets=[], score_root_dir="", plot_root_dir=""):
         ax.set_xlabel("perplexity in log-scale")
         ax.set_ylabel("KL loss")
 
+        # make the border grey
+        utils.change_border(ax, width=0.1, color="0.5", hide_axis=False)
+
     ax.set_xlim(left=2, right=1100)  # [2, N//3]
     ax.yaxis.grid(linestyle="--")
-    plt.legend(loc="upper right")
-    plt.rcParams.update({"font.size": 18})
+    plt.legend(loc="upper right", fontsize=18)
     fig.tight_layout()
     fig.savefig(f"{plot_root_dir}/all_kl_loss.pdf")

@@ -295,6 +295,8 @@ if __name__ == "__main__":
             "NEURON_1K",
         ]
         all_methods = ["tsne", "largevis", "umap"]
+        plt.rcParams.update({"font.size": 24})
+
         plot_all_score_all_method_all_dataset(
             list_datasets=all_datasets,
             list_methods=all_methods,
@@ -385,6 +387,7 @@ if __name__ == "__main__":
 
     if args.plot:
         if score_name == "qij":
+            plt.rcParams.update({"font.size": 32})
             plot_scores(
                 dataset_name,
                 method_name,

@@ -353,9 +353,10 @@ def get_hyperparams_to_show(dataset_name, method_name):
     return transform_list_items(params)
 
 
-def change_border(ax, width=0.25, color="black"):
-    ax.axes.get_yaxis().set_visible(False)
-    ax.axes.get_xaxis().set_visible(False)
+def change_border(ax, width=0.25, color="black", hide_axis=True):
+    if hide_axis:
+        ax.axes.get_yaxis().set_visible(False)
+        ax.axes.get_xaxis().set_visible(False)
     for axis in ["top", "bottom", "left", "right"]:
         ax.spines[axis].set_linewidth(width)
         ax.spines[axis].set_edgecolor(color)

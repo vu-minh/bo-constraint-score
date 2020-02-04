@@ -18,6 +18,7 @@ COPY=true
 # V2-Fig2 : all kl loss
 
 # python run_score.py --plot_all_score
+
 if $COPY; then
 	echo "Copy V2-Fig2, V2-Fig4"
 	# cp plots/all_scores_all_methods.$EXT $TARGET_DIR/all_scores_all_methods.$EXT
@@ -29,15 +30,15 @@ fi
 # See: plot_score::plot_scores
 # V2-Fig5
 
-python run_score.py -d COIL20 -m tsne --use_log_scale --debug --plot
-python run_score.py -d COIL20 -m largevis --use_log_scale --debug --plot
-python run_score.py -d COIL20 -m umap --use_log_scale --debug --plot
+# python run_score.py -d COIL20 -m tsne --use_log_scale --debug --plot
+# python run_score.py -d COIL20 -m largevis --use_log_scale --debug --plot
+# python run_score.py -d COIL20 -m umap --use_log_scale --debug --plot
 
 if $COPY; then
 	echo "Copy V2-Fig5"
-	cp plots/COIL20/umap/scores.$EXT $TARGET_DIR/COIL20_umap_scores.$EXT
-	cp plots/COIL20/tsne/scores.$EXT $TARGET_DIR/COIL20_tsne_scores.$EXT
-	cp plots/COIL20/largevis/scores.$EXT $TARGET_DIR/COIL20_largevis_scores.$EXT
+	# cp plots/COIL20/umap/scores.$EXT $TARGET_DIR/COIL20_umap_scores.$EXT
+	# cp plots/COIL20/tsne/scores.$EXT $TARGET_DIR/COIL20_tsne_scores.$EXT
+	# cp plots/COIL20/largevis/scores.$EXT $TARGET_DIR/COIL20_largevis_scores.$EXT
 fi
 
 
