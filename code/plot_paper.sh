@@ -1,6 +1,15 @@
+#!/bin/bash
+
 # script to reproduce the figure in the paper
 
-# Version V2: 22/01/2020
+# Version V2: 22/01/2020, 03/02/2020
+
+
+# Target folder for latex figures
+TARGET_DIR="../tex/figures_pdf"
+EXT="pdf"
+COPY=true
+
 
 ################################################################################
 # Show all scores for all dataset (tsne, largevis, umap with mind_dist 0.1)
@@ -9,7 +18,9 @@
 # V2-Fig2 : all kl loss
 
 # python run_score.py --plot_all_score
-
+# if $COPY; then
+# 	cp plots/all_scores_all_methods.pdf $TARGET_DIR/all_scores_all_methods.pdf
+# fi
 
 ################################################################################
 # Figure showing score stability for COIL20
@@ -59,13 +70,21 @@
 
 ################################################################################
 # Metamap for tsne embeddings and selected visualizations
+# See: plot_viz::plot_metamap_with_scores_tsne, plot_viz::show_viz_grid
+
 # V2: Fig7 (1st row: metamap, 2nd row: grid of viz)
 # python plot_viz.py -d NEURON_1K -m tsne --plot_metamap --debug
 # python plot_viz.py -d NEURON_1K -m tsne --show_viz_grid
 
+# V2: Fig9
 # python plot_viz.py -d COIL20 -m umap --plot_metamap --debug
 # python plot_viz.py -d COIL20 -m umap --show_viz_grid
 
+if $COPY; then
+	echo "Copy V2:Fig7, V2:Fig9"
+	# cp plots/NEURON_1K/tsne/metamap_scores_50.$EXT ${TARGET_DIR}/NEURON_1K_tsne_metamap.$EXT
+	# cp plots/NEURON_1K/tsne/show.$EXT $TARGET_DIR/NEURON_1K_tsne_show.$EXT
+fi
 
 ################################################################################
 # Run BayOpt for tsne 1D

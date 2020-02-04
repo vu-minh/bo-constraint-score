@@ -286,7 +286,7 @@ def show_viz_grid(
         _simple_scatter(ax, Z, labels, title=param_explanation, comment=comment)
 
     fig.tight_layout()
-    # fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.2, top=0.99)
+    fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.1, top=0.98)
     fig.savefig(f"{plot_dir}/show.pdf")
     plt.close()
 
@@ -387,7 +387,7 @@ def plot_metamap_with_scores_tsne(
             debug_label=use_cache,
         )
         # make the border lighter
-        change_border(ax)
+        change_border(ax, width=0.1, color="0.5")
 
     # ax0 show metamap colored by perplexity values.
     # now show a list of selected perplexities.
@@ -403,7 +403,7 @@ def plot_metamap_with_scores_tsne(
 
     fig.tight_layout()
     plt.subplots_adjust(wspace=0.05, bottom=-0.05, top=0.98, left=0.01, right=0.98)
-    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.png", dpi=300)
+    fig.savefig(f"{plot_dir}/metamap_scores_{meta_n_neighbors}.pdf")
 
 
 def plot_metamap_with_scores_umap(
@@ -690,7 +690,7 @@ if __name__ == "__main__":
         plot_test_vis(X, dataset_name, plot_dir, embedding_dir, labels, other_labels)
 
     if args.show_viz_grid:
-        plt.rcParams.update({"font.size": 8})
+        plt.rcParams.update({"font.size": 10})
         list_params = get_hyperparams_to_show(dataset_name, method_name)
         show_viz_grid(
             dataset_name,
