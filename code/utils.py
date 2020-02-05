@@ -166,7 +166,8 @@ def get_config_labels_for_score_flexibility():
                 "label1": [
                     "graph_based_cluster",  # label name
                     "Points colored by graph-based cluster indices",  # title/description
-                    68,  # best param
+                    # 68,  # best param
+                    72,
                     # list labels of each point will be added
                     # list names for each label will be added
                 ],
@@ -185,7 +186,7 @@ def get_config_labels_for_score_flexibility():
         },
         "20NEWS5": {
             "tsne": {
-                "label1": ["cat", "Group by sub-categories", 130],
+                "label1": ["cat", "Group by sub-categories", 114],  # 130
                 "label2": ["matcat", "Higher-level (semantic) categories", 44,],
             },
             "umap": {
@@ -195,7 +196,7 @@ def get_config_labels_for_score_flexibility():
         },
         "FASHION_MOBILENET": {
             "tsne": {
-                "label1": ["class_subcat", "Group sub-categories", 60],  # 77
+                "label1": ["class_subcat", "Group sub-categories", 60],  # 77 is the best param
                 "label2": ["class_matcat", "Higher-level (hierarchical) categories", 113],
             },
             "umap": {
