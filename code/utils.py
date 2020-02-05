@@ -190,17 +190,21 @@ def get_config_labels_for_score_flexibility():
                 "label2": ["matcat", "Higher-level (semantic) categories", 44,],
             },
             "umap": {
-                "label1": ["cat", "Group sub-categories", "169_0.0010"],
+                "label1": ["cat", "Group by sub-categories", "169_0.0010"],
                 "label2": ["matcat", "Higher-level (semantic) categories", "161_0.0636",],
             },
         },
         "FASHION_MOBILENET": {
             "tsne": {
-                "label1": ["class_subcat", "Group sub-categories", 60],  # 77 is the best param
+                "label1": [
+                    "class_subcat",
+                    "Group by sub-categories",
+                    60,
+                ],  # 77 is the best param
                 "label2": ["class_matcat", "Higher-level (hierarchical) categories", 113],
             },
             "umap": {
-                "label1": ["class_subcat", "Group sub-categories", "20_0.0046"],
+                "label1": ["class_subcat", "Group by sub-categories", "20_0.0046"],
                 "label2": [
                     "class_matcat",
                     "Higher-level (hierarchical) categories",
