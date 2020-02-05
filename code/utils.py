@@ -301,7 +301,8 @@ def get_hyperparams_to_show(dataset_name, method_name):
                 # # (5, 0.01, "+qij, +rnx"),
                 # (4, 0.4642, "--qij, ++rnx"),
                 # (56, 0.1, "--qij, +rnx"),
-                (300, 0.4642, "--all"),
+                # (300, 0.4642, "--all"),
+                (326, 0.2154, "--all"),
             ],
         },
         "NEURON_1K": {
