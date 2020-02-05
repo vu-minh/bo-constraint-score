@@ -12,6 +12,7 @@ import utils
 from common.dataset import dataset
 from run_viz import run_tsne, run_largevis, run_umap
 from bo_plot import plot_bo_one_param_summary, plot_prediction_density_2D
+from bo_plot import plot_legend_bo1D_tsne
 
 
 # transformation rules to transform the params in log scale to linear scale
@@ -384,6 +385,9 @@ if __name__ == "__main__":
                     "xi": args.xi,
                 },
             )
+
+            # plot the legend seperately for paper
+            plot_legend_bo1D_tsne(plot_dir="./plots")
 
 # REPRODUCE
 # python bo_constraint.py -d COIL20 -m umap -nr 100 -nl 5 --seed 2029

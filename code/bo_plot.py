@@ -314,6 +314,41 @@ def plot_bo_one_param_summary(
     plt.close(fig)
 
 
+def plot_legend_bo1D_tsne(plot_dir=""):
+    plt.rcParams.update({"font.size": 20})
+    fig, ax = plt.subplots(1, 1, figsize=(6, 1))
+    ax.axis("off")
+
+    ax.plot(
+        [],
+        [],
+        label="True target",
+        marker="s",
+        markersize=6,
+        color="#FF8200",
+        alpha=0.75,
+        linewidth=1.25,
+    )
+
+    ax.plot([], [], "o", markersize=8, label="Observations", color="#1B365D")
+
+    ax.plot([], [], color="#0047BB", linestyle="--", label="Prediction")
+
+    ax.fill_between(
+        x=[],
+        y1=[],
+        y2=[],
+        alpha=0.75,
+        facecolor="#CCDAF1",
+        edgecolor="None",
+        label="95% confidence",
+    )
+
+    fig.legend(loc="center", frameon=True, ncol=4)
+    fig.savefig(f"{plot_dir}/bo_legend.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
 def plot_density_2D(
     dataset_name: str = "",
     input_score_name: str = "umap_scores",

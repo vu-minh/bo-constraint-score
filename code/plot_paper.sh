@@ -136,7 +136,8 @@ fi
 # python bo_constraint.py -d NEURON_1K 			-m tsne -nr 15 -u ei -x 0.1 --plot --seed 24 --run
 
 if $COPY; then
-	echo "Copy V2-Fig11"
+	echo "Copy V2-Fig11 and Legend"
+	cp plots/bo_legend.$EXT ${TARGET_DIR}/bo_legend.pdf
 	cp plots/DIGITS/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/DIGITS_tsne_bo.$EXT
 	cp plots/COIL20/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/COIL20_tsne_bo.$EXT
 	cp plots/FASHION1000/tsne/qij/bo_summary.$EXT ${TARGET_DIR}/FASHION1000_tsne_bo.$EXT
