@@ -332,8 +332,8 @@ def plot_metamap_with_scores_tsne(
     ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
     score_config = [
         ScoreConfig("qij", "$f_{score}$", "Greens"),
-        ScoreConfig("bic", "BIC-based score", "Purples_r"),
         ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
+        ScoreConfig("bic", "BIC-based score", "Purples_r"),
         ScoreConfig("perplexity", "Perplexity in log-scale", "bone"),
     ]  # perplexity should be in the last of this list, since we have to get list_params first
 

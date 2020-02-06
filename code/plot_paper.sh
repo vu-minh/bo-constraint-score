@@ -107,7 +107,7 @@ fi
 # See: plot_viz::plot_metamap_with_scores_tsne, plot_viz::show_viz_grid
 
 # V2: Fig7 (1st row: metamap, 2nd row: grid of viz)
-# python plot_viz.py -d NEURON_1K -m tsne --plot_metamap --debug
+python plot_viz.py -d NEURON_1K -m tsne --plot_metamap --debug
 # python plot_viz.py -d NEURON_1K -m tsne --show_viz_grid
 
 # V2: Fig9
