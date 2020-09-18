@@ -115,7 +115,11 @@ if __name__ == "__main__":
         help="number of evaluated points run by BayOpt",
     )
     ap.add_argument(
-        "-nc", "--n_constraints", default=50, type=int, help="number of constraints each type"
+        "-nc",
+        "--n_constraints",
+        default=50,
+        type=int,
+        help="number of constraints each type",
     )
     ap.add_argument(
         "-nl",
@@ -132,7 +136,9 @@ if __name__ == "__main__":
         type=float,
         help="target_function = cp * user_constraint + (1-cp)* John's metric",
     )
-    ap.add_argument("-u", "--utility_function", default="ucb", help="in ['ucb', 'ei', 'poi']")
+    ap.add_argument(
+        "-u", "--utility_function", default="ucb", help="in ['ucb', 'ei', 'poi']"
+    )
     ap.add_argument(
         "-k",
         "--kappa",

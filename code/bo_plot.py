@@ -12,7 +12,12 @@ from bayes_opt import UtilityFunction
 
 
 def _plot_acq_func(ax, util_func, list_params, utility_values, next_best_guess_param):
-    ax.plot(list_params, utility_values, color="green", label=f"{util_func.upper()} function")
+    ax.plot(
+        list_params,
+        utility_values,
+        color="green",
+        label=f"{util_func.upper()} function",
+    )
     ax.axvline(
         next_best_guess_param,
         color="green",
@@ -72,7 +77,9 @@ def _plot_true_target_values(ax, list_params, true_score, threshold=0.95):
 
 
 def _plot_observed_points(ax, x_obs, y_obs):
-    ax.plot(x_obs.flatten(), y_obs, "o", markersize=4, label="Observations", color="#1B365D")
+    ax.plot(
+        x_obs.flatten(), y_obs, "o", markersize=4, label="Observations", color="#1B365D"
+    )
 
 
 def _plot_gp_predicted_values(ax, pred_mu, pred_sigma, list_params, threshold=0.95):
@@ -117,7 +124,7 @@ def plot_bo_one_param_detail(
     xi=0.01,
     plot_dir="",
 ):
-    """ Plot the prediction of BayOpt with GP model.
+    """Plot the prediction of BayOpt with GP model.
     Note that all values of `list_params` are in log space (the real param in logscale)
     """
     plt.figure(figsize=(14, 8))
@@ -249,12 +256,19 @@ def plot_bo_one_param_summary(
     if true_score is not None:
         # ax.set_ylim(top=1.1 * max(true_score), bottom=0.9 * min(true_score))
         _plot_true_target_values(
-            ax, list_params, true_score, threshold=threshold if show_best_range else None
+            ax,
+            list_params,
+            true_score,
+            threshold=threshold if show_best_range else None,
         )
 
     _plot_observed_points(ax, x_obs, y_obs)
     _plot_gp_predicted_values(
-        ax, pred_mu, pred_sigma, list_params, threshold=threshold if show_best_range else None
+        ax,
+        pred_mu,
+        pred_sigma,
+        list_params,
+        threshold=threshold if show_best_range else None,
     )
 
     # draw indicator vline @ the best param
@@ -280,7 +294,11 @@ def plot_bo_one_param_summary(
 
     # show param in log scale in xaxis
     list_params_to_show = utils.generate_value_range(
-        min_val=min(list_params), max_val=max(list_params), num=6, range_type="log", dtype=int
+        min_val=min(list_params),
+        max_val=max(list_params),
+        num=6,
+        range_type="log",
+        dtype=int,
     )
     ax.set_xlim(left=min(list_params), right=max(list_params))
     ax.set_xticks(list_params_to_show)
@@ -289,12 +307,17 @@ def plot_bo_one_param_summary(
 
     # plot text for best param
     ax.text(
-        x=best_param, y=1.05 * ax.get_ylim()[0], ha="center", s=f"{int(np.exp(best_param))}"
+        x=best_param,
+        y=1.05 * ax.get_ylim()[0],
+        ha="center",
+        s=f"{int(np.exp(best_param))}",
     )
 
     if show_best_range:
         # draw indicator hline at the current  max value of the  target function
-        ax.axhline([current_max_target_function], color="#A1AFF8", linestyle="--", alpha=0.7)
+        ax.axhline(
+            [current_max_target_function], color="#A1AFF8", linestyle="--", alpha=0.7
+        )
 
         # hint text for the top hightest scores horizontal line
         pivot = threshold * max(pred_mu)
@@ -457,7 +480,10 @@ def plot_prediction_density_2D(
     # get observation from optimizer and retrain the GP model in the optimizer
     # note that, optimizer._gp always work on log-scale
     X_obs = np.array(
-        [[obs["params"]["min_dist"], obs["params"]["n_neighbors"]] for obs in optimizer.res]
+        [
+            [obs["params"]["min_dist"], obs["params"]["n_neighbors"]]
+            for obs in optimizer.res
+        ]
     )
     y_obs = np.array([obs["target"] for obs in optimizer.res])
     gp = optimizer._gp
@@ -519,7 +545,9 @@ def plot_prediction_density_2D(
     ax.set_ylabel("min_dist in log-scale")
     ax.set_yscale("log", basey=np.e)
     y_ticks = [0.001, 0.01, 0.1, 1.0]
-    ax.set_yticks(y_ticks + ([] if round(best_min_dist, 2) in y_ticks else [best_min_dist] * 2))
+    ax.set_yticks(
+        y_ticks + ([] if round(best_min_dist, 2) in y_ticks else [best_min_dist] * 2)
+    )
     ax.set_ylim(list_min_dist.min(), list_min_dist.max())
     ax.yaxis.set_major_formatter(mpl.ticker.ScalarFormatter())
 

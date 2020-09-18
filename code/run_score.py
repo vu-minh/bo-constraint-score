@@ -45,7 +45,9 @@ def run_qij_score(
         scores = collections.defaultdict(dict)
         run_index = seed + i
 
-        for n_labels_each_class in tqdm(list_n_labels_values, desc="n_labels per class"):
+        for n_labels_each_class in tqdm(
+            list_n_labels_values, desc="n_labels per class"
+        ):
             constraints = utils.generate_constraints(
                 constraint_strategy="partial_labels",
                 score_name=score_name,
@@ -65,7 +67,10 @@ def run_qij_score(
                     key_name = str(perp)
                 embedding = all_embeddings[key_name]
                 score = utils.score_embedding(
-                    embedding, score_name, constraints, degrees_of_freedom=degrees_of_freedom
+                    embedding,
+                    score_name,
+                    constraints,
+                    degrees_of_freedom=degrees_of_freedom,
                 )
                 scores[n_labels_each_class][str(perp)] = score
 
@@ -142,7 +147,9 @@ def run_all_score_umap(
     pd.DataFrame(all_metrics).to_csv(f"{score_dir}/umap_metrics.csv")
 
 
-def run_all_quality_metric(X, list_perps, default_min_dist=0.1, embedding_dir="", score_dir=""):
+def run_all_quality_metric(
+    X, list_perps, default_min_dist=0.1, embedding_dir="", score_dir=""
+):
     all_embeddings = joblib.load(f"{embedding_dir}/all.z")
 
     # store the list of metric results for each metric name
@@ -213,7 +220,12 @@ def merge_all_score_files(
             all_scores[n_labels_each_class].append(list(scores_i_j.values()))
 
     for n_labels_each_class, scores_i_j in all_scores.items():
-        print("[Debug]#score values:", n_labels_each_class, len(scores_i_j), len(scores_i_j[0]))
+        print(
+            "[Debug]#score values:",
+            n_labels_each_class,
+            len(scores_i_j),
+            len(scores_i_j[0]),
+        )
 
     with open(f"{score_dir}/dof{degrees_of_freedom}_all.txt", "w") as out_file:
         json.dump({"list_params": list_params, "all_scores": all_scores}, out_file)
@@ -229,7 +241,9 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dataset_name", default="")
-    ap.add_argument("-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']")
+    ap.add_argument(
+        "-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']"
+    )
     ap.add_argument(
         "-sc",
         "--score_name",
@@ -359,7 +373,9 @@ if __name__ == "__main__":
                 seed=args.seed,
                 n_repeat=args.n_repeat,
                 degrees_of_freedom=args.degrees_of_freedom,
-                list_accepted_perp=list_perp_in_log_scale if args.use_log_scale else None,
+                list_accepted_perp=list_perp_in_log_scale
+                if args.use_log_scale
+                else None,
                 embedding_dir=embedding_dir,
                 score_dir=score_dir,
                 default_min_dist=default_min_dist,
@@ -382,7 +398,8 @@ if __name__ == "__main__":
             )
         else:
             raise ValueError(
-                f"Invalid score name {score_name}," f" should be ['qij', 'metrics', 'bic']"
+                f"Invalid score name {score_name},"
+                f" should be ['qij', 'metrics', 'bic']"
             )
 
     if args.plot:
@@ -416,7 +433,8 @@ if __name__ == "__main__":
             )
         else:
             raise ValueError(
-                f"Invalid score name {score_name}," f" should be ['qij', 'metrics', 'bic']"
+                f"Invalid score name {score_name},"
+                f" should be ['qij', 'metrics', 'bic']"
             )
 
     if args.run_score_umap:

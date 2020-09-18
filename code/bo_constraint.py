@@ -24,8 +24,10 @@ transformation_rules = {
 }
 
 
-def _target_func(method_name, X, check_log, embedding_dir, seed=42, **params_in_log_scale):
-    """ The score function, calls viz method to obtain `Z` and calculates score on `Z`
+def _target_func(
+    method_name, X, check_log, embedding_dir, seed=42, **params_in_log_scale
+):
+    """The score function, calls viz method to obtain `Z` and calculates score on `Z`
     The `params_in_log_scale` should be:
         + log(`perplexity`) for tsne and largevis,
         + log(`n_neighbors`, `min_dist`) for umap
@@ -43,7 +45,11 @@ def _target_func(method_name, X, check_log, embedding_dir, seed=42, **params_in_
 
     # get the embedding and calculate constraint score
     Z = embedding_function(
-        X=X, seed=seed, check_log=True, embedding_dir=embedding_dir, **params_in_log_scale
+        X=X,
+        seed=seed,
+        check_log=True,
+        embedding_dir=embedding_dir,
+        **params_in_log_scale,
     )
     return utils.score_embedding(Z, score_name, constraints)
 
@@ -62,7 +68,7 @@ def bayopt_workflow(
 
     # value range of params in original linear scale
     min_perp, max_perp = 2, int(X.shape[0] // 3)
-    start_min_dist, stop_min_dist = 0.001, 1.0
+    start_min_dist, stop_min_dist = 0.01, 1.0  # 0.001, 1.0
 
     # value range of param in log scale
     perp_range = (math.log(min_perp), math.log(max_perp))
@@ -77,7 +83,11 @@ def bayopt_workflow(
 
     # define the target function which will be maximize by BayOpt
     target_func = partial(
-        _target_func, method_name=method_name, X=X, check_log=True, embedding_dir=embedding_dir
+        _target_func,
+        method_name=method_name,
+        X=X,
+        check_log=True,
+        embedding_dir=embedding_dir,
     )
 
     # run bayopt
@@ -104,7 +114,9 @@ def run_bo(
 ):
 
     # create BO object to find max of `target_func` in the domain of param `p`
-    optimizer = BayesianOptimization(f=target_func, pbounds=params_space, random_state=seed)
+    optimizer = BayesianOptimization(
+        f=target_func, pbounds=params_space, random_state=seed
+    )
 
     # log the progress for plotting
     log_name = f"{util_func}_k{kappa}_xi{xi}_n{n_total_runs}"
@@ -224,7 +236,11 @@ if __name__ == "__main__":
         help="number of evaluated points run by BayOpt",
     )
     ap.add_argument(
-        "-nc", "--n_constraints", default=50, type=int, help="number of constraints each type"
+        "-nc",
+        "--n_constraints",
+        default=50,
+        type=int,
+        help="number of constraints each type",
     )
     ap.add_argument(
         "-nl",
@@ -234,20 +250,26 @@ if __name__ == "__main__":
         help="number of labelled points selected for each class",
     )
     ap.add_argument("--seed", default=42, type=int)
-    ap.add_argument("-u", "--utility_function", default="ucb", help="in ['ucb', 'ei', 'poi']")
+    ap.add_argument(
+        "-u", "--utility_function", default="ucb", help="in ['ucb', 'ei', 'poi']"
+    )
     ap.add_argument(
         "-k",
         "--kappa",
         default=5.0,
         type=float,
-        help=("For UCB, small(1.0)->exploitation, large(10.0)->exploration, default 5.0"),
+        help=(
+            "For UCB, small(1.0)->exploitation, large(10.0)->exploration, default 5.0"
+        ),
     )
     ap.add_argument(
         "-x",
         "--xi",
         default=0.025,
         type=float,
-        help=("For EI/POI, small(1e-4)->exploitation, large(1e-1)->exploration, default 0.025"),
+        help=(
+            "For EI/POI, small(1e-4)->exploitation, large(1e-1)->exploration, default 0.025"
+        ),
     )
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--plot", action="store_true")
@@ -348,9 +370,11 @@ if __name__ == "__main__":
         list_perp_in_log_scale = utils.generate_value_range(
             min_val=2, max_val=X.shape[0] // 3, range_type="log", num=200, dtype=int
         )
-        list_min_dist_in_log_scale = utils.generate_value_range(
-            min_val=0.001, max_val=1.0, range_type="log", num=10, dtype=float
-        )
+        # list_min_dist_in_log_scale = utils.generate_value_range(
+        #     min_val=0.001, max_val=1.0, range_type="log", num=10, dtype=float
+        # )
+        min_dist_range = [0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1]
+        list_min_dist_in_log_scale = np.log(min_dist_range)
 
         true_score = _calculate_score(
             method_name, list_perp_in_log_scale, embedding_dir=embedding_dir
@@ -360,7 +384,9 @@ if __name__ == "__main__":
         threshold = {"tsne": 0.96, "umap": 0.96, "largevis": 0.90}[method_name]
 
         # load optimizer object
-        log_name = f"{args.utility_function}_k{args.kappa}_xi{args.xi}_n{args.n_total_runs}"
+        log_name = (
+            f"{args.utility_function}_k{args.kappa}_xi{args.xi}_n{args.n_total_runs}"
+        )
         optimizer = joblib.load(f"{log_dir}/{log_name}.z")
 
         # plot the predicted score of BayOpt

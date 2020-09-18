@@ -96,8 +96,7 @@ def qij_based_scores(Q, sim, dis, normalized: bool = False):
 
 
 def min_max_qij_based_score(Q):
-    """Calculate the min and max value of log(q_ij) for all pairs of Q
-    """
+    """Calculate the min and max value of log(q_ij) for all pairs of Q"""
     if Q.ndim > 1:
         Q = squareform(Q)
     score_all_pairs = np.log(Q)

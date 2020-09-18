@@ -10,7 +10,12 @@ from common.metric.dr_metrics import DRMetric
 
 
 def generate_constraints(
-    constraint_strategy, score_name, labels, n_constraints=50, n_labels_each_class=5, seed=None
+    constraint_strategy,
+    score_name,
+    labels,
+    n_constraints=50,
+    n_labels_each_class=5,
+    seed=None,
 ):
     if constraint_strategy == "partial_labels":
         sim_links, dis_links = constraint.generate_constraints_from_partial_labels(
@@ -55,7 +60,9 @@ def _qij_score(Z, sim_links, dis_links, degrees_of_freedom=1.0):
 def score_embedding(Z, score_name, constraints, degrees_of_freedom=1.0):
     score_func = {
         "contrastive": partial(_contrastive_score, **constraints),
-        "qij": partial(_qij_score, degrees_of_freedom=degrees_of_freedom, **constraints),
+        "qij": partial(
+            _qij_score, degrees_of_freedom=degrees_of_freedom, **constraints
+        ),
     }[score_name]
     return score_func(Z)
 
@@ -172,7 +179,11 @@ def get_config_labels_for_score_flexibility():
                     # list names for each label will be added
                 ],
                 "label2": ["umi", "Points colored by UMI count", 144],
-                "label2_correct": ["less than 6.5K", "from 6.5K to 12.5K", "more than 12.5K",],
+                "label2_correct": [
+                    "less than 6.5K",
+                    "from 6.5K to 12.5K",
+                    "more than 12.5K",
+                ],
             },
             "umap": {
                 "label1": [
@@ -181,17 +192,29 @@ def get_config_labels_for_score_flexibility():
                     "10_0.0038",  # best param
                 ],
                 "label2": ["umi", "Points colored by UMI count", "8_0.0185"],
-                "label2_correct": ["less than 6.5K", "from 6.5K to 12.5K", "more than 12.5K",],
+                "label2_correct": [
+                    "less than 6.5K",
+                    "from 6.5K to 12.5K",
+                    "more than 12.5K",
+                ],
             },
         },
         "20NEWS5": {
             "tsne": {
                 "label1": ["cat", "Group by sub-categories", 114],  # 130
-                "label2": ["matcat", "Higher-level (semantic) categories", 44,],
+                "label2": [
+                    "matcat",
+                    "Higher-level (semantic) categories",
+                    44,
+                ],
             },
             "umap": {
                 "label1": ["cat", "Group by sub-categories", "169_0.0010"],
-                "label2": ["matcat", "Higher-level (semantic) categories", "161_0.0636",],
+                "label2": [
+                    "matcat",
+                    "Higher-level (semantic) categories",
+                    "161_0.0636",
+                ],
             },
         },
         "FASHION_MOBILENET": {
@@ -201,7 +224,11 @@ def get_config_labels_for_score_flexibility():
                     "Group by sub-categories",
                     60,
                 ],  # 77 is the best param
-                "label2": ["class_matcat", "Higher-level (hierarchical) categories", 113],
+                "label2": [
+                    "class_matcat",
+                    "Higher-level (hierarchical) categories",
+                    113,
+                ],
             },
             "umap": {
                 "label1": ["class_subcat", "Group by sub-categories", "20_0.0046"],

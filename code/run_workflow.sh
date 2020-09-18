@@ -25,6 +25,7 @@ function run_viz {
 	   -m $METHOD \
 	   --n_perp 200 \
 	   --run \
+       --min_dist_scale hardcoded
 	   # --debug # only for umap
 	   # --perp_scale linear \
 }
@@ -73,7 +74,8 @@ function run_score_umap_2D {
        -d $DATASET_NAME \
        -m umap \
        -sc qij \
-       --run_score_umap
+       --run_score_umap \
+       --debug
 }
 
 
@@ -137,7 +139,7 @@ if [ $RUN_ALL = true ]; then
     declare -a LIST_DATASETS=("FASHION1000" "DIGITS" "COIL20")
     declare -a LIST_METHODS=("tsne" "umap" "largevis")
 else
-    declare -a LIST_DATASETS=("COIL20")
+    declare -a LIST_DATASETS=("COIL20" "FASHION1000" "FASHION_MOBILENET" "20NEWS5" "NEURON_1K")
     declare -a LIST_METHODS=("umap")
 fi
 
@@ -149,17 +151,17 @@ for DATASET_NAME in "${LIST_DATASETS[@]}"; do
             run_bic $DATASET_NAME # run BIC first to generate tsne embeddings
         fi
         
-    	# run_viz $DATASET_NAME $METHOD
-    	# run_score $DATASET_NAME $METHOD
-        # run_metric $DATASET_NAME $METHOD
+    	run_viz $DATASET_NAME $METHOD
+    	run_score $DATASET_NAME $METHOD
+        run_metric $DATASET_NAME $METHOD
 
         if [ $METHOD == "umap" ]; then
            run_score_umap_2D $DATASET_NAME
         fi
 
-        plot_compare_scores $DATASET_NAME $METHOD
-        gen_metamap $DATASET_NAME $METHOD
-        gen_grid_viz_demo $DATASET_NAME $METHOD
+        # plot_compare_scores $DATASET_NAME $METHOD
+        # gen_metamap $DATASET_NAME $METHOD
+        # gen_grid_viz_demo $DATASET_NAME $METHOD
     done
 done
 

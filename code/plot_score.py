@@ -58,12 +58,17 @@ def _plot_best_param(ax, best_param_value, text_y_pos=0.0, text_align=None):
         markevery=100,
     )
     if text_align is not None:
-        ax.text(x=best_param_value, y=text_y_pos, s=str(best_param_value), ha=text_align)
+        ax.text(
+            x=best_param_value, y=text_y_pos, s=str(best_param_value), ha=text_align
+        )
 
     # plot text for best param
     text_y_pos = ax.get_ylim()[0] + 0.1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
     ax.text(
-        x=best_param_value, y=text_y_pos, ha="center", s=best_param_value,
+        x=best_param_value,
+        y=text_y_pos,
+        ha="center",
+        s=best_param_value,
     )
 
 
@@ -107,7 +112,8 @@ def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0, best_param=None):
         transform=ax.transAxes,
         ha="right",
         va="center",
-        s=f"[{param_min}, {param_max}]" + ("" if best_param is None else f", ({best_param})"),
+        s=f"[{param_min}, {param_max}]"
+        + ("" if best_param is None else f", ({best_param})"),
         color="#0047BB",
     )
 
@@ -134,7 +140,9 @@ def _plot_score_with_best_param_and_range(
     if param_best == param_min or param_best == param_max:
         text_align = None
     else:
-        text_align = "right" if (param_best - param_min) > (param_max - param_best) else "left"
+        text_align = (
+            "right" if (param_best - param_min) > (param_max - param_best) else "left"
+        )
     _plot_best_param(ax, param_best, text_y_pos, text_align)
 
     # plot also the best param range (the top 96% scores)
@@ -268,7 +276,9 @@ def plot_scores(
     plt.close(fig)
 
 
-def plot_quality_metrics(dataset_name, method_name, param_name="", score_dir="", plot_dir=""):
+def plot_quality_metrics(
+    dataset_name, method_name, param_name="", score_dir="", plot_dir=""
+):
     with open(f"{score_dir}/metrics.txt", "r") as in_file:
         metrics_data = json.load(in_file)
         list_params = list(map(int, metrics_data["list_params"]))
@@ -296,7 +306,9 @@ def plot_quality_metrics(dataset_name, method_name, param_name="", score_dir="",
         plt.close()
 
 
-def plot_bic_scores(dataset_name, method_name, param_name="", score_dir="", plot_dir=""):
+def plot_bic_scores(
+    dataset_name, method_name, param_name="", score_dir="", plot_dir=""
+):
     with open(f"{score_dir}/BIC.txt", "r") as in_file:
         bic_data = json.load(in_file)
         list_params = list(map(int, bic_data["list_params"]))
@@ -410,7 +422,9 @@ def plot_compare_qij_rnx_bic(
                 text_align = None
             else:
                 text_align = (
-                    "right" if (param_best - param_min) > (param_max - param_best) else "left"
+                    "right"
+                    if (param_best - param_min) > (param_max - param_best)
+                    else "left"
                 )
             _plot_best_param(ax, param_best, text_y_pos, text_align)
 
@@ -454,7 +468,9 @@ def plot_all_score_all_method_all_dataset(
     for col_idx, dataset_name in enumerate(list_datasets):
         for row_idx, method_name in enumerate(list_methods):
             # load the score file
-            score_file_name = f"{score_root_dir}/{dataset_name}/{method_name}/qij/dof1.0_42.txt"
+            score_file_name = (
+                f"{score_root_dir}/{dataset_name}/{method_name}/qij/dof1.0_42.txt"
+            )
             try:
                 with open(score_file_name) as in_file:
                     score_data = json.load(in_file).get(str(n_labels_each_class), None)
@@ -489,7 +505,8 @@ def plot_all_score_all_method_all_dataset(
             # show x-axis label in the middle of the plot
             if col_idx == len(list_datasets) // 2 - 1:
                 ax.set_xlabel(
-                    f"{utils.get_param_display_name(method_name)} in log-scale", fontsize=28
+                    f"{utils.get_param_display_name(method_name)} in log-scale",
+                    fontsize=28,
                 )
 
             # show dataset name, method name
@@ -509,7 +526,9 @@ def plot_all_score_all_method_all_dataset(
             utils.change_border(ax, width=0.1, color="0.5", hide_axis=False)
 
     fig.tight_layout(pad=0.4, w_pad=0.5, h_pad=1.0)
-    draw_seperator_between_subplots(fig, axes, color="gray", linestyle="--", linewidth=1.0)
+    draw_seperator_between_subplots(
+        fig, axes, color="gray", linestyle="--", linewidth=1.0
+    )
     fig.subplots_adjust(hspace=0.6)
     fig.savefig(f"{plot_root_dir}/all_scores_all_methods.pdf")
     plt.close(fig)

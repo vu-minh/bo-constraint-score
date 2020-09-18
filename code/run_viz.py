@@ -20,12 +20,22 @@ def run_viz(
 
     if method_name == "tsne":
         for perp in perplexity_range:
-            run_tsne(X, perplexity=perp, seed=seed, check_log=True, embedding_dir=embedding_dir)
+            run_tsne(
+                X,
+                perplexity=perp,
+                seed=seed,
+                check_log=True,
+                embedding_dir=embedding_dir,
+            )
 
     if method_name == "largevis":
         for perp in perplexity_range:
             run_largevis(
-                X, perplexity=perp, seed=seed, check_log=True, embedding_dir=embedding_dir
+                X,
+                perplexity=perp,
+                seed=seed,
+                check_log=True,
+                embedding_dir=embedding_dir,
             )
 
     if method_name == "umap":
@@ -41,7 +51,11 @@ def run_viz(
 
 
 def run_largevis(
-    X, perplexity: int = 30, seed: int = 42, check_log: bool = True, embedding_dir: str = ""
+    X,
+    perplexity: int = 30,
+    seed: int = 42,
+    check_log: bool = True,
+    embedding_dir: str = "",
 ):
     # https://github.com/lferry007/LargeVis
     perplexity = int(round(perplexity))
@@ -56,7 +70,9 @@ def run_largevis(
     current_path = os.path.dirname(os.path.realpath(__file__))
     input_file_name = f"{current_path}/temp_largevis_input.txt"
     input_header = f"{X.shape[0]} {X.shape[1]}"
-    np.savetxt(input_file_name, X, header=input_header, comments="")  # disable comment header
+    np.savetxt(
+        input_file_name, X, header=input_header, comments=""
+    )  # disable comment header
 
     # prepare params to run largevis program
     output_file_name = f"{current_path}/temp_largevis_output.txt"
@@ -87,7 +103,11 @@ def run_largevis(
 
 
 def run_tsne(
-    X, perplexity: int = 30, seed: int = 42, check_log: bool = True, embedding_dir: str = ""
+    X,
+    perplexity: int = 30,
+    seed: int = 42,
+    check_log: bool = True,
+    embedding_dir: str = "",
 ):
     perplexity = int(round(perplexity))
     print(f"[Debug] MulticoreTSNE(perplexity={perplexity}, seed={seed})")
@@ -118,16 +138,18 @@ def run_umap(
     embedding_dir: str = "",
 ):
     n_neighbors = int(round(n_neighbors))
-    print(f"[Debug] UMAP(n_neighbors={n_neighbors}, min_dist={min_dist:.4f}, seed={seed})")
+    print(
+        f"[Debug] UMAP(n_neighbors={n_neighbors}, min_dist={min_dist:.4f}, seed={seed})"
+    )
 
     embedded_file_name = f"{embedding_dir}/{n_neighbors}_{min_dist:.4f}.z"
     if check_log and os.path.exists(embedded_file_name):
         print(f"[Debug] Reuse {embedded_file_name}")
         return joblib.load(embedded_file_name)
 
-    Z = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, random_state=seed).fit_transform(
-        X
-    )
+    Z = umap.UMAP(
+        n_neighbors=n_neighbors, min_dist=min_dist, random_state=seed
+    ).fit_transform(X)
     joblib.dump(Z, embedded_file_name)
     return Z
 
@@ -188,7 +210,9 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dataset_name", default="")
-    ap.add_argument("-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']")
+    ap.add_argument(
+        "-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']"
+    )
     ap.add_argument("-s", "--seed", default=42, type=int)
     ap.add_argument(
         "--perp_scale",
@@ -201,7 +225,10 @@ if __name__ == "__main__":
         help="min_dist scale, in ['log', 'linear', 'hardcoded']",
     )
     ap.add_argument(
-        "--n_perp", default=200, type=int, help="approximated number of perplexity to evaluate"
+        "--n_perp",
+        default=200,
+        type=int,
+        help="approximated number of perplexity to evaluate",
     )
     ap.add_argument(
         "--n_min_dist",
@@ -218,7 +245,9 @@ if __name__ == "__main__":
     dataset_name = args.dataset_name
     method_name = args.method_name
 
-    X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method="auto")
+    X_origin, X, labels = dataset.load_dataset(
+        dataset_name, preprocessing_method="auto"
+    )
 
     embedding_dir = f"./embeddings/{dataset_name}/{method_name}"
     plot_dir = f"./plots/{dataset_name}/{method_name}"
@@ -260,8 +289,12 @@ if __name__ == "__main__":
             min_dist_range=min_dist_range,
         )
         merge_embeddings(
-            method_name, perplexity_range=perplexity_range, min_dist_range=min_dist_range
+            method_name,
+            perplexity_range=perplexity_range,
+            min_dist_range=min_dist_range,
         )
 
     if args.debug and args.plot:
-        print("You wanna gen some plot for debug purpose?" "Consider using `plot_viz.py`.")
+        print(
+            "You wanna gen some plot for debug purpose?" "Consider using `plot_viz.py`."
+        )
