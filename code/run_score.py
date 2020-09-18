@@ -421,10 +421,13 @@ if __name__ == "__main__":
 
     if args.run_score_umap:
         # list min_dist values in log scale
-        start_min_dist, stop_min_dist = 0.001, 1.0
-        min_dist_range = utils.generate_value_range(
-            start_min_dist, stop_min_dist, range_type="log", num=10, dtype=float
-        )
+        # start_min_dist, stop_min_dist = 0.001, 1.0
+        # min_dist_range = utils.generate_value_range(
+        #     start_min_dist, stop_min_dist, range_type="log", num=10, dtype=float
+        # )
+
+        # 2020-09-18: hardcode list min_dist values
+        min_dist_range = [0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0]
         print(list(map("{:.4f}".format, min_dist_range)))
 
         run_all_score_umap(
