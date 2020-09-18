@@ -238,7 +238,7 @@ if __name__ == "__main__":
     if args.debug:
         min_dist_range = [0.1]
     elif args.min_dist_scale == "hardcoded":
-        min_dist_range = [0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0]
+        min_dist_range = [0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0]
     else:
         start_min_dist, stop_min_dist = 0.001, 1.0
         min_dist_range = utils.generate_value_range(
