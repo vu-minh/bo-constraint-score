@@ -459,7 +459,7 @@ def plot_prediction_density_2D(
     contour_cmap="gray",
     show_best_range=False,
 ):
-    plt.rcParams.update({"font.size": 16})
+    plt.rcParams.update({"font.size": 14})
 
     # plot contour/contourf guide:
     # https://matplotlib.org/3.1.1/gallery/images_contours_and_fields/irregulardatagrid.html#sphx-glr-gallery-images-contours-and-fields-irregulardatagrid-py
