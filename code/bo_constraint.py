@@ -5,7 +5,7 @@ from functools import partial
 import numpy as np
 
 from bayes_opt import BayesianOptimization
-from bayes_opt.observer import JSONLogger
+from bayes_opt.logger import JSONLogger
 from bayes_opt.event import Events
 
 import utils
@@ -115,16 +115,16 @@ def run_bo(
 
     # create BO object to find max of `target_func` in the domain of param `p`
     optimizer = BayesianOptimization(
-        f=target_func, pbounds=params_space, random_state=seed
+        f=target_func, pbounds=params_space, random_state=seed, verbose=2
     )
 
     # log the progress for plotting
     log_name = f"{util_func}_k{kappa}_xi{xi}_n{n_total_runs}"
     logger = JSONLogger(path=f"{log_dir}/{log_name}.json")
-    optimizer.subscribe(Events.OPTMIZATION_STEP, logger)
+    optimizer.subscribe(Events.OPTIMIZATION_STEP, logger)
 
     # specific params for GPs in BO: alpha controls noise level, default to 1e-10 (noise-free).
-    optimizer_params = dict(alpha=1e-5, n_restarts_optimizer=3, random_state=seed)
+    optimizer_params = dict(alpha=1e-3, n_restarts_optimizer=5, random_state=seed)
 
     optimizer.maximize(
         acq=util_func,
@@ -265,7 +265,7 @@ if __name__ == "__main__":
     ap.add_argument(
         "-x",
         "--xi",
-        default=0.025,
+        default=0.1,  # 0.025,
         type=float,
         help=(
             "For EI/POI, small(1e-4)->exploitation, large(1e-1)->exploration, default 0.025"
@@ -282,9 +282,10 @@ if __name__ == "__main__":
         ),
     )
     args = ap.parse_args()
+    print(args)
 
     # setup mlflow to trace the experiment
-    mlflow.set_experiment("BO-with-Constraint-Scores-v3")
+    mlflow.set_experiment("BO-with-Constraint-Scores-v4")
     for arg_key, arg_value in vars(args).items():
         mlflow.log_param(arg_key, arg_value)
 
@@ -300,11 +301,11 @@ if __name__ == "__main__":
 
     _, X, default_labels = dataset.load_dataset(
         # note COIL20 with UMAP now only run without PCA (pca=None)
+        # (to avoid problem with eigen solver used in UMAP)
         dataset_name,
         preprocessing_method="auto",
-        pca=0.9,
+        pca=0.9 if dataset_name != "COIL20" else None,
     )
-    # note: only with COIL dataset, use `pca=None`
 
     target_label_name = args.use_other_label
     if target_label_name is not None:
@@ -374,7 +375,7 @@ if __name__ == "__main__":
         #     min_val=0.001, max_val=1.0, range_type="log", num=10, dtype=float
         # )
         min_dist_range = [0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1]
-        list_min_dist_in_log_scale = np.log(min_dist_range)
+        list_min_dist_in_log_scale = np.array(min_dist_range)
 
         true_score = _calculate_score(
             method_name, list_perp_in_log_scale, embedding_dir=embedding_dir
