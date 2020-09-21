@@ -544,7 +544,7 @@ def plot_prediction_density_2D(
 
     ax.set_ylabel("min_dist in log-scale")
     ax.set_yscale("log", basey=np.e)
-    y_ticks = [0.001, 0.01, 0.1, 1.0]
+    y_ticks = [0.01, 0.1, 1.0]
     ax.set_yticks(
         y_ticks + ([] if round(best_min_dist, 2) in y_ticks else [best_min_dist] * 2)
     )
@@ -557,7 +557,7 @@ def plot_prediction_density_2D(
 
     # partial dependence: plot score by n_neighbors
     ax0 = plt.subplot(gs[0, 0], sharex=ax)
-    ax0.set_title("Score by n_neighbors")
+    ax0.set_title("Average score by n_neighbors")
     score_by_n_neighbors = Z.mean(axis=0)
     (plt_score_by_n_neighbors,) = ax0.plot(list_n_neigbors, score_by_n_neighbors)
     plt.setp(ax0.get_xticklabels(), visible=False)
@@ -575,7 +575,7 @@ def plot_prediction_density_2D(
 
     # partial dependence: plot score by min_dist
     ax1 = plt.subplot(gs[1, 1], sharey=ax)
-    ax1.set_title("Score by \n min_dist")
+    ax1.set_title("Average score \n by min_dist")
     score_by_min_dist = Z.mean(axis=1)
     (plt_score_by_min_dist,) = ax1.plot(score_by_min_dist, list_min_dist)
     plt.setp(ax1.get_yticklabels(), visible=False)
