@@ -246,7 +246,7 @@ def _scatter_with_colorbar_and_legend_size(
 
         # create "free" legend showing size of points by min_dist values for the first plot
         # (plot metamap by n_neighbors and min_dist values)
-        min_dist_vals = [1e-3, 0.1, 0.5, 1.0]
+        min_dist_vals = [0.01, 0.1, 0.5, 1.0]
         min_dist_shows = MinMaxScaler((30, 90)).fit_transform(
             np.array(min_dist_vals).reshape(-1, 1)
         )
@@ -261,7 +261,7 @@ def _scatter_with_colorbar_and_legend_size(
             labelspacing=0.25,
             title="min_dist",
             loc="lower center",
-            bbox_to_anchor=(0.825, 0.125),  # (0.5, -0.15),
+            bbox_to_anchor=(0.825, 0.02),  # (0.5, -0.15),
             ncol=1,  # len(min_dist_vals),
             fontsize=16,
             title_fontsize=16,
@@ -342,7 +342,7 @@ def meta_umap(X, meta_n_neighbors=15, cache=False, embedding_dir=""):
         Z = joblib.load(f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     else:
         Z = UMAP(
-            n_neighbors=meta_n_neighbors, min_dist=1.0, random_state=1234, verbose=1
+            n_neighbors=meta_n_neighbors, min_dist=0.5, random_state=1234, verbose=1
         ).fit_transform(X)
         joblib.dump(Z, f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     return Z
@@ -534,7 +534,8 @@ def plot_metamap_with_scores_umap(
             list_annotations.append((f"({chr(97 + i)})", n_neighbors, min_dist, *pos))
         else:
             print("Debug: params to show but not found: ", key)
-    annotate_selected_params_umap(axes[0], list_annotations)
+    if list_annotations:
+        annotate_selected_params_umap(axes[0], list_annotations)
 
     fig.tight_layout()
     plt.subplots_adjust(bottom=-0.05, top=0.98, left=0.01, right=0.99, wspace=0.05)
