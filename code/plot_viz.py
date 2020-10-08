@@ -261,7 +261,7 @@ def _scatter_with_colorbar_and_legend_size(
             labelspacing=0.25,
             title="min_dist",
             loc="lower center",
-            bbox_to_anchor=(0.825, 0.02),  # (0.5, -0.15),
+            bbox_to_anchor=(0.825, 0.01),  # (0.5, -0.15),
             ncol=1,  # len(min_dist_vals),
             fontsize=16,
             title_fontsize=16,
@@ -572,17 +572,22 @@ def annotate_selected_params_umap(ax, list_annotations):
     print(list_annotations)
     # an anotation is formated as "(a), n_neighbors, min_dist, pos[0], pos[1]"
     # sort by y coordinate
-    offset = 1.0 / len(list_annotations) + 0.1
+
+    # hard code text y-positions instead of auto-offset
+    text_y_positions = [0.3, 0.01, 0.8, 0.95]
+    # offset = 1.0 / (len(list_annotations) - 1)
+
     for i, (idx, n_neighbors, min_dist, pos_x, pos_y) in enumerate(
         sorted(list_annotations, key=lambda p: p[4])
     ):
         ax.scatter(pos_x, pos_y, marker="X", color="orange")
-        txt = f"{idx} ({n_neighbors},\n{min_dist:>6})"
+        txt = f"{idx} ({n_neighbors},{min_dist})"
         ax.annotate(
             txt,
             xy=(pos_x, pos_y),
             xycoords="data",
-            xytext=(0, min(i * offset, 0.9)),
+            # xytext=(0.01, 0.01 + min(i * offset, 0.9)),
+            xytext=(0.01, text_y_positions[i]),
             textcoords="axes fraction",
             arrowprops=dict(
                 arrowstyle="->",

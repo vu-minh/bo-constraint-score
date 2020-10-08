@@ -202,11 +202,7 @@ def get_config_labels_for_score_flexibility():
         "20NEWS5": {
             "tsne": {
                 "label1": ["cat", "Group by sub-categories", 114],  # 130
-                "label2": [
-                    "matcat",
-                    "Higher-level (semantic) categories",
-                    44,
-                ],
+                "label2": ["matcat", "Higher-level (semantic) categories", 44],
             },
             "umap": {
                 "label1": ["cat", "Group by sub-categories", "169_0.0010"],
@@ -322,19 +318,26 @@ def get_hyperparams_to_show(dataset_name, method_name):
                 (247, "--all"),
             ],
             "umap": [
-                # (11, 0.01, "++qij, -rnx"),
-                # (5, 0.4642, "-qij, ++rnx"),
-                # (102, 0.1, "--qij, +rnx"),
-                (20, 0.001, "++qij"),
-                (4, 0.2154, "++rnx"),
-                (67, 0.4642, "--qij, +rnx"),
-                # (8, 0.01, "~prediction, ++qij, =rnx"),
-                # # bo_constraint.py  --seed 2019 -d COIL20 -m umap -u ei -x 0.1 -nr 40 --run
-                # # (5, 0.01, "+qij, +rnx"),
-                # (4, 0.4642, "--qij, ++rnx"),
-                # (56, 0.1, "--qij, +rnx"),
-                # (300, 0.4642, "--all"),
-                (326, 0.2154, "--all"),
+                # # NOT USED
+                # # (11, 0.01, "++qij, -rnx"),
+                # # (5, 0.4642, "-qij, ++rnx"),
+                # # (102, 0.1, "--qij, +rnx"),
+                # # (8, 0.01, "~prediction, ++qij, =rnx"),
+                # # # bo_constraint.py  --seed 2019 -d COIL20 -m umap -u ei -x 0.1 -nr 40 --run
+                # # # (5, 0.01, "+qij, +rnx"),
+                # # (4, 0.4642, "--qij, ++rnx"),
+                # # (56, 0.1, "--qij, +rnx"),
+                # # (300, 0.4642, "--all"),
+                # # V1 (Neurocomp)
+                # (20, 0.001, "++qij"),
+                # (4, 0.2154, "++rnx"),
+                # (67, 0.4642, "--qij, +rnx"),
+                # (326, 0.2154, "--all"),
+                # V2 (IEEE-TAI)
+                (19, 0.025, "++qij"),
+                (4, 0.5, "++rnx"),
+                (67, 0.5, "--qij, +rnx"),
+                (326, 0.25, "--all"),
             ],
         },
         "NEURON_1K": {
