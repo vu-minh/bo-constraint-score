@@ -64,15 +64,12 @@ def _plot_best_param(ax, best_param_value, text_y_pos=0.0, text_align=None):
 
     # plot text for best param
     text_y_pos = ax.get_ylim()[0] + 0.1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
-    ax.text(
-        x=best_param_value,
-        y=text_y_pos,
-        ha="center",
-        s=best_param_value,
-    )
+    ax.text(x=best_param_value, y=text_y_pos, ha="center", s=best_param_value)
 
 
-def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0, best_param=None):
+def _plot_best_range(
+    ax, param_min, param_max, text_y_pos=0.0, best_param=None, show_annotation=False
+):
     ax.axvspan(param_min, param_max, alpha=0.12, color="orange")
 
     # vertical line on the left
@@ -106,16 +103,17 @@ def _plot_best_range(ax, param_min, param_max, text_y_pos=0.0, best_param=None):
     ax.text(x=param_max, y=text_y_pos, s=str(param_max), ha="left")
 
     # add text to show the best range on top right of figure
-    ax.text(
-        x=1.0,
-        y=1.065,
-        transform=ax.transAxes,
-        ha="right",
-        va="center",
-        s=f"[{param_min}, {param_max}]"
-        + ("" if best_param is None else f", ({best_param})"),
-        color="#0047BB",
-    )
+    if show_annotation:
+        ax.text(
+            x=1.0,
+            y=1.065,
+            transform=ax.transAxes,
+            ha="right",
+            va="center",
+            s=f"[{param_min}, {param_max}]"
+            + ("" if best_param is None else f", ({best_param})"),
+            color="#0047BB",
+        )
 
 
 def _plot_score_with_best_param_and_range(
@@ -130,7 +128,7 @@ def _plot_score_with_best_param_and_range(
     text_y_pos=0,
 ):
     # horizontal line to indicate top 96% highest score
-    ax.axhline(pivot, linestyle="--", alpha=0.4)
+    # ax.axhline(pivot, linestyle="--", alpha=0.4)
 
     # main line of mean_score with variance
     _plot_line_with_variance(ax, list_params, score_mean, score_sigma=score_sigma)
@@ -145,7 +143,7 @@ def _plot_score_with_best_param_and_range(
         )
     _plot_best_param(ax, param_best, text_y_pos, text_align)
 
-    # plot also the best param range (the top 96% scores)
+    # plot also the best param range (the top 95% scores)
     show_best_param_on_top = text_y_pos < 10
     _plot_best_range(
         ax,
@@ -166,6 +164,7 @@ def plot_scores(
     plot_dir="",
     compare_with_rnx=False,
     show_best_range=False,
+    show_hint_dataset_name=False,
 ):
     # prepare qij score data
     with open(f"{score_dir}/dof1.0_all.txt", "r") as in_file:
@@ -237,15 +236,16 @@ def plot_scores(
         # additional annotation for the first plot and the last plot
         if first_plot:
             # hint the dataset and method name
-            ax.text(
-                x=0.985,
-                y=0.865,
-                # s=f"{dataset_name}, {method_name}",
-                s=dataset_name,
-                transform=ax.transAxes,
-                ha="right",
-                bbox=dict(edgecolor="b", facecolor="w"),
-            )
+            if show_hint_dataset_name:
+                ax.text(
+                    x=0.985,
+                    y=0.865,
+                    # s=f"{dataset_name}, {method_name}",
+                    s=dataset_name,
+                    transform=ax.transAxes,
+                    ha="right",
+                    bbox=dict(edgecolor="b", facecolor="w"),
+                )
             if show_best_range:
                 # hint text for the top hightest scores horizontal line
                 ax.text(
@@ -351,11 +351,11 @@ def plot_bic_scores(
 def plot_compare_qij_rnx_bic(
     dataset_name,
     n_labels_each_class=10,
-    threshold=0.96,
+    threshold=0.95,
     param_name="",
     score_dir="",
     plot_dir="",
-    list_score_names=["Constraint score", "$AUC_{log}RNX$", "BIC"],
+    list_score_names=["$f_{score}$", "$AUC[RNX]$", "$BIC$"],
     show_range=False,
 ):
     # prepare subplots
@@ -366,13 +366,13 @@ def plot_compare_qij_rnx_bic(
         ax.set_title(title, loc="left")
 
         # prepare score data
-        if title == "BIC":
+        if title == "$BIC$":
             with open(f"{score_dir}/../bic/BIC.txt", "r") as in_file_bic:
                 bic_data = json.load(in_file_bic)
                 list_params = list(map(int, bic_data["list_params"]))
                 score_data = np.array(bic_data["bic"])
 
-        if title == "$AUC_{log}RNX$":
+        if title == "$AUC[RNX]$":
             with open(f"{score_dir}/../metrics/metrics.txt", "r") as in_file_metric:
                 metrics_data = json.load(in_file_metric)
                 list_params = list(map(int, metrics_data["list_params"]))
@@ -387,7 +387,7 @@ def plot_compare_qij_rnx_bic(
                 score_data = np.mean(all_scores[str(n_labels_each_class)], axis=0)
 
         # find best param range
-        if title == "BIC":  # need to find the min
+        if title == "$BIC$":  # need to find the min
             pivot = (1.0 + (1.0 - threshold)) * min(score_data)
             (best_indices,) = np.where(score_data < pivot)
             param_best = list_params[np.argmin(score_data)]
@@ -437,7 +437,7 @@ def plot_compare_qij_rnx_bic(
 
     fig.tight_layout()
     fig.subplots_adjust(hspace=0.4, top=0.96, bottom=0.075, left=0.15, right=0.94)
-    fig.savefig(f"{plot_dir}/plot_compare.pdf")
+    fig.savefig(f"{plot_dir}/plot_compare{'_with_range' if show_range else ''}.pdf")
     plt.close(fig)
 
 

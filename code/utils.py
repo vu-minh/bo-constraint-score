@@ -161,7 +161,7 @@ def get_score_display_name(score_name):
         "qij": "$f_{score}$",
         "qij_score": "$f_{score}$",
         "f_score": "$f_{score}$",
-        "auc_rnx": "$AUC_{log}RNX$",
+        "auc_rnx": "$AUC[RNX]$",
         "bic": "BIC-based score",
     }.get(score_name, score_name)
 

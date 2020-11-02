@@ -412,7 +412,8 @@ def plot_density_2D(
 
     if ax is None or fig is None:
         fig, ax = plt.subplots(1, 1, figsize=(12, 4.5))
-    ax.set_title(f"[{dataset_name}] {title}", fontsize=22)
+    # ax.set_title(f"[{dataset_name}] {title}", fontsize=22)
+    ax.set_title(f"{title}\t{dataset_name}", loc="left", fontsize=22)
 
     # contour for score
     ax.contour(X, Y, Z, levels=contour_levels, linewidths=0.25, colors="#696969")
@@ -436,7 +437,15 @@ def plot_density_2D(
     ax.set_xticks(np.append(ax.get_xticks(), [best_n_neighbors] * 4))
 
     # plot best param
-    ax.plot(best_n_neighbors, best_min_dist, "s", c="orange")
+    ax.plot(
+        best_n_neighbors,
+        best_min_dist,
+        "s",
+        c="black",
+        markeredgecolor="orange",
+        markeredgewidth=2.5,
+        markersize=8.5,
+    )
 
     # make the border grey
     utils.change_border(ax, width=0.1, color="0.5", hide_axis=False)
@@ -520,7 +529,7 @@ def plot_prediction_density_2D(
         np.exp(X_obs[:, 0]),
         c=y_obs,
         cmap=contour_cmap,
-        edgecolors="white",
+        edgecolors="#1f77b4",  # "white",
     )
 
     # evaluate the correctness of the viz by evaluating the corresponding color
@@ -533,8 +542,15 @@ def plot_prediction_density_2D(
     best_min_dist = np.exp(best_param["min_dist"])
 
     # plot best param
-    ax.plot(best_n_neighbors, best_min_dist, marker="s", color="orange", markersize=8)
-
+    ax.plot(
+        best_n_neighbors,
+        best_min_dist,
+        marker="s",
+        color="black",
+        markeredgecolor="orange",
+        markeredgewidth=2.5,
+        markersize=8.5,
+    )
     # custom axes: show ticks values in log scale, add best param indicator
     ax.set_xlabel("n_neighbors in log-scale")
     ax.set_xscale("log", basex=np.e)

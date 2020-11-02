@@ -362,7 +362,7 @@ def plot_metamap_with_scores_tsne(
     ScoreConfig = namedtuple("ScoreConfig", ["score_name", "score_title", "score_cmap"])
     score_config = [
         ScoreConfig("qij", "$f_{score}$", "Greens"),
-        ScoreConfig("rnx", "$AUC_{log}RNX$", "Blues"),
+        ScoreConfig("rnx", "$AUC[RNX]$", "Blues"),
         ScoreConfig("bic", "BIC-based score", "Purples_r"),
         ScoreConfig("perplexity", "Perplexity in log-scale", "bone"),
     ]  # perplexity should be in the last of this list, since we have to get list_params first
@@ -485,7 +485,7 @@ def plot_metamap_with_scores_umap(
             "n_neighbors", "n_neighbors in log-scale", "bone", np.log(list_n_neighbors)
         ),
         ScoreConfig("qij", "$f_{score}$ values in log-scale", "Greens", qij_scores),
-        ScoreConfig("rnx", "$AUC_{log}RNX$ values in log-scale", "Blues", rnx_scores),
+        ScoreConfig("rnx", "$AUC[RNX]$ values in log-scale", "Blues", rnx_scores),
     ]
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 6))

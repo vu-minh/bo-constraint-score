@@ -467,7 +467,7 @@ if __name__ == "__main__":
                 "Plot compare only for tsne."
                 "If want to compare for umap (contour plot), see bo_plot.py"
             )
-        list_score_names = ["$f_{score}$", "$AUC_{log}RNX$", "BIC"]
+        list_score_names = ["$f_{score}$", "$AUC[RNX]$", "$BIC$"]
         plot_compare_qij_rnx_bic(
             dataset_name,
             n_labels_each_class=10,
@@ -476,6 +476,7 @@ if __name__ == "__main__":
             score_dir=score_dir,
             plot_dir=plot_dir,
             list_score_names=list_score_names,
+            show_range=True,
         )
         sys.exit(0)
 
