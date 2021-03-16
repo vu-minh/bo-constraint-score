@@ -199,7 +199,7 @@ fi
 
 ###############################################################################
 # PLOT SCORE FLEXIBILITY
-# Fig.5: Score flexibility for 3 datasets: NEURON_1K, FASH_MOBI, 5NEWS
+# Fig.5: Score flexibility for 3 datasets: NEURON_1K, FASHION_MOBILENET, 20NEWS5
 # Only use method_name (-m) tsne
 #       python3 plot_viz.py -d NEURON_1K -m tsne --plot_score_flexibility
 

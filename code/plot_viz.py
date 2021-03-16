@@ -34,17 +34,9 @@ def plot_2_labels(Z, labels, other_labels, out_name, title1="", title2=""):
 
 
 def plot_test_vis(
-    X,
-    dataset_name,
-    plot_dir="",
-    embedding_dir="",
-    labels=None,
-    other_labels=None,
-    debug=False,
+    X, dataset_name, plot_dir="", embedding_dir="", labels=None, other_labels=None, debug=False,
 ):
-    other_labels, des = dataset.load_additional_labels(
-        dataset_name, label_name="class_matcat"
-    )
+    other_labels, des = dataset.load_additional_labels(dataset_name, label_name="class_matcat")
     print(des)
 
     list_min_dist = [0.001, 0.01, 0.1, 0.5, 1.0]
@@ -77,13 +69,7 @@ def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=False):
     ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap="Spectral", s=6)
     # ax.set_title(title, loc="center")
     ax.text(
-        x=1.0,
-        y=0.0,
-        s=comment,
-        transform=ax.transAxes,
-        ha="right",
-        va="bottom",
-        fontsize=14,
+        x=1.0, y=0.0, s=comment, transform=ax.transAxes, ha="right", va="bottom", fontsize=14,
     )
     if axis_off:
         ax.axis("off")
@@ -149,13 +135,7 @@ def _simple_scatter_with_colorbar(
         norm=norm,
     )
     ax.text(
-        x=0.5,
-        y=-0.2,
-        s=title,
-        transform=ax.transAxes,
-        va="bottom",
-        ha="center",
-        fontsize=18,
+        x=0.5, y=-0.2, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18,
     )
 
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal")
@@ -193,9 +173,7 @@ def _scatter_with_colorbar_and_legend_size(
     if best_indices is not None:
         # color metamap by score values
         if best_idx is not None:
-            ax.scatter(
-                *Z[best_idx], c="red", marker="X", s=2 * sizes[best_idx], zorder=100
-            )
+            ax.scatter(*Z[best_idx], c="red", marker="X", s=2 * sizes[best_idx], zorder=100)
 
         print("Z: ", Z.shape)
         highlight_mask = np.isin(np.arange(len(Z)), best_indices)
@@ -252,9 +230,7 @@ def _scatter_with_colorbar_and_legend_size(
         )
 
         for min_dist_val, min_dist_show in zip(min_dist_vals, min_dist_shows.ravel()):
-            ax.scatter(
-                [], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val)
-            )
+            ax.scatter([], [], c="k", alpha=0.5, s=min_dist_show, label=str(min_dist_val))
         ax.legend(
             scatterpoints=1,
             frameon=True,
@@ -269,13 +245,7 @@ def _scatter_with_colorbar_and_legend_size(
 
     # plot title of colorbar
     ax.text(
-        x=0.5,
-        y=-0.085,
-        s=title,
-        transform=ax.transAxes,
-        va="bottom",
-        ha="center",
-        fontsize=18,
+        x=0.5, y=-0.085, s=title, transform=ax.transAxes, va="bottom", ha="center", fontsize=18,
     )
     cb = plt.colorbar(scatter, ax=ax, orientation="horizontal", pad=0.075)
 
@@ -342,7 +312,7 @@ def meta_umap(X, meta_n_neighbors=15, cache=False, embedding_dir=""):
         Z = joblib.load(f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     else:
         Z = UMAP(
-            n_neighbors=meta_n_neighbors, min_dist=0.5, random_state=1234, verbose=1
+            n_neighbors=meta_n_neighbors, min_dist=0.5, random_state=42, verbose=1
         ).fit_transform(X)
         joblib.dump(Z, f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     return Z
@@ -392,7 +362,7 @@ def plot_metamap_with_scores_tsne(
         if score_name == "perplexity":
             best_indices, best_idx = None, None
         else:
-            # UPDATE 03/02: Get top 10$ highest scores
+            # UPDATE 03/02: Get top 10% highest scores
             if score_name == "bic":
                 # pivot = (1.0 + (1.0 - threshold)) * min(scores)
                 # (best_indices,) = np.where(scores < pivot)
@@ -402,9 +372,7 @@ def plot_metamap_with_scores_tsne(
                 # pivot = threshold * scores.max()
                 # (best_indices,) = np.where(scores > pivot)
                 best_idx = int(np.argmax(scores))
-                best_indices = np.argsort(scores)[::-1][
-                    : int(top_percent / 100 * len(scores))
-                ]
+                best_indices = np.argsort(scores)[::-1][: int(top_percent / 100 * len(scores))]
             print("\n[DEBUG]", len(scores), len(best_indices))
             print("[DEBUG] best perplexity: ", score_name, perp_values[best_idx])
 
@@ -548,9 +516,7 @@ def annotate_selected_params_tsne(ax, list_annotations):
     offset = 1.0 / len(list_annotations)
     # an anotation is formated as "(a) perplexity, x=pos[0], y=pos[1]"
     # sort by x coordinate
-    for i, (perp_val, pos_x, pos_y) in enumerate(
-        sorted(list_annotations, key=lambda p: p[1])
-    ):
+    for i, (perp_val, pos_x, pos_y) in enumerate(sorted(list_annotations, key=lambda p: p[1])):
         ax.scatter(pos_x, pos_y, marker="X", color="orange", s=60)
         ax.annotate(
             str(perp_val),
@@ -599,9 +565,7 @@ def annotate_selected_params_umap(ax, list_annotations):
         )
 
 
-def plot_samples(
-    dataset_name, data, plot_dir="", n_samples=4, transpose=False, cmap="gray"
-):
+def plot_samples(dataset_name, data, plot_dir="", n_samples=4, transpose=False, cmap="gray"):
     img_size = int(math.sqrt(data.shape[1]))
     fig, axes = plt.subplots(1, n_samples, figsize=(n_samples, 1.0))
     for i, ax in enumerate(axes.ravel()):
@@ -618,17 +582,12 @@ def plot_samples(
 
 
 def plot_viz_with_score_flexibility(
-    dataset_name,
-    method_name,
-    config_label1,
-    config_label2,
-    plot_dir="",
-    embedding_dir="",
+    dataset_name, method_name, config_label1, config_label2, plot_dir="", embedding_dir="",
 ):
     label_name1, title1, best_param1, labels1, label_names1 = config_label1
     label_name2, title2, best_param2, labels2, label_names2 = config_label2
 
-    fig, [[ax0, ax1], [ax2, ax3]] = plt.subplots(2, 2, figsize=(8, 9.5))
+    fig, [[ax0, ax1], [ax2, ax3]] = plt.subplots(2, 2, figsize=(10.6, 13))
     sub_text = [
         [f"Best perplexity {best_param1}", f"Best perplexity {best_param1}"],
         [f"Best perplexity {best_param2}", f"Best perplexity {best_param2}"],
@@ -640,25 +599,19 @@ def plot_viz_with_score_flexibility(
         Z = joblib.load(f"{embedding_dir}/{best_param}.z")
 
         # ax_lbl1.set_title(title1)
-        s1 = ax_lbl1.scatter(
-            Z[:, 0], Z[:, 1], s=6, c=labels1, alpha=0.7, cmap="Spectral"
-        )
-        ax_lbl1.text(
-            0.98, 0.02, t1, transform=ax_lbl1.transAxes, fontsize=16, ha="right"
-        )
+        s1 = ax_lbl1.scatter(Z[:, 0], Z[:, 1], s=6, c=labels1, alpha=0.7, cmap="Spectral")
+        ax_lbl1.text(0.96, 0.04, t1, transform=ax_lbl1.transAxes, fontsize=24, ha="right")
 
         # ax_lbl2.set_title(title2)
         s2 = ax_lbl2.scatter(Z[:, 0], Z[:, 1], s=6, c=labels2, alpha=0.7, cmap="Paired")
-        ax_lbl2.text(
-            0.98, 0.02, t2, transform=ax_lbl2.transAxes, fontsize=16, ha="right"
-        )
+        ax_lbl2.text(0.96, 0.04, t2, transform=ax_lbl2.transAxes, fontsize=24, ha="right")
 
     for ax in [ax0, ax1, ax2, ax3]:
         change_border(ax, width=0.1, color="0.5")
         # ax.set_aspect("equal")
 
     # legend
-    num_cols_in_legend = {"20NEWS5": 3, "FASHION_MOBILENET": 4, "NEURON_1K": 6}.get(
+    num_cols_in_legend = {"20NEWS5": 3, "FASHION_MOBILENET": 4, "NEURON_1K": 3}.get(
         dataset_name, 6
     )
 
@@ -669,12 +622,15 @@ def plot_viz_with_score_flexibility(
         handles1,
         label_names1,
         fancybox=True,
-        loc="upper left",
-        bbox_to_anchor=(0.0, 1.3),
+        loc="upper center",
+        bbox_to_anchor=(1.04, 1.35),
         borderaxespad=0.1,
         ncol=min(num_cols_in_legend, len(label_names1)),
         title=title1,
-        fontsize="small",
+        fontsize=22,
+        title_fontsize=24,
+        markerscale=2.5,
+        handletextpad=0.0,
     )
 
     if label_names2 is None:
@@ -684,12 +640,15 @@ def plot_viz_with_score_flexibility(
         handles2,
         label_names2,
         fancybox=True,
-        loc="lower left",
-        bbox_to_anchor=(0, -0.2),
+        loc="lower center",
+        bbox_to_anchor=(1.04, -0.25),
         borderaxespad=0.1,
         ncol=min(4, len(label_names2)),
         title=title2,
-        fontsize="small",
+        fontsize=22,
+        title_fontsize=24,
+        markerscale=2.5,
+        handletextpad=0.05,
     )
 
     fig.tight_layout()  # (pad=0.4, w_pad=0.2, h_pad=1.0)
@@ -707,9 +666,7 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dataset_name", default="")
-    ap.add_argument(
-        "-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']"
-    )
+    ap.add_argument("-m", "--method_name", default="umap", help="['tsne', 'umap', 'largevis']")
     # ap.add_argument("-s", "--seed", default=42, type=int)
     ap.add_argument("--use_other_label", default=None)
     ap.add_argument("--plot_test_vis", action="store_true")
@@ -727,15 +684,11 @@ if __name__ == "__main__":
     # print(get_hyperparams_to_show(dataset_name, method_name))
     # sys.exit(0)
 
-    X_origin, X, labels = dataset.load_dataset(
-        dataset_name, preprocessing_method="auto"
-    )
+    X_origin, X, labels = dataset.load_dataset(dataset_name, preprocessing_method="auto")
 
     other_label_name = args.use_other_label
     if other_label_name is not None:
-        other_labels, des = dataset.load_additional_labels(
-            dataset_name, other_label_name
-        )
+        other_labels, des = dataset.load_additional_labels(dataset_name, other_label_name)
         if labels is None:
             raise ValueError("Fail to load additional labels: " + des)
         print("Using additional labels: ", other_label_name)
@@ -786,9 +739,7 @@ if __name__ == "__main__":
             plot_dir=f"./plots/{dataset_name}",
             n_samples=n_samples,
             transpose={"COIL20": True}.get(dataset_name, False),
-            cmap={"FASHION1000": "gray_r", "DIGITS": "gray_r"}.get(
-                dataset_name, "gray"
-            ),
+            cmap={"FASHION1000": "gray_r", "DIGITS": "gray_r"}.get(dataset_name, "gray"),
         )
 
     if args.plot_score_flexibility:
@@ -805,7 +756,19 @@ if __name__ == "__main__":
 
         # hard-coded to fix custom labels of NEURON_1K dataset
         if dataset_name == "NEURON_1K":
+            label_names1 = [f"Cluste {i}" for i in range(1, 7)]
             label_names2 = config["label2_correct"]
+        # hard-coded: fix too long label name
+        if dataset_name == "20NEWS5":
+            for i in range(len(label_names1)):
+                if label_names1[i] == "comp.sys.mac.hardware":
+                    label_names1[i] = "mac.hardware"
+            names2 = {
+                "comp": "Computer",
+                "rec": "Sportive records",
+                "sci": "Science",
+            }
+            label_names2 = [names2[c] for c in label_names2]
 
         config_label1 += [labels1, label_names1]
         config_label2 += [labels2, label_names2]
