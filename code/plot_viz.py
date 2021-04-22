@@ -291,6 +291,44 @@ def show_viz_grid(
     plt.close()
 
 
+def show_viz_grid_zoom_in(
+    dataset_name,
+    method_name,
+    labels=None,
+    plot_dir="",
+    embedding_dir="",
+    list_params=[],
+    show_comment=True,
+):
+    n_rows, n_cols = 1, 2
+    fig, [ax0, ax1] = plt.subplots(n_rows, n_cols, figsize=(n_cols * 2.5, n_rows * 2.75))
+
+    # params = list_params[0][0:2]
+    # print("PARAMS: ", params)
+    # param_key = f"{params[0]}_{params[1]:.4f}"
+    # print("PARAM KEY: ", param_key)
+    param_key = "19_0.0276"
+    Z = joblib.load(f"{embedding_dir}/{param_key}.z")
+    ax0.scatter(*Z.T, c=labels, s=16, alpha=0.3, cmap="Spectral")
+
+    zone1 = {"xlim": (-10, -7), "ylim": (3.5, 6.5)}
+
+    mask1 = (zone1["xlim"][0] <= Z[:, 0]) & (Z[:, 0] <= zone1["xlim"][1])
+    mask2 = (zone1["ylim"][0] <= Z[:, 1]) & (Z[:, 1] <= zone1["ylim"][1])
+
+    Za, Ya = Z[mask1 & mask2], labels[mask1 & mask2]
+    ax1.scatter(*Za.T, c=Ya, s=8, alpha=0.5)
+
+    ax1.set_xlim(*zone1["xlim"])
+    ax1.set_ylim(*zone1["ylim"])
+    ax0.indicate_inset_zoom(ax1)
+
+    fig.tight_layout()
+    # fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.1, top=0.98)
+    fig.savefig(f"{plot_dir}/show_zoom_in.png")
+    plt.close()
+
+
 def meta_tsne(X, meta_perplexity=30, cache=False, embedding_dir=""):
     if cache:
         Z = joblib.load(f"{embedding_dir}/metamap{meta_perplexity}.z")
@@ -708,7 +746,7 @@ if __name__ == "__main__":
     if args.show_viz_grid:
         plt.rcParams.update({"font.size": 10})
         list_params = get_hyperparams_to_show(dataset_name, method_name)
-        show_viz_grid(
+        show_viz_grid_zoom_in(
             dataset_name,
             method_name,
             labels,
