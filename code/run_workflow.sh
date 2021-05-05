@@ -181,7 +181,7 @@ fi
 
 ###############################################################################
 # PLOT COMPARE F-SCORE, AUC[RNX], BIC for TSNE (Sec.6)
-# Fig.4 compare 3 scores for tsne (Sec.6.1)
+# Fig.6 compare 3 scores for tsne (Sec.6.1)
 # Repeat for other datasets. Edit run_score.py L497 for show_range
 #       python3 run_score.py -d DIGITS -m tsne --plot-compare
 

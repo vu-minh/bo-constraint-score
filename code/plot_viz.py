@@ -644,13 +644,13 @@ def plot_viz_with_score_flexibility(
             Z[:, 0], Z[:, 1], s=6, c=labels1, alpha=0.7, cmap="Spectral"
         )
         ax_lbl1.text(
-            0.98, 0.02, t1, transform=ax_lbl1.transAxes, fontsize=16, ha="right"
+            0.98, 0.02, t1, transform=ax_lbl1.transAxes, fontsize=18, ha="right"
         )
 
         # ax_lbl2.set_title(title2)
         s2 = ax_lbl2.scatter(Z[:, 0], Z[:, 1], s=6, c=labels2, alpha=0.7, cmap="Paired")
         ax_lbl2.text(
-            0.98, 0.02, t2, transform=ax_lbl2.transAxes, fontsize=16, ha="right"
+            0.98, 0.02, t2, transform=ax_lbl2.transAxes, fontsize=18, ha="right"
         )
 
     for ax in [ax0, ax1, ax2, ax3]:
@@ -674,7 +674,7 @@ def plot_viz_with_score_flexibility(
         borderaxespad=0.1,
         ncol=min(num_cols_in_legend, len(label_names1)),
         title=title1,
-        fontsize="small",
+        # fontsize="small",
     )
 
     if label_names2 is None:
@@ -689,14 +689,14 @@ def plot_viz_with_score_flexibility(
         borderaxespad=0.1,
         ncol=min(4, len(label_names2)),
         title=title2,
-        fontsize="small",
+        # fontsize="small",
     )
 
     fig.tight_layout()  # (pad=0.4, w_pad=0.2, h_pad=1.0)
     # This works for NEURON_1K
     # plt.subplots_adjust(wspace=0.02, hspace=0.02, left=0.01, right=0.99)
     plt.subplots_adjust(wspace=0.05, hspace=0.02, left=0.02, right=0.98)
-    fig.savefig(f"{plot_dir}/score_flexibility.pdf")
+    fig.savefig(f"{plot_dir}/score_flexibility.png")
     plt.close(fig)
 
 
