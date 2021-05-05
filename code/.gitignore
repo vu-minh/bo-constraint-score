@@ -8,6 +8,7 @@ run_score.py.lprof
 data
 embeddings
 embeddings_old
+embeddings_nonPCA
 logs
 logs_old
 mlruns

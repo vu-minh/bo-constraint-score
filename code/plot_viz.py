@@ -321,6 +321,46 @@ def show_viz_grid(
     plt.close()
 
 
+def show_viz_grid_zoom_in(
+    dataset_name,
+    method_name,
+    labels=None,
+    plot_dir="",
+    embedding_dir="",
+    list_params=[],
+    show_comment=True,
+):
+    n_rows, n_cols = 1, 2
+    fig, [ax0, ax1] = plt.subplots(
+        n_rows, n_cols, figsize=(n_cols * 2.5, n_rows * 2.75)
+    )
+
+    # params = list_params[0][0:2]
+    # print("PARAMS: ", params)
+    # param_key = f"{params[0]}_{params[1]:.4f}"
+    # print("PARAM KEY: ", param_key)
+    param_key = "19_0.0276"
+    Z = joblib.load(f"{embedding_dir}/{param_key}.z")
+    ax0.scatter(*Z.T, c=labels, s=16, alpha=0.3, cmap="Spectral")
+
+    zone1 = {"xlim": (-10, -7), "ylim": (3.5, 6.5)}
+
+    mask1 = (zone1["xlim"][0] <= Z[:, 0]) & (Z[:, 0] <= zone1["xlim"][1])
+    mask2 = (zone1["ylim"][0] <= Z[:, 1]) & (Z[:, 1] <= zone1["ylim"][1])
+
+    Za, Ya = Z[mask1 & mask2], labels[mask1 & mask2]
+    ax1.scatter(*Za.T, c=Ya, s=8, alpha=0.5)
+
+    ax1.set_xlim(*zone1["xlim"])
+    ax1.set_ylim(*zone1["ylim"])
+    ax0.indicate_inset_zoom(ax1)
+
+    fig.tight_layout()
+    # fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.1, top=0.98)
+    fig.savefig(f"{plot_dir}/show_zoom_in.png")
+    plt.close()
+
+
 def meta_tsne(X, meta_perplexity=30, cache=False, embedding_dir=""):
     if cache:
         Z = joblib.load(f"{embedding_dir}/metamap{meta_perplexity}.z")
@@ -342,7 +382,7 @@ def meta_umap(X, meta_n_neighbors=15, cache=False, embedding_dir=""):
         Z = joblib.load(f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     else:
         Z = UMAP(
-            n_neighbors=meta_n_neighbors, min_dist=0.5, random_state=1234, verbose=1
+            n_neighbors=meta_n_neighbors, min_dist=0.5, random_state=42, verbose=1
         ).fit_transform(X)
         joblib.dump(Z, f"{embedding_dir}/metamap{meta_n_neighbors}.z")
     return Z
@@ -392,7 +432,7 @@ def plot_metamap_with_scores_tsne(
         if score_name == "perplexity":
             best_indices, best_idx = None, None
         else:
-            # UPDATE 03/02: Get top 10$ highest scores
+            # UPDATE 03/02: Get top 10% highest scores
             if score_name == "bic":
                 # pivot = (1.0 + (1.0 - threshold)) * min(scores)
                 # (best_indices,) = np.where(scores < pivot)
@@ -628,7 +668,7 @@ def plot_viz_with_score_flexibility(
     label_name1, title1, best_param1, labels1, label_names1 = config_label1
     label_name2, title2, best_param2, labels2, label_names2 = config_label2
 
-    fig, [[ax0, ax1], [ax2, ax3]] = plt.subplots(2, 2, figsize=(8, 9.5))
+    fig, [[ax0, ax1], [ax2, ax3]] = plt.subplots(2, 2, figsize=(10.6, 13))
     sub_text = [
         [f"Best perplexity {best_param1}", f"Best perplexity {best_param1}"],
         [f"Best perplexity {best_param2}", f"Best perplexity {best_param2}"],
@@ -644,13 +684,13 @@ def plot_viz_with_score_flexibility(
             Z[:, 0], Z[:, 1], s=6, c=labels1, alpha=0.7, cmap="Spectral"
         )
         ax_lbl1.text(
-            0.98, 0.02, t1, transform=ax_lbl1.transAxes, fontsize=18, ha="right"
+            0.96, 0.04, t1, transform=ax_lbl1.transAxes, fontsize=24, ha="right"
         )
 
         # ax_lbl2.set_title(title2)
         s2 = ax_lbl2.scatter(Z[:, 0], Z[:, 1], s=6, c=labels2, alpha=0.7, cmap="Paired")
         ax_lbl2.text(
-            0.98, 0.02, t2, transform=ax_lbl2.transAxes, fontsize=18, ha="right"
+            0.96, 0.04, t2, transform=ax_lbl2.transAxes, fontsize=24, ha="right"
         )
 
     for ax in [ax0, ax1, ax2, ax3]:
@@ -658,7 +698,7 @@ def plot_viz_with_score_flexibility(
         # ax.set_aspect("equal")
 
     # legend
-    num_cols_in_legend = {"20NEWS5": 3, "FASHION_MOBILENET": 4, "NEURON_1K": 6}.get(
+    num_cols_in_legend = {"20NEWS5": 3, "FASHION_MOBILENET": 4, "NEURON_1K": 3}.get(
         dataset_name, 6
     )
 
@@ -669,12 +709,15 @@ def plot_viz_with_score_flexibility(
         handles1,
         label_names1,
         fancybox=True,
-        loc="upper left",
-        bbox_to_anchor=(0.0, 1.3),
+        loc="upper center",
+        bbox_to_anchor=(1.04, 1.35),
         borderaxespad=0.1,
         ncol=min(num_cols_in_legend, len(label_names1)),
         title=title1,
-        # fontsize="small",
+        fontsize=22,
+        title_fontsize=24,
+        markerscale=2.5,
+        handletextpad=0.0,
     )
 
     if label_names2 is None:
@@ -684,12 +727,15 @@ def plot_viz_with_score_flexibility(
         handles2,
         label_names2,
         fancybox=True,
-        loc="lower left",
-        bbox_to_anchor=(0, -0.2),
+        loc="lower center",
+        bbox_to_anchor=(1.04, -0.25),
         borderaxespad=0.1,
         ncol=min(4, len(label_names2)),
         title=title2,
-        # fontsize="small",
+        fontsize=22,
+        title_fontsize=24,
+        markerscale=2.5,
+        handletextpad=0.05,
     )
 
     fig.tight_layout()  # (pad=0.4, w_pad=0.2, h_pad=1.0)
@@ -755,7 +801,7 @@ if __name__ == "__main__":
     if args.show_viz_grid:
         plt.rcParams.update({"font.size": 10})
         list_params = get_hyperparams_to_show(dataset_name, method_name)
-        show_viz_grid(
+        show_viz_grid_zoom_in(
             dataset_name,
             method_name,
             labels,
@@ -805,7 +851,19 @@ if __name__ == "__main__":
 
         # hard-coded to fix custom labels of NEURON_1K dataset
         if dataset_name == "NEURON_1K":
+            label_names1 = [f"Cluste {i}" for i in range(1, 7)]
             label_names2 = config["label2_correct"]
+        # hard-coded: fix too long label name
+        if dataset_name == "20NEWS5":
+            for i in range(len(label_names1)):
+                if label_names1[i] == "comp.sys.mac.hardware":
+                    label_names1[i] = "mac.hardware"
+            names2 = {
+                "comp": "Computer",
+                "rec": "Sportive records",
+                "sci": "Science",
+            }
+            label_names2 = [names2[c] for c in label_names2]
 
         config_label1 += [labels1, label_names1]
         config_label2 += [labels2, label_names2]
