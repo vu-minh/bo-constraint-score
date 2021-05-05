@@ -330,34 +330,76 @@ def show_viz_grid_zoom_in(
     list_params=[],
     show_comment=True,
 ):
-    n_rows, n_cols = 1, 2
-    fig, [ax0, ax1] = plt.subplots(
-        n_rows, n_cols, figsize=(n_cols * 2.5, n_rows * 2.75)
+    if method_name == "umap":
+        show_viz_grid_zoom_in_umap(
+            labels, plot_dir, embedding_dir, list_params, show_comment
+        )
+
+
+def _scatter_with_zoom_in(
+    Z, labels, ax_main, axes_zoom, zone_limits, title="with_zoom", images=None
+):
+    ax_main.scatter(*Z.T, c=labels, s=16, alpha=0.3, cmap="tab20")
+
+    for ax_zoom, zone_limit in zip(axes_zoom, zone_limits):
+        mask1 = (zone_limit["xlim"][0] <= Z[:, 0]) & (Z[:, 0] <= zone_limit["xlim"][1])
+        mask2 = (zone_limit["ylim"][0] <= Z[:, 1]) & (Z[:, 1] <= zone_limit["ylim"][1])
+
+        Za, Ya = Z[mask1 & mask2], labels[mask1 & mask2]
+        ax_zoom.scatter(*Za.T, c=Ya, s=8, alpha=0.5)
+
+        ax_zoom.set_xlim(*sorted(zone_limit["xlim"]))
+        ax_zoom.set_ylim(*sorted(zone_limit["ylim"]))
+        ax_main.indicate_inset_zoom(ax_zoom)
+
+
+def show_viz_grid_zoom_in_umap(
+    labels=None,
+    plot_dir="",
+    embedding_dir="",
+    list_params=[],
+    show_comment=True,
+):
+    fig = plt.figure(figsize=(12, 7))
+    gs = fig.add_gridspec(nrows=4, ncols=3)
+
+    # axes for main plots
+    ax_a, ax_b = fig.add_subplot(gs[:2, 0]), fig.add_subplot(gs[2:, 0])
+    ax_c, ax_d = fig.add_subplot(gs[:2, -1]), fig.add_subplot(gs[2:, -1])
+    all_main_axes = (ax_a, ax_b, ax_c, ax_d)
+
+    # axes for zoom, only for plot (a) and (b). Each plot has 2 zooms
+    ax_a1, ax_a2 = fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[1, 1])
+    ax_b1, ax_b2 = fig.add_subplot(gs[2, 1]), fig.add_subplot(gs[3, 1])
+    all_zoom_axes = ([ax_a1, ax_a2], [ax_b1, ax_b2], None, None)
+
+    all_zoom_limits = (
+        [{"xlim": (-13, -9), "ylim": (5.5, 8)}, {"xlim": (3, 8), "ylim": (-12, -8)}],
+        [{"xlim": (4, 12), "ylim": (6, 12)}, {"xlim": (5, 15), "ylim": (-7, -1)}],
+        None,
+        None,
     )
 
-    # params = list_params[0][0:2]
-    # print("PARAMS: ", params)
-    # param_key = f"{params[0]}_{params[1]:.4f}"
-    # print("PARAM KEY: ", param_key)
-    param_key = "19_0.0276"
-    Z = joblib.load(f"{embedding_dir}/{param_key}.z")
-    ax0.scatter(*Z.T, c=labels, s=16, alpha=0.3, cmap="Spectral")
+    for i, (params, ax_main, axes_zoom, zoom_limits) in enumerate(
+        zip(list_params, all_main_axes, all_zoom_axes, all_zoom_limits)
+    ):
+        param_key = f"{params[0]}_{params[1]:.4f}"
+        param_explanation = f"({chr(97+i)}) ({params[0]}, {params[1]})"
+        comment = f"{params[-1]}" if show_comment else ""
+        Z = joblib.load(f"{embedding_dir}/{param_key}.z")
 
-    zone1 = {"xlim": (-10, -7), "ylim": (3.5, 6.5)}
+        if axes_zoom is not None:
+            _scatter_with_zoom_in(
+                Z, labels, ax_main, axes_zoom, zoom_limits, param_explanation
+            )
+        else:
+            _simple_scatter(
+                ax_main, Z, labels, title=param_explanation, comment=comment
+            )
 
-    mask1 = (zone1["xlim"][0] <= Z[:, 0]) & (Z[:, 0] <= zone1["xlim"][1])
-    mask2 = (zone1["ylim"][0] <= Z[:, 1]) & (Z[:, 1] <= zone1["ylim"][1])
-
-    Za, Ya = Z[mask1 & mask2], labels[mask1 & mask2]
-    ax1.scatter(*Za.T, c=Ya, s=8, alpha=0.5)
-
-    ax1.set_xlim(*zone1["xlim"])
-    ax1.set_ylim(*zone1["ylim"])
-    ax0.indicate_inset_zoom(ax1)
-
-    fig.tight_layout()
+    # fig.tight_layout()
     # fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.1, top=0.98)
-    fig.savefig(f"{plot_dir}/show_zoom_in.png")
+    fig.savefig(f"{plot_dir}/show_zoom_in.png", bbox_inches="tight")
     plt.close()
 
 
