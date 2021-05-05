@@ -73,8 +73,10 @@ def plot_test_vis(
         plot_2_labels(Z, labels, None, out_name)
 
 
-def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=False):
-    ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap="Spectral", s=6)
+def _simple_scatter(
+    ax, Z, labels=None, title="", comment="", cmap="Spectral", axis_off=False
+):
+    ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap=cmap, s=6)
     # ax.set_title(title, loc="center")
     ax.text(
         x=1.0,
@@ -88,7 +90,7 @@ def _simple_scatter(ax, Z, labels=None, title="", comment="", axis_off=False):
     if axis_off:
         ax.axis("off")
     else:
-        change_border(ax, width=0.1, color="0.5")
+        change_border(ax, width=0.4, color="0.4")
 
     # custom show xlabel after changing ax border
     ax.axes.get_xaxis().set_visible(True)
@@ -339,14 +341,16 @@ def show_viz_grid_zoom_in(
 def _scatter_with_zoom_in(
     Z, labels, ax_main, axes_zoom, zone_limits, title="with_zoom", images=None
 ):
-    ax_main.scatter(*Z.T, c=labels, s=16, alpha=0.3, cmap="tab20")
+    # ax_main.scatter(*Z.T, c=labels, s=16, alpha=0.3, cmap="tab20")
+    _simple_scatter(ax_main, Z, labels, title=title, cmap="tab20")
 
     for ax_zoom, zone_limit in zip(axes_zoom, zone_limits):
         mask1 = (zone_limit["xlim"][0] <= Z[:, 0]) & (Z[:, 0] <= zone_limit["xlim"][1])
         mask2 = (zone_limit["ylim"][0] <= Z[:, 1]) & (Z[:, 1] <= zone_limit["ylim"][1])
 
         Za, Ya = Z[mask1 & mask2], labels[mask1 & mask2]
-        ax_zoom.scatter(*Za.T, c=Ya, s=8, alpha=0.5)
+        # ax_zoom.scatter(*Za.T, c=Ya, s=8, alpha=0.5)
+        _simple_scatter(ax_zoom, Za, labels=None)
 
         ax_zoom.set_xlim(*sorted(zone_limit["xlim"]))
         ax_zoom.set_ylim(*sorted(zone_limit["ylim"]))
@@ -360,7 +364,7 @@ def show_viz_grid_zoom_in_umap(
     list_params=[],
     show_comment=True,
 ):
-    fig = plt.figure(figsize=(12, 7))
+    fig = plt.figure(figsize=(11, 7))
     gs = fig.add_gridspec(nrows=4, ncols=3)
 
     # axes for main plots
@@ -394,7 +398,12 @@ def show_viz_grid_zoom_in_umap(
             )
         else:
             _simple_scatter(
-                ax_main, Z, labels, title=param_explanation, comment=comment
+                ax_main,
+                Z,
+                labels,
+                title=param_explanation,
+                comment=comment,
+                cmap="tab20",
             )
 
     # fig.tight_layout()
