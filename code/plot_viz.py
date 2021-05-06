@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 # from matplotlib import rc
 from matplotlib import cm
 from matplotlib import ticker
+from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import seaborn as sns
 
 from common.dataset import dataset
@@ -98,6 +99,18 @@ def _simple_scatter(
     ax.axes.get_xaxis().set_visible(True)
     ax.set_xticks([])
     ax.set_xlabel(title)
+
+
+def _scatter_with_group_label(ax, Z, labels):
+    # ax.axis("off")
+    cmap = cm.get_cmap("tab20")
+    for lbl in np.unique(labels):
+        ax.scatter(*Z[labels == lbl].T, color=cmap(lbl / 20.0))
+        ax.text(
+            *Z[labels == lbl].mean(axis=0),
+            s=f"{int(lbl)}",
+            fontsize=14,
+        )
 
 
 def _simple_scatter_with_colorbar(
@@ -333,10 +346,11 @@ def show_viz_grid_zoom_in(
     embedding_dir="",
     list_params=[],
     show_comment=True,
+    images=None,
 ):
     if method_name == "umap":
         show_viz_grid_zoom_in_umap(
-            labels, plot_dir, embedding_dir, list_params, show_comment
+            labels, plot_dir, embedding_dir, list_params, show_comment, images=images
         )
     elif method_name == "tsne":
         show_viz_grid_density_tsne(
@@ -346,11 +360,26 @@ def show_viz_grid_zoom_in(
         raise ValueError(f"Invalide method_name={method_name}")
 
 
+def _scatter_image(ax, X, Z, zoom=0.3, cmap="binary"):
+    s = int(math.sqrt(X.shape[1]))
+
+    def _add_artist(img, pos, **style):
+        ab = AnnotationBbox(
+            OffsetImage(img, zoom=zoom, cmap=cmap, alpha=0.8), pos, **style
+        )
+        ax.add_artist(ab)
+
+    # draw not selected points first
+    for img, pos in zip(X, Z):
+        img = img.reshape((s, s)).T
+        _add_artist(img, pos, frameon=False)
+
+
 def _scatter_with_zoom_in(
     Z, labels, ax_main, axes_zoom, zone_limits, title="with_zoom", images=None
 ):
-    # ax_main.scatter(*Z.T, c=labels, s=16, alpha=0.3, cmap="tab20")
     _simple_scatter(ax_main, Z, labels, title=title, cmap="tab20")
+    # _scatter_with_group_label(ax_main, Z, labels)
 
     for ax_zoom, zone_limit in zip(axes_zoom, zone_limits):
         mask1 = (zone_limit["xlim"][0] <= Z[:, 0]) & (Z[:, 0] <= zone_limit["xlim"][1])
@@ -358,7 +387,19 @@ def _scatter_with_zoom_in(
 
         Za, Ya = Z[mask1 & mask2], labels[mask1 & mask2]
         # ax_zoom.scatter(*Za.T, c=Ya, s=8, alpha=0.5)
-        _simple_scatter(ax_zoom, Za, labels=None)
+        _simple_scatter(ax_zoom, Za, labels=None, alpha=0.5)
+
+        if images is not None:
+            Xa = images[mask1 & mask2]
+            # idx = np.argsort([math.sin(x) for x, y in Za])
+            # sample_idx = idx[::5]
+            sample_idx = [i for i in range(len(Xa)) if (i % 3 == 0)]
+            _scatter_image(
+                ax_zoom,
+                X=Xa[sample_idx],
+                Z=Za[sample_idx],
+                zoom=zone_limit["z"],
+            )
 
         ax_zoom.set_xlim(*sorted(zone_limit["xlim"]))
         ax_zoom.set_ylim(*sorted(zone_limit["ylim"]))
@@ -371,8 +412,9 @@ def show_viz_grid_zoom_in_umap(
     embedding_dir="",
     list_params=[],
     show_comment=True,
+    images=None,
 ):
-    fig = plt.figure(figsize=(11, 7))
+    fig = plt.figure(figsize=(9, 6))
     gs = fig.add_gridspec(nrows=4, ncols=3)
 
     # axes for main plots
@@ -382,12 +424,19 @@ def show_viz_grid_zoom_in_umap(
 
     # axes for zoom, only for plot (a) and (b). Each plot has 2 zooms
     ax_a1, ax_a2 = fig.add_subplot(gs[0, 1]), fig.add_subplot(gs[1, 1])
-    ax_b1, ax_b2 = fig.add_subplot(gs[2, 1]), fig.add_subplot(gs[3, 1])
-    all_zoom_axes = ([ax_a1, ax_a2], [ax_b1, ax_b2], None, None)
+    # ax_b1, ax_b2 = fig.add_subplot(gs[2, 1]), fig.add_subplot(gs[3, 1])
+    ax_b1 = fig.add_subplot(gs[2:, 1])
+    all_zoom_axes = ([ax_a1, ax_a2], [ax_b1], None, None)
 
     all_zoom_limits = (
-        [{"xlim": (-13, -9), "ylim": (5.5, 8)}, {"xlim": (3, 8), "ylim": (-12, -8)}],
-        [{"xlim": (4, 12), "ylim": (6, 12)}, {"xlim": (5, 15), "ylim": (-7, -1)}],
+        [
+            {"xlim": (23, 24.45), "ylim": (9, 10.5), "z": 0.5},
+            # {"xlim": (11.65, 13), "ylim": (-11.4, -9.75), "z": 0.4},
+            {"xlim": (12.75, 14.75), "ylim": (-2.1, -0.05), "z": 0.65},
+        ],
+        [
+            {"xlim": (5.9, 12.8), "ylim": (9.8, 18.8), "z": 0.65}
+        ],  # [ {"xlim": (5, 15), "ylim": (-7, -1)}],
         None,
         None,
     )
@@ -402,7 +451,13 @@ def show_viz_grid_zoom_in_umap(
 
         if axes_zoom is not None:
             _scatter_with_zoom_in(
-                Z, labels, ax_main, axes_zoom, zoom_limits, param_explanation
+                Z,
+                labels,
+                ax_main,
+                axes_zoom,
+                zoom_limits,
+                param_explanation,
+                images=images,
             )
         else:
             _simple_scatter(
@@ -414,9 +469,9 @@ def show_viz_grid_zoom_in_umap(
                 cmap="tab20",
             )
 
-    # fig.tight_layout()
-    # fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.1, top=0.98)
-    fig.savefig(f"{plot_dir}/show_zoom_in.png", bbox_inches="tight")
+    fig.tight_layout()
+    fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.05, top=0.99)
+    fig.savefig(f"{plot_dir}/show_zoom_in.png")
     plt.close()
 
 
@@ -916,6 +971,7 @@ if __name__ == "__main__":
             embedding_dir,
             list_params,
             show_comment=False,  # do not show comment on the level of favoribility
+            images=X_origin,  # for showing images in the zoom-in views
         )
 
     if args.plot_metamap:
