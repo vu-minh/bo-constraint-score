@@ -495,31 +495,26 @@ def show_viz_grid_density_tsne(
         _simple_scatter(ax0, Z, labels, title="", comment=comment, cmap=cmap)
 
         # plot density
-        same_color_cmap = sns.diverging_palette(250, 250, center="dark", as_cmap=True)
-
-        _simple_scatter(
-            ax1, Z, labels=None, title=param_explanation, alpha=0.2, cmap=cmap
-        )
-        # sns.kdeplot(
-        #     x=Z[:, 0], y=Z[:, 1], ax=ax1, levels=5, thresh=0.1, legend=False, alpha=0.1
-        # )
+        same_color_cmap = sns.color_palette(["black"] * len(np.unique(labels)))
         sns.kdeplot(
             x=Z[:, 0],
             y=Z[:, 1],
             ax=ax1,
-            palette=cmap,
+            palette=same_color_cmap,
             levels=5,
-            thresh=0.1,
+            thresh=0.2,
             hue=labels,
             legend=False,
-            alpha=0.5,
+            alpha=0.7,
+            linewidths=0.7,
         )
+        _simple_scatter(ax1, Z, labels=None, title=param_explanation, alpha=0.2)
 
     fig.tight_layout()
     fig.subplots_adjust(
-        wspace=0.05, hspace=0.05, left=0.01, right=0.99, bottom=0.1, top=0.99
+        wspace=0.05, hspace=0.05, left=0.01, right=0.99, bottom=0.05, top=0.99
     )
-    fig.savefig(f"{plot_dir}/show_density.png")  # bbox_inches="tight")
+    fig.savefig(f"{plot_dir}/show_density.pdf")
     plt.close()
 
 
