@@ -191,9 +191,9 @@ fi
 # Fig.8+9: Metamap Neuron_1K + COIL20
 #       python3 plot_viz.py -d COIL20 -m umap --plot_metamap
 #       python3 plot_viz.py -d NEURON_1K -m tsne --plot_metamap
-# Fig.9: Sample viz (with metamap) for COIL20
+# Fig.9: Sample viz (with metamap) for COIL20 (run on remote)
 #       python3 plot_viz.py -d COIL20 -m umap --show_viz_grid
-# Fig.8: Sample viz
+# Fig.8: Sample viz (run on local)
 #       python3 plot_viz.py -d NEURON_1K -m tsne --show_viz_grid
 
 

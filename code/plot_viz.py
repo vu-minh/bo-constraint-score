@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 # from matplotlib import rc
 from matplotlib import cm
 from matplotlib import ticker
+import seaborn as sns
+
 from common.dataset import dataset
 from run_viz import run_umap, run_tsne
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
@@ -74,9 +76,9 @@ def plot_test_vis(
 
 
 def _simple_scatter(
-    ax, Z, labels=None, title="", comment="", cmap="Spectral", axis_off=False
+    ax, Z, labels=None, title="", comment="", cmap="Spectral", alpha=0.7, axis_off=False
 ):
-    ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=0.7, cmap=cmap, s=6)
+    ax.scatter(Z[:, 0], Z[:, 1], c=labels, alpha=alpha, cmap=cmap, s=6)
     # ax.set_title(title, loc="center")
     ax.text(
         x=1.0,
@@ -336,6 +338,12 @@ def show_viz_grid_zoom_in(
         show_viz_grid_zoom_in_umap(
             labels, plot_dir, embedding_dir, list_params, show_comment
         )
+    elif method_name == "tsne":
+        show_viz_grid_density_tsne(
+            labels, plot_dir, embedding_dir, list_params, show_comment
+        )
+    else:
+        raise ValueError(f"Invalide method_name={method_name}")
 
 
 def _scatter_with_zoom_in(
@@ -409,6 +417,54 @@ def show_viz_grid_zoom_in_umap(
     # fig.tight_layout()
     # fig.subplots_adjust(wspace=0.05, left=0.01, right=0.99, bottom=0.1, top=0.98)
     fig.savefig(f"{plot_dir}/show_zoom_in.png", bbox_inches="tight")
+    plt.close()
+
+
+def show_viz_grid_density_tsne(
+    labels=None,
+    plot_dir="",
+    embedding_dir="",
+    list_params=[],
+    show_comment=True,
+    cmap="Spectral",
+):
+    n_rows, n_cols = 2, 4
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 2.5, n_rows * 2.75))
+    axes0, axes1 = axes[0, :], axes[1, :]
+
+    for i, (params, ax0, ax1) in enumerate(zip(list_params, axes0, axes1)):
+        param_key = str(params[0])
+        param_explanation = f"({chr(97+i)}) perplexity={params[0]}"
+        comment = f"{params[-1]}" if show_comment else ""
+        Z = joblib.load(f"{embedding_dir}/{param_key}.z")
+        _simple_scatter(ax0, Z, labels, title="", comment=comment, cmap=cmap)
+
+        # plot density
+        same_color_cmap = sns.diverging_palette(250, 250, center="dark", as_cmap=True)
+
+        _simple_scatter(
+            ax1, Z, labels=None, title=param_explanation, alpha=0.2, cmap=cmap
+        )
+        # sns.kdeplot(
+        #     x=Z[:, 0], y=Z[:, 1], ax=ax1, levels=5, thresh=0.1, legend=False, alpha=0.1
+        # )
+        sns.kdeplot(
+            x=Z[:, 0],
+            y=Z[:, 1],
+            ax=ax1,
+            palette=cmap,
+            levels=5,
+            thresh=0.1,
+            hue=labels,
+            legend=False,
+            alpha=0.5,
+        )
+
+    fig.tight_layout()
+    fig.subplots_adjust(
+        wspace=0.05, hspace=0.05, left=0.01, right=0.99, bottom=0.1, top=0.99
+    )
+    fig.savefig(f"{plot_dir}/show_density.png")  # bbox_inches="tight")
     plt.close()
 
 
