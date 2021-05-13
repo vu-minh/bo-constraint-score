@@ -107,9 +107,7 @@ def _scatter_with_group_label(ax, Z, labels):
     for lbl in np.unique(labels):
         ax.scatter(*Z[labels == lbl].T, color=cmap(lbl / 20.0))
         ax.text(
-            *Z[labels == lbl].mean(axis=0),
-            s=f"{int(lbl)}",
-            fontsize=14,
+            *Z[labels == lbl].mean(axis=0), s=f"{int(lbl)}", fontsize=14,
         )
 
 
@@ -395,10 +393,7 @@ def _scatter_with_zoom_in(
             # sample_idx = idx[::5]
             sample_idx = [i for i in range(len(Xa)) if (i % 3 == 0)]
             _scatter_image(
-                ax_zoom,
-                X=Xa[sample_idx],
-                Z=Za[sample_idx],
-                zoom=zone_limit["z"],
+                ax_zoom, X=Xa[sample_idx], Z=Za[sample_idx], zoom=zone_limit["z"],
             )
 
         ax_zoom.set_xlim(*sorted(zone_limit["xlim"]))
@@ -492,23 +487,35 @@ def show_viz_grid_density_tsne(
         param_explanation = f"({chr(97+i)}) perplexity={params[0]}"
         comment = f"{params[-1]}" if show_comment else ""
         Z = joblib.load(f"{embedding_dir}/{param_key}.z")
+
+        # synchronize axis limits for both ax0, ax1
+        xlims = Z[:, 0].min() * 1.1, Z[:, 0].max() * 1.1
+        ylims = Z[:, 1].min() * 1.1, Z[:, 1].max() * 1.1
+
+        ax0.set_xlim(xlims)
+        ax0.set_ylim(ylims)
         _simple_scatter(ax0, Z, labels, title="", comment=comment, cmap=cmap)
 
         # plot density
+        ax1.set_xlim(xlims)
+        ax1.set_ylim(ylims)
+
         same_color_cmap = sns.color_palette(["black"] * len(np.unique(labels)))
         sns.kdeplot(
             x=Z[:, 0],
             y=Z[:, 1],
             ax=ax1,
-            palette=same_color_cmap,
-            levels=5,
-            thresh=0.2,
-            hue=labels,
-            legend=False,
-            alpha=0.7,
-            linewidths=0.7,
+            # palette=same_color_cmap,
+            levels=7,
+            thresh=0.2625,
+            # hue=labels,
+            # legend=False,
+            alpha=0.65,
+            linewidths=0.3,
+            color="black",
         )
-        _simple_scatter(ax1, Z, labels=None, title=param_explanation, alpha=0.2)
+
+        _simple_scatter(ax1, Z, labels=None, title=param_explanation, alpha=0.22)
 
     fig.tight_layout()
     fig.subplots_adjust(
