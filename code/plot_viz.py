@@ -506,16 +506,16 @@ def show_viz_grid_density_tsne(
             y=Z[:, 1],
             ax=ax1,
             # palette=same_color_cmap,
-            levels=7,
+            levels=5,
             thresh=0.2625,
             # hue=labels,
             # legend=False,
-            alpha=0.65,
-            linewidths=0.3,
-            color="black",
+            alpha=0.75,
+            linewidths=0.75,
+            color="grey",
         )
 
-        _simple_scatter(ax1, Z, labels=None, title=param_explanation, alpha=0.22)
+        _simple_scatter(ax1, Z, labels=None, title=param_explanation, alpha=0.25)
 
     fig.tight_layout()
     fig.subplots_adjust(
